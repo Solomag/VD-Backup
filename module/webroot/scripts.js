@@ -133,6 +133,31 @@ function copyRow(k, v) {
   return row;
 }
 
+// --- VDLU flashless updater bridge --------------------------------------
+// Adapts execCommand to the contract the vendored vdlu.js widget expects (resolve
+// stdout on rc 0, reject otherwise) and drives the engine in MOD/vdlu via the
+// Tier-2 state dir /data/adb/vdbackup/vdlu. The widget renders its own toast,
+// reboot banner and the "Updates" panel; it is a no-op if the build omits vdlu.js.
+var VDLU_STATE_DIR = "/data/adb/vdbackup/vdlu";
+var _vdluReady = false, _vdluPanelMounted = false;
+function vdluExec(cmd) {
+  return execCommand(cmd).then(function (r) {
+    if (r.errno === 0) return r.stdout;
+    throw new Error(r.stderr || r.stdout || ("rc=" + r.errno));
+  });
+}
+function initVdlu() {
+  if (_vdluReady || !window.VDLU) return;
+  _vdluReady = true;
+  VDLU.init({ exec: vdluExec, moduleDir: MOD, vdluDir: VDLU_STATE_DIR, modid: "vdbackup", module: "VDBackup" });
+  VDLU.onWebUIOpen().catch(function () {});
+}
+function openUpdatesPanel() {
+  if (!window.VDLU) return;
+  initVdlu();
+  if (!_vdluPanelMounted) { _vdluPanelMounted = true; VDLU.mountUpdatesPanel("vdlu-updates"); }
+}
+
 function switchTab(name) {
   if (name !== "dests") resetAuthorizeUI();   // leaving Destinations ends any pending authorize poll
   document.querySelectorAll(".tab").forEach(function (t) { t.classList.toggle("active", t.dataset.tab === name); });
@@ -142,6 +167,7 @@ function switchTab(name) {
   if (name === "dests") loadDests();
   if (name === "settings") loadSettings();
   if (name === "schedule") loadSchedule();
+  if (name === "updates") openUpdatesPanel();
   if (name === "log") openLog();
 }
 
@@ -297,7 +323,7 @@ function renderApps(filter) {
     if (iconObserver) iconObserver.observe(ic); else loadIcon(ic);
   });
   // "Back up tag" is offered only when a tag is active, we are not in select mode, and the
-  // tag actually matches apps in the current (user/system) view - so it never dead-ends.
+  // tag actually matches apps in the current (user/system) view, so it never dead-ends.
   var tb = $("#app-backuptag");
   if (tb) tb.hidden = !(tagFilter && !selectMode && tagFilterApps().length);
 }
@@ -834,7 +860,7 @@ var AUTH_TIMEOUT_MS = 300000, AUTH_POLL_MS = 2000;
 function stopAuthorizePoll() { if (_authTimer) { clearInterval(_authTimer); _authTimer = null; } }
 // opening the consent page backgrounds the webview, which throttles/stops the poll.
 // When the app comes back to the foreground, resume: the token is already captured
-// by rclone, so one poll completes the remote automatically - the user just returns.
+// by rclone, so one poll completes the remote automatically. The user just returns.
 function onAuthForeground() {
   if (!_authActive || document.visibilityState !== "visible") return;
   _authDeadline = Date.now() + AUTH_TIMEOUT_MS;   // do not count time spent in the browser
@@ -1191,8 +1217,8 @@ function updateProgSub(sub, p) {
   var xfer = [];
   if (p.rate) xfer.push(String(p.rate));
   if (p.eta) xfer.push(I18N.t("ui_prog_eta", { eta: String(p.eta) }));
-  if (xfer.length) pieces.push(xfer.join(" - "));
-  sub.textContent = pieces.join(" - ");
+  if (xfer.length) pieces.push(xfer.join(" · "));
+  sub.textContent = pieces.join(" · ");
   sub.hidden = !pieces.length;
 }
 // lite edition: the cloud binaries (rclone + restic) are not bundled. On the first
@@ -1288,7 +1314,7 @@ function trackOp(opid, ctx) {
         return;
       }
       // a live op leaves "starting" within a second; if it is still stuck there
-      // with no progress, its worker died at launch - drop the stale card.
+      // with no progress, its worker died at launch; drop the stale card.
       if (p.phase === "starting" && (p.percent || 0) === 0) {
         if (++stuck >= 15) { clearInterval(timer); box.hidden = true; }
       } else stuck = 0;
@@ -1398,7 +1424,7 @@ function renderJobs(jobs) {
     var parts = [when];
     if ((j.action || "backup") === "backup") { parts.push(j.mode); parts.push(I18N.t("job_keep_n", { n: j.keep })); }
     parts.push(I18N.t("job_last", { when: last }));
-    grow.appendChild(el("div", "sub", parts.join(" - ")));
+    grow.appendChild(el("div", "sub", parts.join(" · ")));
     var badges = [];
     if (j.require_wifi) badges.push(I18N.t("ui_sched_badge_wifi"));
     if (j.require_charging) badges.push(I18N.t("ui_sched_badge_charging"));
@@ -1657,7 +1683,12 @@ function saveSettings() {
   CFG.language = $("#set-lang").value;
   helper("config-set", CFG).then(function (r) {
     $("#set-status").textContent = (r && r.ok !== false) ? I18N.t("saved") : errMsg(r);
-    I18N.init(CFG.language || "auto").then(function () { I18N.apply(); buildLangOptions(); });
+    I18N.init(CFG.language || "auto").then(function () {
+      I18N.apply(); buildLangOptions();
+      // Re-render the app list so dynamically-built labels (e.g. the per-app "Back up"
+      // button, created with I18N.t at render time) pick up the new language too (issue #12).
+      if (typeof renderApps === "function") renderApps($("#search") ? $("#search").value : "");
+    });
   });
 }
 
@@ -2373,6 +2404,7 @@ function boot() {
   setupSegments();
   setupSwipe();
   setupBackNav();
+  initVdlu();   // VDLU: evaluate reboot banner + auto_on_webui_open on load (panel mounts on tab open)
 
   helper("config-get").then(function (c) { CFG = c || {}; activeUser = (CFG.user != null) ? (CFG.user | 0) : 0; return I18N.init(CFG.language || "auto"); })
     .then(function () { I18N.apply(); loadDests(); loadSettings(); loadUsers(); loadOverview(); reattachOps(); recoverPendingAuth(); autoCheckUpdates(); });

@@ -6,6 +6,26 @@
 
 VDBackup'taki tüm kayda değer değişiklikler burada belgelenir. Yalnızca İngilizce.
 
+## v1.08
+
+Güncellemeler:
+
+- VDBackup artık yeniden flashlamadan kendini güncelleyebiliyor. Sürümler arasında, tüm paketi yeniden indirmek yerine yalnızca değişen dosyaları getirir (içerik adresli, imzalı bir manifest ile). Her güncelleme geçerli bir imza taşımalıdır, sürüm düşürmeler reddedilir ve tam paket bir yedek olarak kullanılabilir kalır.
+- WebUI'deki yeni bir Updates paneli güncelleme ilerlemesini gösterir, iptal etmenize izin verir ve istek üzerine güncellemeleri denetler. Güncellemeler bir sonraki açılışta, sayaçlı bağlantı için bir korumayla uygulanır.
+
+Güvenilirlik:
+
+- Çok sayıda uygulamayı aynı anda yedeklemek artık yarıda takılmıyor. VDBackup artık her uygulamaya sinyal göndermek yerine, yedeklemeden önce yalnızca gerçekten çalışan uygulamaları durduruyor; uzun listelerde bu istek seli, Android'in işlem sınırını tüketip çalıştırmayı askıda bırakabiliyordu. İptal edilen veya kesintiye uğrayan bir yedek artık her zaman wake lock'ını serbest bırakır.
+
+Geri yükleme:
+
+- Bir uygulamanın kaydedilmiş ağ erişim ilkesini özel ROM'larda geri yüklemek artık anında etkili oluyor ve kalıcı oluyor. VDBackup, çalışan hizmetin altındaki ilke dosyasını düzenlemek yerine, onu uygulaması için sistemin ağ ilkesi hizmetine başvurur; aksi hâlde hizmet bunun üzerine yazabilirdi.
+
+Düzeltmeler:
+
+- Uygulama başına "Back up" düğmesi artık uygulama listesi yeniden oluşturulana kadar önceki dilini korumak yerine, arayüzün geri kalanıyla birlikte dil değiştiriyor.
+- Bir yedeği silmek artık onu güvenilir biçimde kaldırıyor ve geride bıraktığı boş klasörleri temizliyor.
+
 ## v1.07
 
 Güvenilirlik:

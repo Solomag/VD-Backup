@@ -6,6 +6,26 @@
 
 Semua perubahan penting pada VDBackup didokumentasikan di sini. Hanya dalam bahasa Inggris.
 
+## v1.08
+
+Pembaruan:
+
+- VDBackup kini dapat memperbarui dirinya sendiri tanpa flash ulang. Di antara rilis, ia hanya mengambil berkas yang berubah (dialamatkan menurut konten, dengan manifest bertanda tangan) alih-alih mengunduh ulang seluruh paket. Setiap pembaruan wajib membawa tanda tangan yang sah, penurunan versi ditolak, dan paket lengkap tetap tersedia sebagai cadangan.
+- Panel Pembaruan baru di WebUI menampilkan kemajuan pembaruan, memungkinkan Anda membatalkan, dan memeriksa pembaruan sesuai permintaan. Pembaruan diterapkan pada boot berikutnya, dengan pelindung koneksi berkuota.
+
+Keandalan:
+
+- Mencadangkan sejumlah besar aplikasi sekaligus tidak lagi macet di tengah jalan. VDBackup kini hanya menghentikan aplikasi yang benar-benar berjalan sebelum mencadangkannya, alih-alih memberi sinyal ke setiap aplikasi; pada daftar panjang, banjir permintaan itu bisa menghabiskan batas transaksi Android dan menggantung proses. Pencadangan yang dibatalkan atau terputus kini selalu melepaskan wake lock-nya.
+
+Pemulihan:
+
+- Memulihkan kebijakan akses jaringan tersimpan sebuah aplikasi pada ROM kustom kini langsung berlaku dan bertahan. VDBackup meminta layanan kebijakan jaringan sistem untuk menerapkannya, alih-alih menyunting berkas kebijakan di bawah layanan yang sedang berjalan, yang bisa ditimpa oleh layanan itu.
+
+Perbaikan:
+
+- Tombol "Cadangkan" per aplikasi kini berganti bahasa bersama sisa antarmuka, alih-alih mempertahankan bahasa sebelumnya sampai daftar aplikasi dibangun ulang.
+- Menghapus sebuah cadangan kini menghapusnya dengan andal dan membersihkan folder kosong yang ditinggalkannya.
+
 ## v1.07
 
 Keandalan:

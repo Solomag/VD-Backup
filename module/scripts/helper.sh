@@ -719,9 +719,18 @@ case "$verb" in
     case "$ref" in
       *..*) err ERR_BAD_REF "ref must not contain .." ;;
       /data/media/*/VDBackup/*)
-        rm -rf "$ref" && { printf '{"ts":"%s","op":"delete-backup","ref":"%s"}\n' \
-          "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$ref")" >> "$LOGS/audit.jsonl"; ok "\"deleted\":\"$(jstr "$ref")\""; } \
-          || err ERR_DELETE "could not delete" ;;
+        if rm -rf "$ref"; then
+          # Remove now-empty parent dirs up to (not including) the VDBackup root, so a
+          # deleted backup leaves no empty app folder behind (issue #14). rmdir only
+          # removes empty dirs and we stop at the first non-empty one.
+          _dd="$(dirname "$ref")"
+          while case "$_dd" in /data/media/*/VDBackup/?*) : ;; *) false ;; esac && rmdir "$_dd" 2>/dev/null; do
+            _dd="$(dirname "$_dd")"
+          done
+          printf '{"ts":"%s","op":"delete-backup","ref":"%s"}\n' \
+            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$ref")" >> "$LOGS/audit.jsonl"
+          ok "\"deleted\":\"$(jstr "$ref")\""
+        else err ERR_DELETE "could not delete"; fi ;;
       *) err ERR_BAD_REF "ref must be under the backups dir" ;;
     esac ;;
 

@@ -6,6 +6,26 @@
 
 Všechny podstatné změny ve VDBackup jsou zdokumentovány zde. Pouze anglicky.
 
+## v1.08
+
+Aktualizace:
+
+- VDBackup se nyní dokáže aktualizovat sám, bez opětovného přeflashování. Mezi vydáními stáhne jen soubory, které se změnily (adresované obsahem, s podepsaným manifestem), místo aby znovu stahoval celý balíček. Každá aktualizace musí nést platný podpis, návrat na starší verzi je odmítán a celý balíček zůstává k dispozici jako záloha.
+- Nový panel Aktualizace ve WebUI ukazuje průběh aktualizace, umožňuje ji zrušit a kontroluje aktualizace na vyžádání. Aktualizace se použijí při příštím startu, s ochranou pro měřená připojení.
+
+Spolehlivost:
+
+- Zálohování velkého počtu aplikací najednou se už nezastaví v polovině. VDBackup teď před zálohováním zastaví jen aplikace, které skutečně běží, místo aby signalizoval každé aplikaci; u dlouhých seznamů mohla tato záplava požadavků vyčerpat limit transakcí Androidu a běh zaseknout. Zrušená nebo přerušená záloha teď vždy uvolní svůj wake lock.
+
+Obnovení:
+
+- Obnovení uložené zásady síťového přístupu aplikace na custom ROM se nyní projeví okamžitě a vydrží. VDBackup požádá systémovou službu síťové zásady, aby ji aplikovala, místo aby upravoval soubor zásady pod běžící službou, kterou by služba mohla přepsat.
+
+Opravy:
+
+- Tlačítko "Back up" u jednotlivé aplikace teď mění jazyk společně se zbytkem rozhraní, místo aby si drželo předchozí jazyk, dokud se seznam aplikací nepřebuduje.
+- Smazání zálohy ji teď spolehlivě odstraní a uklidí prázdné složky, které po něm zůstanou.
+
 ## v1.07
 
 Spolehlivost:

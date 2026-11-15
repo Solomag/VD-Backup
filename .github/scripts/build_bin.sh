@@ -22,7 +22,7 @@
 # ======================================================================
 #
 #  Assemble module/bin/<abi>/ by FETCHING prebuilt binaries from the Termux
-#  package REPOSITORY (packages.termux.dev/apt) - the official .debs, never from a
+#  package REPOSITORY (packages.termux.dev/apt): the official .debs, never from a
 #  Termux installed on some Android device. Validated on device (Android 16/KSU):
 #  Termux's GNU tar preserves user.*/security.* xattrs + SELinux labels, and
 #  the binaries run standalone once their Termux libs are shipped alongside
@@ -49,8 +49,8 @@ termux_arch() { case "$1" in
 esac; }
 
 ABIS="arm64-v8a armeabi-v7a x86 x86_64"
-TOOL_PKGS="tar zstd gzip jq rclone restic rsync openssh age util-linux sqlite curl"
-WANT_BINS="tar zstd gzip jq rclone restic rsync ssh sftp age age-keygen script sqlite3 curl"
+TOOL_PKGS="tar zstd gzip jq rclone restic rsync openssh age util-linux sqlite curl openssl"
+WANT_BINS="tar zstd gzip jq rclone restic rsync ssh sftp age age-keygen script sqlite3 curl openssl"
 # libs always provided by Android (never bundle these)
 BIONIC="libc.so libm.so libdl.so liblog.so libandroid.so libz.so libselinux.so libc++.so libc++_shared.so libstdc++.so libEGL.so libnativehelper.so libbinder.so"
 
@@ -65,7 +65,7 @@ sha() { { sha256sum "$1" 2>/dev/null || true; } | cut -d' ' -f1; }
 # Supply-chain provenance (privacy/security HARD rule): record where EVERY shipped
 # binary and library came from (official upstream, version, URL, sha256) plus the
 # sha256 of every file actually shipped, so the prebuilt payload can be audited and
-# reproduced - nothing opaque is bundled. Writes bin/<abi>/PROVENANCE.json, which
+# reproduced; nothing opaque is bundled. Writes bin/<abi>/PROVENANCE.json, which
 # survives the on-device ABI prune, so the audit trail ships with the module itself.
 write_provenance() {
   local abi="$1" out="$OUT_BASE/$abi" w="$WORK/$abi" prov f rel first=1
@@ -123,7 +123,7 @@ build_abi() {
   done
   local U="$prefix/data/data/com.termux/files/usr"
 
-  # copy wanted binaries (follow symlinks; warn - do not silently skip)
+  # copy wanted binaries (follow symlinks; warn, do not silently skip)
   local missing=""
   for b in $WANT_BINS; do
     if [ -e "$U/bin/$b" ]; then cp -Lf "$U/bin/$b" "$out/$b"

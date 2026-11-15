@@ -6,6 +6,26 @@
 
 Mọi thay đổi đáng chú ý của VDBackup được ghi lại ở đây. Chỉ bằng tiếng Anh.
 
+## v1.08
+
+Cập nhật:
+
+- VDBackup giờ có thể tự cập nhật mà không cần flash lại. Giữa các bản phát hành, nó chỉ tải về những tệp đã thay đổi (content-addressed, với một manifest đã ký) thay vì tải lại toàn bộ gói. Mọi bản cập nhật phải mang một chữ ký hợp lệ, việc hạ cấp bị từ chối, và gói đầy đủ vẫn sẵn sàng như một phương án dự phòng.
+- Một bảng Updates mới trong WebUI hiển thị tiến trình cập nhật, cho phép bạn hủy, và kiểm tra cập nhật theo yêu cầu. Các bản cập nhật được áp dụng ở lần khởi động kế tiếp, với một cơ chế bảo vệ cho kết nối có đo lưu lượng.
+
+Độ tin cậy:
+
+- Sao lưu một số lượng lớn ứng dụng cùng lúc không còn kẹt giữa chừng nữa. VDBackup giờ chỉ dừng những ứng dụng thực sự đang chạy trước khi sao lưu chúng, thay vì ra tín hiệu cho mọi ứng dụng; với các danh sách dài, cơn lũ yêu cầu đó có thể làm cạn giới hạn giao dịch của Android và khiến lần chạy bị treo. Một bản sao lưu bị hủy hoặc bị gián đoạn giờ luôn giải phóng wake lock của nó.
+
+Khôi phục:
+
+- Khôi phục chính sách truy cập mạng đã lưu của một ứng dụng trên các ROM tùy chỉnh giờ có hiệu lực ngay lập tức và giữ nguyên. VDBackup yêu cầu dịch vụ chính sách mạng của hệ thống áp dụng nó, thay vì chỉnh sửa tệp chính sách bên dưới dịch vụ đang chạy, thứ mà dịch vụ có thể ghi đè.
+
+Sửa lỗi:
+
+- Nút "Back up" theo từng ứng dụng giờ đổi ngôn ngữ cùng với phần còn lại của giao diện, thay vì giữ ngôn ngữ trước đó cho đến khi danh sách ứng dụng được dựng lại.
+- Xóa một bản sao lưu giờ sẽ xóa nó một cách đáng tin cậy và dọn dẹp các thư mục trống mà nó để lại.
+
 ## v1.07
 
 Độ tin cậy:

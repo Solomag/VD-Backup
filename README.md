@@ -130,6 +130,18 @@ contributions are reviewed and accepted like any other. An agent can administer
 see **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** for the full control surface, and
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) to contribute.
 
+## Incremental updates (VDLU)
+
+VD Backup ships the **VDLU** engine (vendored in `vdlu/`): the module updates itself by fetching only the
+files that changed (content-addressed blobs + a signed `manifest.json`), instead of re-downloading the
+whole `.zip`. **Hardened** profile: the ed25519 signature is mandatory and downgrades are blocked; the
+full `.zip` stays valid as a fallback.
+
+- **LIVE-only** (no reboot): updates apply on the next boot via `service.sh`, backgrounded, a no-op when
+  no feed is reachable.
+- **State** in `/data/adb/vdbackup/vdlu/`, outside the module, so it survives a reflash.
+- **WebUI:** an **Updates** panel with a progress toast and cancel; auto-update is opt-in.
+
 ## Documentation
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki)**: the docs, browsable online.

@@ -57,4 +57,30 @@ setsid nohup sh -c '
   done
 ' sh "$LOOPPID" "$MODDIR/scripts/helper.sh" "$INTERVAL" >/dev/null 2>&1 &
 
+# VDLU flashless update on boot (opt-in, detached, no-op without a reachable feed).
+# VDBackup is self-contained (no Zygisk .so, no system overlay, no real sepolicy rule), so
+# the update applies live with nothing to swap and needs no pre-zygote window; late_start is
+# fine. Fail-safe: seed the config if missing, bail unless auto_on_reboot=1, run detached so a
+# slow or unreachable source never blocks boot. The engine reaches its bundled curl/zstd via
+# the per-ABI bin dir; an unpublished or 404 feed just makes the engine a no-op.
+VDLU_DIR="$STATE_DIR/vdlu"
+if [ -f "$MODDIR/vdlu/update.sh" ]; then
+  if [ ! -f "$VDLU_DIR/config" ] && [ -f "$MODDIR/vdlu/config.default" ]; then
+    mkdir -p "$VDLU_DIR"; cp -f "$MODDIR/vdlu/config.default" "$VDLU_DIR/config"; chmod 600 "$VDLU_DIR/config"
+  fi
+  if grep -q '^auto_on_reboot=1' "$VDLU_DIR/config" 2>/dev/null; then
+    case "$(getprop ro.product.cpu.abi)" in
+      arm64-v8a) VBINABI=arm64-v8a ;; armeabi-v7a) VBINABI=armeabi-v7a ;;
+      x86_64) VBINABI=x86_64 ;; x86) VBINABI=x86 ;; *) VBINABI=arm64-v8a ;;
+    esac
+    setsid nohup sh -c '
+      BA="$3"
+      export PATH="$1/bin/$BA:/system/bin:/system/xbin:$PATH"
+      export LD_LIBRARY_PATH="$1/bin/$BA/lib:${LD_LIBRARY_PATH:-}"
+      export VDLU_DIR="$2" MODULE_DIR="$1" MODID=vdbackup
+      sh "$1/vdlu/update.sh" boot
+    ' sh "$MODDIR" "$VDLU_DIR" "$VBINABI" >>"$VDLU_DIR/boot.log" 2>&1 &
+  fi
+fi
+
 exit 0

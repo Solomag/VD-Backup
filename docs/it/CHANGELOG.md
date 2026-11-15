@@ -6,6 +6,26 @@
 
 Tutte le modifiche rilevanti di VDBackup sono documentate qui. Solo in inglese.
 
+## v1.08
+
+Aggiornamenti:
+
+- VDBackup ora può aggiornarsi da solo senza riflashare. Tra una versione e l'altra recupera solo i file cambiati (indirizzati per contenuto, con un manifest firmato) invece di riscaricare l'intero pacchetto. Ogni aggiornamento deve avere una firma valida, i downgrade vengono rifiutati, e il pacchetto completo resta disponibile come ripiego.
+- Un nuovo pannello Aggiornamenti nella WebUI mostra l'avanzamento dell'aggiornamento, permette di annullarlo e cerca aggiornamenti su richiesta. Gli aggiornamenti si applicano al prossimo avvio, con una protezione per le connessioni a consumo.
+
+Affidabilità:
+
+- Il backup di un gran numero di app in una volta non si blocca più a metà. VDBackup ora arresta solo le app effettivamente in esecuzione prima di eseguirne il backup, invece di segnalare ogni app; su elenchi lunghi quel diluvio di richieste poteva esaurire il limite di transazioni di Android e bloccare l'esecuzione. Un backup annullato o interrotto ora rilascia sempre il suo wake lock.
+
+Ripristino:
+
+- Il ripristino della policy di accesso alla rete salvata di un'app sulle ROM personalizzate ora ha effetto immediato e resta. VDBackup chiede al servizio di policy di rete del sistema di applicarla, invece di modificare il file della policy sotto il servizio in esecuzione, che il servizio potrebbe sovrascrivere.
+
+Correzioni:
+
+- Il pulsante "Backup" di ogni app ora cambia lingua insieme al resto dell'interfaccia, invece di mantenere la lingua precedente finché l'elenco delle app non viene ricostruito.
+- L'eliminazione di un backup ora lo rimuove in modo affidabile e ripulisce le cartelle vuote che lascia dietro di sé.
+
 ## v1.07
 
 Affidabilità:

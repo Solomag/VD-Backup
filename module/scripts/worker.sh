@@ -140,15 +140,25 @@ ssaid_restore() {
 
 # Per-app network policy (opt-in). Some ROMs (LineageOS and derivatives) store a per-app
 # "deny network" toggle as a <uid-policy uid=.. policy=..> entry in /data/system/netpolicy.xml
-# (ABX), keyed by uid - not an AppOp, so it is not carried by the permission/appops path
+# (ABX), keyed by uid, not an AppOp, so it is not carried by the permission/appops path
 # (issue #9). On restore the app gets a fresh uid, so the captured policy is written for the
 # NEW uid: decode the ABX, update-or-insert the uid-policy, verify a round-trip, back up the
 # live file byte-exact, then overwrite. Applies after reboot (the service caches it).
 netpolicy_restore() {   # <pkg> <user> <policy-int>
   _p="$1"; _u="$2"; _pol="$3"
   case "$_pol" in ''|*[!0-9]*|0) return 0 ;; esac   # nothing to restore for no/zero policy
-  _f=/data/system/netpolicy.xml; [ -f "$_f" ] || { audit "netpolicy no file $_p"; return 0; }
   _nuid="$(stat -c %u "/data/user/$_u/$_p" 2>/dev/null)"; case "$_nuid" in ''|*[!0-9]*) audit "netpolicy no uid $_p"; return 0 ;; esac
+  # Preferred: apply the policy through NetworkPolicyManager (setUidPolicy), which applies it
+  # live and persists it itself. Editing netpolicy.xml behind the running service is unreliable
+  # - NPMS rewrites that file, so the offline edit never took even after a reboot (issue #9).
+  # The XML path below stays as a fallback for ROMs where the framework call is unavailable.
+  if [ -f "$MODDIR/etc/vdbackup_helper.dex" ]; then
+    _hr="$(LD_LIBRARY_PATH= app_process -Djava.class.path="$MODDIR/etc/vdbackup_helper.dex" \
+        /system/bin ru.vd171.vdbackup.Helper netpolicy-set "$_nuid" "$_pol" 2>/dev/null)"
+    case "$_hr" in *'"ok":true'*) audit "netpolicy restored via framework $_p uid=$_nuid policy=$_pol"; return 0 ;; esac
+    audit "netpolicy framework set failed, falling back to xml $_p"
+  fi
+  _f=/data/system/netpolicy.xml; [ -f "$_f" ] || { audit "netpolicy no file $_p"; return 0; }
   _abx=no; is_abx "$_f" && _abx=yes
   if [ "$_abx" = yes ]; then { [ -x /system/bin/abx2xml ] || [ -x "$BIN/abx2xml" ]; } || { audit "netpolicy no abx tool $_p"; return 0; }; fi
   _x="$STATE/staging/np.$OPID.xml"; _o="$STATE/staging/np.$OPID.out"; _c="$STATE/staging/np.$OPID.chk"
@@ -225,7 +235,10 @@ ARGS="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
 echo -1000 > /proc/$$/oom_score_adj 2>/dev/null || true
 echo "vdbackup_$OPID" > /sys/power/wake_lock 2>/dev/null || true
 _release_wakelock() { echo "vdbackup_$OPID" > /sys/power/wake_unlock 2>/dev/null || true; }
-trap _release_wakelock EXIT
+# Release on termination signals too, not just a clean exit, so a worker that is asked to
+# stop does not leave its wakelock held and keep the device awake (issue #5). SIGKILL cannot
+# be trapped, but the oom_score_adj above makes the LMK pick something else first.
+trap _release_wakelock EXIT INT TERM HUP
 
 cleanup() { verifier_restore; rm -f "$LOGS/$OPID.pid"; }
 trap cleanup EXIT
@@ -303,12 +316,18 @@ net_guard() {
 }
 
 # pm install-create flags: -r replace, -t allow test, -d allow downgrade, and
-# --bypass-low-target-sdk-block where the platform supports it - so restoring an
+# --bypass-low-target-sdk-block where the platform supports it, so restoring an
 # older or old-targetSdk build succeeds where a plain install would fail.
 # force-stop the target app for a consistent snapshot, but NEVER the Drive
 # companion (could be mid-upload) or the framework itself.
 freeze() {
   case "$1" in ru.vd171.vdbackup|android|system|"") return 0 ;; esac
+  # Only force-stop an app that is actually running: a stopped app's data is already at
+  # rest. Force-stopping every app in a bulk backup hammered the ActivityManager until its
+  # binder started failing ("Failed transaction") around ~100 apps, stalling the whole run
+  # and leaking the wakelock of the hung worker (issue #5). This also kills fewer of the
+  # user's live apps. pidof matches the main process name (= package).
+  pidof "$1" >/dev/null 2>&1 || return 0
   # Bounded and best-effort: a hung ActivityManager (binder "Failed transaction" under
   # memory pressure, seen in bulk-backup logs) must not freeze the op at "preparing".
   # Skip and continue if the force-stop stalls or fails; a running app is still backed up.
@@ -345,7 +364,7 @@ installer_flag() {   # <captured-installer>; echoes "-i <pkg>" or nothing
   case "$1" in ''|null) ;; *) printf -- '-i %s' "$1" ;; esac
 }
 # After install (+ any spoof) read the LIVE install source back and record it, so the
-# activity log shows what actually stuck - and warn if the spoof did not take (Swift
+# activity log shows what actually stuck, and warn if the spoof did not take (Swift
 # Backup verifies getInstallSourceInfo the same way). Audit-only, never fails the restore.
 verify_install_source() {
   _ivs="$(fw dumpsys package "$PKG" 2>/dev/null)"
@@ -418,7 +437,7 @@ verifier_off() {
   fw settings put global package_verifier_enable 0 2>/dev/null
 }
 verifier_restore() {
-  # restore the EXACT prior state - including leaving it ABSENT when it was null/empty
+  # restore the EXACT prior state, including leaving it ABSENT when it was null/empty
   # (a 0/1 where there was none is itself a tell on a stealth device).
   case "$VERIFIER_OLD" in ""|null|"null") : ;; *) fw settings put global verifier_verify_adb_installs "$VERIFIER_OLD" 2>/dev/null ;; esac
   case "$PKGVERIF_OLD" in ""|null|"null") : ;; *) fw settings put global package_verifier_enable "$PKGVERIF_OLD" 2>/dev/null ;; esac
@@ -542,7 +561,7 @@ fwstate_apply() {   # <json-file>; uses $PKG $U
 }
 
 # Encryption: age with a scrypt passphrase ($PW), so a backup decrypts on any PC
-# with just the passphrase (`age -d`) - no device keyfile needed. age reads the
+# with just the passphrase (`age -d`), no device keyfile needed. age reads the
 # passphrase from a controlling terminal, which a detached root process lacks, so it
 # runs under a pty (util-linux `script`). The data goes via a staged file, never
 # through the pty (a pty would corrupt binary). Produces standard scrypt-stanza files.
@@ -1139,7 +1158,7 @@ backup() {
         |select(.mode|test("^(ignore|deny|foreground)$")))')"; [ -n "$APPOPS_UID_JSON" ] || APPOPS_UID_JSON='[]' ;;
   esac
   # Extra grants that reset on reinstall (captured as state, restored like appops so an
-  # automation/accessibility app works again right after restore - Swift Backup does this):
+  # automation/accessibility app works again right after restore; Swift Backup does this):
   #   - Doze battery-exemption (deviceidle whitelist)
   #   - notification-listener components this app has enabled
   #   - accessibility-service components this app has enabled
@@ -1515,7 +1534,7 @@ restore() {
     # Portability (universal restore): app-data ownership and SELinux context are
     # re-derived from the TARGET, never copied from the source. chown to the freshly
     # installed app's LIVE uid/gid (differs per device/user), and restorecon to re-derive
-    # the context from this device's policy - the stored context carries the source's
+    # the context from this device's policy; the stored context carries the source's
     # per-install seinfo categories, which are wrong on another device/user and would stop
     # the app reading its own data. (The stored root context $ctx is kept in the manifest
     # for reference/audit only, not applied.)
@@ -1536,7 +1555,7 @@ restore() {
   done
 
   # restore runtime permissions / appops / Doze / listener+accessibility grants / enabled
-  # flag - shared helper so Full, Snapshot and Mirror restore identically (issue #9).
+  # flag: shared helper so Full, Snapshot and Mirror restore identically (issue #9).
   # install-source attribution is applied at install time via install-create -i (see
   # installer_flag); pm set-installer is rejected for uid 0, so nothing to do here.
   prog 90 framework "$PKG"
@@ -1557,8 +1576,8 @@ restore() {
   elif [ -n "$SS" ] && [ "$SS" != null ]; then
     audit "ssaid present in backup but not opted in $PKG"
   fi
-  # per-app network policy: OPT-IN only (.netpolicy). Rewrites /data/system/netpolicy.xml
-  # for the new uid; applies after reboot. Same validate-then-overwrite discipline as ssaid.
+  # per-app network policy: OPT-IN only (.netpolicy). Applied live via NetworkPolicyManager
+  # for the new uid, falling back to rewriting /data/system/netpolicy.xml. ROM-specific.
   NP="$("$JQ" -r '.permissions.netpolicy // empty' "$M" 2>/dev/null)"
   if [ "$(jget "$ARGS" '.netpolicy')" = true ]; then
     case "$NP" in ''|null|0|*[!0-9]*) : ;; *) netpolicy_restore "$PKG" "$U" "$NP" ;; esac
@@ -1729,7 +1748,7 @@ do_import_neo() {
 # ----------------------------------------------------------------------
 # Special (system-wide) backups: messages (SMS/MMS), contacts + call log, Wi-Fi,
 # Bluetooth. Raw mode archives the owning data/misc paths faithfully (SELinux/xattr
-# via $TARC) - restore is same-device/same-ROM faithful. A portable content:// export
+# via $TARC). Restore is same-device/same-ROM faithful. A portable content:// export
 # sidecar is produced separately by the dex helper. Restore is reboot-required and
 # gated behind heavy UI friction (it overwrites live system state).
 special_paths() {   # <category>; echoes each existing owned path, one per line
@@ -1981,7 +2000,7 @@ do_special_restore() {
 
 # on-demand fetch of the large cloud binaries (rclone + restic) for the lite edition.
 # Downloads the per-ABI addon named in etc/cloud_addons.json, verifies it against the
-# sha256 baked into the module (mandatory - the binary runs as root), then extracts it
+# sha256 baked into the module (mandatory, the binary runs as root), then extracts it
 # into $CLOUD. Nothing else is ever downloaded; the full editions ship these embedded.
 do_cloud_fetch() {
   prog 2 preparing "cloud"
@@ -2238,11 +2257,11 @@ config_import() {
   finish true ERR_NONE
 }
 
-# Detached-engine survival (issue #5): move this worker - and so every child it forks -
+# Detached-engine survival (issue #5): move this worker, and so every child it forks,
 # out of the manager app's cgroup into the root cgroup, where root daemons run. Android's
 # cached-app freezer (cgroup.freeze on /apps/uid_<app>) and the phantom-process killer act
 # per app cgroup, so a worker left there is paused or killed when the WebUI/manager app is
-# backgrounded or closed - the backup then stalls until it is reopened and never finishes
+# backgrounded or closed, the backup then stalls until it is reopened and never finishes
 # unattended. Done here, before any heavy child is forked. Best-effort: a kernel that
 # refuses the move leaves the worker where it was, no worse than before.
 echo $$ > /sys/fs/cgroup/cgroup.procs 2>/dev/null || true

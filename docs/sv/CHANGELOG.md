@@ -6,6 +6,26 @@
 
 Alla noterbara ändringar i VDBackup dokumenteras här. Endast engelska.
 
+## v1.08
+
+Uppdateringar:
+
+- VDBackup kan nu uppdatera sig självt utan att flasha om. Mellan versioner hämtar den bara de filer som har ändrats (content-addressed, med ett signerat manifest) i stället för att ladda ner hela paketet på nytt. Varje uppdatering måste bära en giltig signatur, nedgraderingar avvisas, och det fullständiga paketet förblir tillgängligt som reserv.
+- En ny Updates-panel i WebUI visar uppdateringsförloppet, låter dig avbryta och söker efter uppdateringar på begäran. Uppdateringar tillämpas vid nästa uppstart, med ett skydd för anslutningar med datapott.
+
+Tillförlitlighet:
+
+- Att säkerhetskopiera ett stort antal appar på en gång stannar inte längre halvvägs. VDBackup stoppar nu bara de appar som faktiskt körs innan de säkerhetskopieras, i stället för att signalera varje app; på långa listor kunde den floden av förfrågningar uttömma Androids transaktionsgräns och få körningen att hänga sig. En annullerad eller avbruten säkerhetskopia släpper nu alltid sin wake lock.
+
+Återställning:
+
+- Att återställa en apps sparade policy för nätverksåtkomst på anpassade ROM:ar träder nu i kraft omedelbart och håller i sig. VDBackup ber systemets nätverkspolicytjänst att tillämpa den, i stället för att redigera policyfilen under den körande tjänsten, vilket tjänsten skulle kunna skriva över.
+
+Korrigeringar:
+
+- Knappen "Back up" per app byter nu språk tillsammans med resten av gränssnittet, i stället för att behålla sitt tidigare språk tills applistan byggs om.
+- Att radera en säkerhetskopia tar nu bort den tillförlitligt och rensar upp de tomma mapparna den lämnar efter sig.
+
 ## v1.07
 
 Tillförlitlighet:

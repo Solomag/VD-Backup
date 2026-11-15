@@ -396,7 +396,7 @@ button { cursor: pointer; font-family: inherit; }
   white-space: pre; color: var(--text); margin: 0; }
 
 /* accent-colour picker (Settings): the reset control comes first, then the
-   swatches in one horizontal row that does NOT wrap - it scrolls sideways
+   swatches in one horizontal row that does NOT wrap; it scrolls sideways
    (swipe on touch) with a thin/low-profile scrollbar, so more colours are a
    swipe away rather than pushed onto a second line. */
 .swatches { display: flex; flex-wrap: nowrap; gap: 8px; align-items: center;

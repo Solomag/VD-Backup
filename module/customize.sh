@@ -25,7 +25,7 @@ SKIPUNZIP=0
 STATE_DIR=/data/adb/vdbackup
 
 ui_print ""
-ui_print "  VD BACKUP  -  root backup & restore"
+ui_print "  VD BACKUP: root backup & restore"
 ui_print "  https://github.com/VD171/VD-Backup"
 ui_print ""
 
@@ -136,6 +136,17 @@ rm -f "$STATE_DIR/staging/authorize.pgid"   # stale transient from a previous ru
 chmod 700 "$STATE_DIR"
 for _d in $STATE_SUBDIRS; do chmod 700 "$STATE_DIR/$_d" 2>/dev/null; done
 
+# --- seed the VDLU flashless-updater config (only if absent) ------------
+# The engine keeps its mutable state in Tier-2 ($STATE_DIR/vdlu), never under the module
+# dir it rewrites. Seed the hardened defaults on first install; never clobber an existing
+# config (the user edits source/channel/toggles from the WebUI Updates tab).
+if [ ! -f "$STATE_DIR/vdlu/config" ] && [ -f "$MODPATH/vdlu/config.default" ]; then
+  ui_print "- Seeding update engine (VDLU) configuration"
+  mkdir -p "$STATE_DIR/vdlu"
+  cp -f "$MODPATH/vdlu/config.default" "$STATE_DIR/vdlu/config"
+  chmod 600 "$STATE_DIR/vdlu/config"
+fi
+
 # --- permissions --------------------------------------------------------
 ui_print "- Setting permissions"
 set_perm_recursive "$MODPATH" 0 0 0755 0644
@@ -144,11 +155,13 @@ set_perm "$MODPATH/scripts/helper.sh" 0 0 0755
 set_perm "$MODPATH/scripts/worker.sh" 0 0 0755
 set_perm "$MODPATH/service.sh" 0 0 0755
 [ -f "$MODPATH/uninstall.sh" ] && set_perm "$MODPATH/uninstall.sh" 0 0 0755
+[ -f "$MODPATH/vdlu/update.sh" ] && set_perm "$MODPATH/vdlu/update.sh" 0 0 0755
+[ -f "$MODPATH/vdlu/vdlu-verify" ] && set_perm "$MODPATH/vdlu/vdlu-verify" 0 0 0755
 
 # --- ready without a reboot --------------------------------------------
 # VDBackup is self-contained (WebUI + helper + bundled binaries live under the
 # module dir); it needs no magic mount, Zygisk or sepolicy. Managers stage modules
-# under modules_update/ and only activate them on reboot - but since we have nothing
+# under modules_update/ and only activate them on reboot, but since we have nothing
 # to mount, copy ourselves into the active modules/ dir so the WebUI works NOW.
 MID="${MODID:-vdbackup}"
 ACTIVE="/data/adb/modules/$MID"
@@ -166,6 +179,6 @@ else
 fi
 
 ui_print ""
-ui_print "- Ready to use NOW - no reboot needed."
+ui_print "- Ready to use NOW, no reboot needed."
 ui_print "  Open the VDBackup WebUI from your root manager to run backups."
 ui_print ""

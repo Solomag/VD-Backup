@@ -6,6 +6,26 @@
 
 Toutes les modifications notables de VDBackup sont documentées ici. En anglais uniquement.
 
+## v1.08
+
+Mises à jour:
+
+- VDBackup peut désormais se mettre à jour lui-même sans reflasher. Entre les versions, il ne récupère que les fichiers qui ont changé (adressés par contenu, avec un manifeste signé) au lieu de retélécharger le paquet entier. Chaque mise à jour doit porter une signature valide, les rétrogradations sont refusées, et le paquet complet reste disponible comme solution de repli.
+- Un nouveau panneau Mises à jour dans la WebUI affiche la progression de la mise à jour, permet de l'annuler et recherche les mises à jour à la demande. Les mises à jour s'appliquent au prochain démarrage, avec une protection contre les connexions facturées à l'usage.
+
+Fiabilité:
+
+- La sauvegarde d'un grand nombre d'applications à la fois ne se bloque plus en cours de route. VDBackup n'arrête désormais que les applications réellement en cours d'exécution avant de les sauvegarder, au lieu de signaler chaque application ; sur de longues listes, ce flot de requêtes pouvait épuiser la limite de transactions d'Android et figer l'exécution. Une sauvegarde annulée ou interrompue libère désormais toujours son wake lock.
+
+Restauration:
+
+- La restauration de la politique d'accès réseau enregistrée d'une application sur les ROM personnalisées prend désormais effet immédiatement et persiste. VDBackup demande au service de politique réseau du système de l'appliquer, au lieu de modifier le fichier de politique sous le service en cours d'exécution, que celui-ci pourrait écraser.
+
+Corrections:
+
+- Le bouton « Sauvegarder » de chaque application change désormais de langue en même temps que le reste de l'interface, au lieu de conserver sa langue précédente jusqu'à ce que la liste des applications soit reconstruite.
+- La suppression d'une sauvegarde la supprime désormais de façon fiable et nettoie les dossiers vides qu'elle laisse derrière elle.
+
 ## v1.07
 
 Fiabilité:

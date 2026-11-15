@@ -25,7 +25,7 @@
   after sign-in. Styled like the VDBackup WebUI so the sign-in feels in-app.
   Go template: .OK is rclone's success flag (bool). Do NOT branch on .Error:
   rclone's AuthResult implements the error interface, so printing .Error calls a
-  method that always returns a non-empty string (even on success) - branching
+  method that always returns a non-empty string (even on success). Branching
   on it would always show failure. (Go templates evaluate actions even inside
   HTML comments, so this note avoids the double-brace form.)
 -->

@@ -148,6 +148,25 @@ public final class Helper {
         return ai;
     }
 
+    // Set a UID's network policy mask via INetworkPolicyManager/ServiceManager (hidden API,
+    // reached by reflection so this still compiles against public android.jar). NPMS applies
+    // it live and persists it to netpolicy.xml itself - unlike editing that file behind the
+    // service, which NPMS overwrites, so the restore never took (issue #9). The policy int is
+    // the exact mask captured at backup time (e.g. a custom-ROM "block all networks" value).
+    private static void netpolicySet(int uid, int policy) throws Exception {
+        Class<?> sm = Class.forName("android.os.ServiceManager");
+        IBinder binder = (IBinder) sm.getMethod("getService", String.class).invoke(null, "netpolicy");
+        if (binder == null) throw new IllegalStateException("netpolicy service unavailable");
+        Class<?> stub = Class.forName("android.net.INetworkPolicyManager$Stub");
+        Object inpm = stub.getMethod("asInterface", IBinder.class).invoke(null, binder);
+        Method sup = null;
+        for (Method m : inpm.getClass().getMethods()) {
+            if ("setUidPolicy".equals(m.getName()) && m.getParameterTypes().length == 2) { sup = m; break; }
+        }
+        if (sup == null) throw new NoSuchMethodException("setUidPolicy");
+        sup.invoke(inpm, uid, policy);
+    }
+
     // APK resources through a bare AssetManager (no Context, so systemMain() never runs).
     private static Resources apkResources(ApplicationInfo ai) throws Exception {
         String apk = (ai.sourceDir != null) ? ai.sourceDir : ai.publicSourceDir;
@@ -286,6 +305,18 @@ public final class Helper {
                 return;
             }
 
+            if ("netpolicy-set".equals(verb)) {
+                // netpolicy-set <uid> <policyInt>: apply a per-UID network policy via the
+                // framework. Context-free (ServiceManager only), never touches systemMain().
+                int uid = Integer.parseInt(args[1]);
+                int policy = Integer.parseInt(args[2]);
+                netpolicySet(uid, policy);
+                System.out.println("{\"ok\":true,\"verb\":\"netpolicy-set\",\"uid\":" + uid + ",\"policy\":" + policy + "}");
+                System.out.flush();
+                System.exit(0);
+                return;
+            }
+
             if ("list-apps".equals(verb)) {
                 int userId = 0;
                 if (args.length > 1) { try { userId = Integer.parseInt(args[1]); } catch (NumberFormatException ignore) { } }
@@ -296,7 +327,7 @@ public final class Helper {
             }
 
             if ("icon".equals(verb)) {
-                // icon <pkg> <out.png> [userId] - context-free, never hangs
+                // icon <pkg> <out.png> [userId]. Context-free, never hangs
                 int userId = 0;
                 if (args.length > 3) { try { userId = Integer.parseInt(args[3]); } catch (NumberFormatException ignore) { } }
                 iconFree(args[1], args[2], userId);
@@ -307,7 +338,7 @@ public final class Helper {
             }
 
             if ("icons".equals(verb)) {
-                // icons <userId> <listfile> - batch: one JVM renders many icons.
+                // icons <userId> <listfile>. Batch: one JVM renders many icons.
                 // listfile: one "pkg\t/abs/out.png" per line. Amortizes JVM startup.
                 int userId = 0;
                 try { userId = Integer.parseInt(args[1]); } catch (Exception ignore) { }
@@ -329,7 +360,7 @@ public final class Helper {
             }
 
             if ("label".equals(verb)) {
-                // label <pkg> [userId] - context-free, never hangs
+                // label <pkg> [userId]. Context-free, never hangs
                 int userId = 0;
                 if (args.length > 2) { try { userId = Integer.parseInt(args[2]); } catch (NumberFormatException ignore) { } }
                 System.out.println("{\"ok\":true,\"label\":\"" + esc(labelOf(appInfo(args[1], userId))) + "\"}");

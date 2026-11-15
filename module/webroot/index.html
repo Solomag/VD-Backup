@@ -29,6 +29,7 @@
   <title>VDBackup</title>
   <link rel="icon" href="assets/logo-icon.svg">
   <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="vdlu.css">
 </head>
 <body>
   <header class="topbar">
@@ -94,7 +95,7 @@
           <span data-i18n="susfs_notice_title">Hide the backup folder</span>
           <span class="tag" data-i18n="susfs_notice_badge">Recommended</span>
         </div>
-        <div class="notice-msg" data-i18n="susfs_notice_body">You have local backups in /sdcard/VDBackup. Hide this folder with SUSFS so its presence does not reveal root or an unlocked bootloader - just as the companion app would.</div>
+        <div class="notice-msg" data-i18n="susfs_notice_body">You have local backups in /sdcard/VDBackup. Hide this folder with SUSFS so its presence does not reveal root or an unlocked bootloader, just as the companion app would.</div>
         <div class="notice-msg" data-i18n="susfs_notice_howto">Add the backup folder as a SUSFS hidden path (sus_path) in your root manager or SUSFS module. SUSFS does the hiding; this just reminds you.</div>
         <div class="pkg" id="susfs-notice-path"></div>
         <div class="modal-actions">
@@ -229,7 +230,7 @@
           <button id="r-auth-cancel" class="btn small" type="button" hidden data-i18n="ui_r_cancel">Cancel</button>
         </div>
         <textarea id="r-token" data-i18n-ph="ph_remote_token" placeholder="rclone drive token"></textarea>
-        <p id="r-drive-hint" class="muted" data-i18n="remote_drive_hint">No Google Cloud account needed. On any computer run: rclone authorize "drive" - then paste the token it prints here.</p>
+        <p id="r-drive-hint" class="muted" data-i18n="remote_drive_hint">No Google Cloud account needed. On any computer run: rclone authorize "drive", then paste the token it prints here.</p>
         <button id="r-save" class="btn go block" data-i18n="remote_create">Create remote</button>
       </div>
       <div id="companion-hma" class="notice" hidden>
@@ -339,7 +340,7 @@
 
       <div class="card">
         <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg></span><span class="sh-t" data-i18n="settings_app_items">Per-app items and tags</span></h2>
-        <div class="muted" data-i18n="settings_app_items_hint">Choose exactly which items each app backs up in bulk, automatic and scheduled backups - for example APK only, or APK + OBB. A single manual backup still lets you pick at the time. Apps you do not set here back up everything. Tap an app to also give it tags: free labels to group apps, filter the list, and back up a whole group at once.</div>
+        <div class="muted" data-i18n="settings_app_items_hint">Choose exactly which items each app backs up in bulk, automatic and scheduled backups, for example APK only, or APK + OBB. A single manual backup still lets you pick at the time. Apps you do not set here back up everything. Tap an app to also give it tags: free labels to group apps, filter the list, and back up a whole group at once.</div>
         <input id="ai-app-search" type="search" class="picker-search" data-i18n-ph="ui_job_search" placeholder="Search apps by name or package" autocomplete="off">
         <div id="ai-app-count" class="muted picker-count"></div>
         <ul id="ai-applist" class="list picker-list"></ul>
@@ -481,6 +482,11 @@
       <button id="log-open" class="btn block" data-i18n="ui_log_open">View activity log</button>
     </section>
 
+    <section id="updates" class="panel">
+      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5l-2 2"/><path d="M4 13a8 8 0 0 0 14 5l2-2"/><path d="M4 4v4h4"/><path d="M20 20v-4h-4"/></svg></span><span class="sh-t" data-i18n="tab_updates">Updates</span></h2>
+      <div id="vdlu-updates"></div>
+    </section>
+
     <section id="about" class="panel about">
       <div class="about-hero">
         <img src="assets/logo-icon.svg" alt="VDBackup">
@@ -515,9 +521,13 @@
         <a href="https://github.com/VD171/VD-Infos"><span class="k">VDInfos</span><span class="val" data-i18n="about_sib_vdinfos">a device method debugger: reads each item through every method that can read it and compares them side by side.</span></a>
         <a href="https://github.com/VD171/VD-Google"><span class="k">VDGoogle</span><span class="val" data-i18n="about_sib_vdgoogle">your Google services (RCS, Wallet, Play Integrity attestations), read on your device with no internet.</span></a>
         <a href="https://github.com/VD171/COPG-VD"><span class="k">COPG-VD</span><span class="val" data-i18n="about_sib_copg">a device spoofer that turns a fresh fingerprint into a coherent, consistent profile.</span></a>
+        <a href="https://github.com/VD171/VD-dropbear"><span class="k">VD-dropbear</span><span class="val" data-i18n="about_sib_vddropbear">a standalone rooted SSH daemon (Dropbear).</span></a>
       </div>
       <button id="prov-open" class="btn block" data-i18n="about_prov_btn">View bundled-binary manifest</button>
-      <div class="foot" data-i18n="about_foot">GNU AGPL-3.0-or-later - Copyright (C) 2026 VD171</div>
+      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="sh-t" data-i18n="about_disclaimer">Disclaimer</span></h2>
+      <p class="muted" data-i18n="about_disclaimer_safety">VD Backup is free software provided as is, with no warranty of any kind. Restoring overwrites what is currently on your device and can cause data loss, so review each operation before you run it and keep your own copy of anything you cannot afford to lose. Your backups contain your personal data, so store them somewhere you trust.</p>
+      <p class="muted" data-i18n="about_disclaimer_tm">VD Backup is an independent, unofficial project. It is not affiliated with, endorsed by, or sponsored by Google LLC or any other vendor. "Google Drive", "Android" and related names and logos are trademarks of their respective owners. VD Backup runs on your device and uploads only to the destinations you configure.</p>
+      <div class="foot" data-i18n="about_foot">GNU AGPL-3.0-or-later. Copyright (C) 2026 VD171</div>
     </section>
 
     <section id="log" class="panel">
@@ -552,6 +562,10 @@
     <button class="tab" data-tab="schedule" data-i18n-title="tab_schedule">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2"/><path d="M5 3 2.5 5.5"/><path d="M19 3l2.5 2.5"/></svg>
       <span data-i18n="tab_schedule">Schedule</span>
+    </button>
+    <button class="tab" data-tab="updates" data-i18n-title="tab_updates">
+      <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5l-2 2"/><path d="M4 13a8 8 0 0 0 14 5l2-2"/><path d="M4 4v4h4"/><path d="M20 20v-4h-4"/></svg>
+      <span data-i18n="tab_updates">Updates</span>
     </button>
     <button class="tab" data-tab="about" data-i18n-title="tab_about">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9.5"/><path d="M12 11v5"/><circle cx="12" cy="7.6" r="0.1" stroke-width="2.4"/></svg>
@@ -835,6 +849,7 @@
 
   <script src="lang/en.js"></script>
   <script src="i18n.js"></script>
+  <script src="vdlu.js"></script>
   <script src="scripts.js"></script>
 </body>
 </html>
