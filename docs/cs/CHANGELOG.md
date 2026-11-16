@@ -6,6 +6,12 @@
 
 Všechny podstatné změny ve VDBackup jsou zdokumentovány zde. Pouze anglicky.
 
+## v1.09
+
+Spolehlivost:
+
+- Zálohování velkého seznamu aplikací se teď spolehlivě dokončí. Krok, který před zálohováním každou aplikaci ztiší, dříve procházel přes ActivityManager Androidu, což nad zhruba 120 aplikacemi vyčerpalo systémový limit transakcí a zastavilo zbytek běhu; teď zastaví přímo procesy samotné aplikace, takže záloha libovolného počtu aplikací proběhne až do konce. Dokončená nebo přerušená záloha také spolehlivě uvolní svůj wake lock, takže opakované zálohy už neudržují zařízení vzhůru.
+
 ## v1.08
 
 Aktualizace:

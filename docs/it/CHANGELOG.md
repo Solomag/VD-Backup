@@ -6,6 +6,12 @@
 
 Tutte le modifiche rilevanti di VDBackup sono documentate qui. Solo in inglese.
 
+## v1.09
+
+Affidabilità:
+
+- Il backup di un lungo elenco di app ora si completa in modo affidabile. Il passo che mette a riposo ogni app prima di eseguirne il backup passava prima per l'ActivityManager di Android, che oltre circa 120 app esauriva il limite di transazioni del sistema e bloccava il resto dell'esecuzione; ora arresta direttamente i processi dell'app stessa, così che un backup di un numero qualsiasi di app si completi. Un backup completato o interrotto rilascia inoltre in modo affidabile il suo wake lock, così che backup ripetuti non tengano più il dispositivo sveglio.
+
 ## v1.08
 
 Aggiornamenti:

@@ -6,6 +6,12 @@
 
 Alle noemenswaardige wijzigingen aan VDBackup worden hier gedocumenteerd. Alleen in het Engels.
 
+## v1.09
+
+Betrouwbaarheid:
+
+- Een grote app-lijst back-uppen voltooit nu betrouwbaar. De stap die elke app stillegt voordat die geback-upt wordt, liep vroeger via de ActivityManager van Android, wat voorbij zo'n 120 apps de transactielimiet van het systeem uitputte en de rest van de uitvoering liet hangen; nu stopt het de eigen processen van de app rechtstreeks, zodat een back-up van elk aantal apps voltooit. Een voltooide of onderbroken back-up geeft ook betrouwbaar zijn wake lock vrij, zodat herhaalde back-ups het apparaat niet meer wakker houden.
+
 ## v1.08
 
 Updates:

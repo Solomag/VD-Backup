@@ -132,7 +132,25 @@ jobs:
 
       - name: Assemble release zip
         if: steps.chk.outputs.state == 'changed'
-        run: cd module && zip -r9 "../VD-Backup-${{ steps.v.outputs.name }}.zip" . -x 'bin/*/.gitkeep'
+        run: cd module && zip -r9 "../VD-Backup-${{ steps.v.outputs.name }}-universal-full.zip" . -x 'bin/*/.gitkeep'
+
+      # version.sh regenerates update.json with the -universal-full zipUrl template but EMPTY
+      # size/sha256/notes placeholders. Fill them here from the built zip, exactly like the
+      # release workflow does, so the in-app update check is not served a 0-byte, unsigned,
+      # note-less entry pointing at a mismatched zip name (that broke the v1.08.1 refresh).
+      - name: Fill update.json (size + sha256 + notes)
+        if: steps.chk.outputs.state == 'changed'
+        run: |
+          VER="${{ steps.v.outputs.name }}"
+          zip="VD-Backup-${VER}-universal-full.zip"
+          sz=$(stat -c%s "$zip"); sh=$(sha256sum "$zip" | cut -d' ' -f1)
+          url="https://github.com/VD171/VD-Backup/releases/download/${VER}/${zip}"
+          notes="Binary refresh: the bundled, pre-compiled upstream tools (rclone, restic, tar, ...) were updated to their latest versions. No app or feature changes from the previous release; per-binary source and SHA-256 are in bin/<abi>/PROVENANCE.json (see docs/BINARIES.md)."
+          tmp=$(mktemp)
+          jq --arg url "$url" --argjson size "$sz" --arg sha "$sh" --arg notes "$notes" \
+             '.zipUrl=$url | .size=$size | .sha256=$sha | .notes=$notes' module/update.json > "$tmp"
+          mv "$tmp" module/update.json
+          cat module/update.json
 
       - name: Commit bump + lock
         if: steps.chk.outputs.state == 'changed'
@@ -149,6 +167,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "${{ steps.v.outputs.name }}" \
-            "VD-Backup-${{ steps.v.outputs.name }}.zip" \
+            "VD-Backup-${{ steps.v.outputs.name }}-universal-full.zip" \
             --title "VDBackup ${{ steps.v.outputs.name }} (binary refresh)" \
             --notes "Automated refresh of the bundled, pre-compiled upstream tools (Termux + ABX) to their latest versions. Source and SHA-256 of every binary are in bin/<abi>/PROVENANCE.json; see docs/BINARIES.md."

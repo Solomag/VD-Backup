@@ -6,10 +6,23 @@ so installed devices update **flashlessly and incrementally** - fetching only th
 applying the live ones without a reboot. The `.zip` stays the first-install and fallback path; VDLU is
 additive and never replaces it.
 
+**Why this also matters: flavor-preserving updates (owner's standing concern).** A static zip update
+(`update.json` for the root manager, the MMRL feed) can only point at ONE `zipUrl`, and the device sends
+no ABI/flavor in the request, so it cannot serve the installed flavor: the manager ends up on
+universal-full (232 MB, but it does keep the full flavor and `customize.sh` prunes the ABI), and MMRL is
+forced to universal-lite by its 50 MB cap (a full install drops to lite until rclone/restic are re-fetched
+on demand - not catastrophic, but not what the user picked). VDLU sidesteps all of it: it diffs the
+**installed** tree (whatever ABI/flavor) against the feed and fetches only the deltas, so arm64-full stays
+arm64-full and lite stays lite - no forced flavor, no 232 MB, no 50 MB cap. So "serve the matching flavor
+wherever possible" is, concretely, "keep the VDLU feed live"; the per-flavor zips remain first-install only.
+
 The feed is produced by the canonical tools in `VD/Sources/VDLiveUpdate/producer/` and consumed by the
 vendored engine here. The private signing key stays with the release operator, never in the repo or on a
-device (`VDLiveUpdate/keys/vd-2026.pem`, gitignored); only `vd-2026.pub` is embarked, in
-`module/vdlu/keyring/`. Contract: `VDLiveUpdate/INTERFACES.md` §3/§6; architecture:
+device (`VDLiveUpdate/keys/vd-2026.pem`, gitignored); only the public key is embarked, as the RAW
+32-byte `vd-2026.pub` in `module/vdlu/keyring/`. On-device signature verification uses the embedded
+`ed25519-mini` (per-ABI under `module/vdlu/verify/`, pruned to the device ABI by `customize.sh`), not
+openssl; blobs are gzip (`enc:"gz"`) and the manifest is `engine_min:3`. Contract:
+`VDLiveUpdate/INTERFACES.md` §3/§6; architecture:
 `MODULO_VDLU.md` §12/§13 (the VDLU design doc).
 
 ## Prerequisites
@@ -25,18 +38,40 @@ device (`VDLiveUpdate/keys/vd-2026.pem`, gitignored); only `vd-2026.pub` is emba
 
 ```sh
 VDLU=../VDLiveUpdate                 # VD/Sources/VDLiveUpdate
-TREE=module                          # the final module tree (same contents the .zip ships)
 OUT=./vdlu-feed                      # manifest.json + blobs/ land here
-VER=10500                            # module.prop versionCode (monotonic; hardened blocks downgrade)
-NAME=v1.05                           # module.prop versionName
+VER=10800                            # module.prop versionCode (monotonic; hardened blocks downgrade)
+NAME=v1.08                           # module.prop versionName
+
+# 0. stage the SHIPPED tree. The CI zips module/ with `-x 'bin/*/.gitkeep'`, so the feed must be
+#    packed from a copy with those placeholders stripped: otherwise the manifest lists the
+#    `bin/<abi>/.gitkeep` files the installed module does NOT have, and the engine sees a phantom
+#    diff on them. (Verified locally: pack of module/ lists 4 `.gitkeep`; pack of the stripped tree
+#    lists 0.) This is the only CI zip-exclusion for VD-Backup; everything else in module/ ships.
+rm -rf _shipped && cp -a module _shipped && rm -f _shipped/bin/*/.gitkeep
+TREE=_shipped                        # == exactly what every device flashes
 
 # 1. pack the tree into a content-addressed feed (dedup; --prev computes delete[]).
+#    Blobs are gzip (enc:"gz"); the manifest carries engine_min:3 (the slim engine).
 "$VDLU/producer/vdlu-pack" "$TREE" "$OUT" vdbackup "$VER" --version-name "$NAME" --channel stable \
     [--prev ./prev-feed/manifest.json]
 
 # 2. sign the manifest in place (ed25519; key_id must match the embarked pubkey).
 "$VDLU/producer/vdlu-sign" "$OUT/manifest.json" "$VDLU/keys/vd-2026.pem" vd-2026
+
+# The install "from:0" seed (vdlu/baseline.json) is NOT produced here. The github CI already stamps a
+# keyless, per-variant baseline into every .zip (.github/workflows/VD-Backup.yml -> seed_baseline),
+# so a fresh install is born "current" without the private key ever touching CI. Nothing to copy.
 ```
+
+> **Baseline is automatic and keyless - no open decision.** Each `.zip` already ships `vdlu/baseline.json`,
+> the content-addressed manifest of exactly what *that* variant installs (universal-full, lite without
+> rclone/restic, or a single ABI), stamped by the CI with the vendored keyless `vdlu-pack`
+> (`.github/scripts/vdlu-pack` - hash + gzip only, never signs). The engine seeds its local `current.json`
+> from it: it is trusted install-local state (it rode in the flashed zip), not a fetched blob, so it is
+> never signature-verified - only the FETCHED feed manifest is (`vdlu-verify`). So the private key stays
+> entirely off the CI and signs only the feed above. `baseline.json` is per-release and gitignored; the CI
+> regenerates it every build, matching each variant's installed tree, so the first self-update per install
+> is an incremental diff instead of a from:0 full re-fetch.
 
 - `module` is `id=vdbackup`, so the `vdlu-pack` module id is `vdbackup`; the feed is published under the
   `source` the config seeds (`https://vd171.github.io/VD-Modules/VD-Backup`), a path that keeps the repo

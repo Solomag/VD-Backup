@@ -59,6 +59,14 @@ if [ -d "$MODPATH/bin" ]; then
   ui_print "- Keeping binaries for $ABIDIR only"
 fi
 
+# --- VDLU verifier: keep only this device's ed25519-mini ABI --------------
+if [ -d "$MODPATH/vdlu/verify" ]; then
+  for d in "$MODPATH"/vdlu/verify/*/; do
+    [ -d "$d" ] || continue
+    [ "$(basename "$d")" = "$ABIDIR" ] || rm -rf "$d"
+  done
+fi
+
 # --- one-time migration (old layout) -----------------------------------
 # Backups used to live under $STATE_DIR/backups; the engine now writes to
 # /data/media/<user>/VDBackup. Move any leftovers there and drop the old dir.

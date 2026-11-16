@@ -6,6 +6,12 @@
 
 Toutes les modifications notables de VDBackup sont documentées ici. En anglais uniquement.
 
+## v1.09
+
+Fiabilité:
+
+- La sauvegarde d'une longue liste d'applications se termine désormais de façon fiable. L'étape qui met chaque application au repos avant de la sauvegarder passait auparavant par l'ActivityManager d'Android, ce qui, au-delà d'environ 120 applications, épuisait la limite de transactions du système et bloquait le reste de l'exécution ; elle arrête désormais directement les propres processus de l'application, de sorte qu'une sauvegarde de n'importe quel nombre d'applications se termine. Une sauvegarde terminée ou interrompue libère aussi de façon fiable son wake lock, de sorte que des sauvegardes répétées n'empêchent plus l'appareil de se mettre en veille.
+
 ## v1.08
 
 Mises à jour:

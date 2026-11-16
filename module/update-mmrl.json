@@ -1,9 +1,9 @@
 {
-  "version": "v1.08",
-  "versionCode": 10800,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.08/VD-Backup-v1.08-universal-lite.zip",
+  "version": "v1.07",
+  "versionCode": 10700,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.07/VD-Backup-v1.07-universal-lite.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "Updates: VDBackup can now update itself without reflashing. Between releases it fetches only the files that changed (signed, content-addressed) instead of the whole package, and keeps the full zip as a fallback. A new Updates panel shows progress, lets you cancel, and checks on demand; updates apply on the next boot, with a metered-connection guard.\n\nReliability: backing up many apps at once no longer stalls. VDBackup now stops only the apps that are actually running first, and a cancelled or interrupted backup always releases its wake lock.\n\nRestore: a restored app's network-access policy now applies immediately and sticks on custom ROMs.\n\nFixes: the per-app Back up button now follows the interface language; deleting a backup removes it cleanly and prunes the empty folders left behind.",
-  "size": 51095243,
-  "sha256": "8048eb81a8f215729a985563b68901350cbdd844e2c8f150b4ad8cd3b60562f8"
+  "notes": "Reliability: unattended and scheduled backups no longer stop when you leave the app - the backup now runs fully outside the app's process group.\n\nRestore: app permissions restore correctly on custom ROMs - per-UID permission modes and a restored app's network-access policy are reapplied (Android 16 and 17). You can opt in, per app, to also back up its network policy.\n\nSettings: exporting settings, or any encrypted backup, now reports a clear message when encryption cannot run on this device, instead of a generic error.\n\nInterface: dragging the interface-scale slider no longer switches tabs.\n\nLanguages: Ukrainian added - 22 languages.",
+  "size": 49628589,
+  "sha256": "4979f4db88a84e9f7176bfea87a98ad00c94fa1044af120162693f04196f4d34"
 }

@@ -91,3 +91,6 @@ Thumbs.db
 
 # build-generated per-release (URLs+sha256 of the on-demand cloud addons)
 module/etc/cloud_addons.json
+
+# VDLU per-release feed artifact (regenerated each release, never committed)
+module/vdlu/baseline.json

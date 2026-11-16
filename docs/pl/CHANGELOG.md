@@ -6,6 +6,12 @@
 
 Wszystkie istotne zmiany w VDBackup są udokumentowane tutaj. Tylko po angielsku.
 
+## v1.09
+
+Niezawodność:
+
+- Tworzenie kopii dużej listy aplikacji kończy się teraz niezawodnie. Krok, który wycisza każdą aplikację przed jej skopiowaniem, przechodził wcześniej przez ActivityManager Androida, co powyżej około 120 aplikacji wyczerpywało systemowy limit transakcji i zawieszało resztę wykonania; teraz zatrzymuje bezpośrednio własne procesy aplikacji, więc kopia dowolnej liczby aplikacji dochodzi do końca. Zakończona lub przerwana kopia niezawodnie zwalnia też swój wake lock, więc powtarzane kopie nie utrzymują już urządzenia w stanie czuwania.
+
 ## v1.08
 
 Aktualizacje:

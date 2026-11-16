@@ -172,12 +172,35 @@ jobs:
           VER: ${{ steps.v.outputs.name }}
         run: |
           set -e
+          VCODE="$(sed -n 's/^versionCode=//p' module/module.prop)"
+          # Seed each variant with a KEYLESS vdlu/baseline.json: the content-addressed manifest of
+          # exactly what THAT zip ships, so a fresh install is "born current" and its first VDLU
+          # self-update is a proper incremental diff, not a from:0 full re-fetch. vdlu-pack only
+          # hashes + gzips (NO private key), so it is safe in CI; the SIGNED feed is still produced
+          # off-CI with the key. The manifest must match the INSTALLED tree, so the per-variant
+          # pruning (lite drops rclone/restic; per-ABI keeps one bin/<abi>) happens BEFORE the seed,
+          # and bin/*/.gitkeep is stripped (the zip -x drops it too). Non-fatal: if the seed ever
+          # fails, the zip simply ships without a baseline and the engine does one from:0 fetch -
+          # correct, never a broken release.
+          seed_baseline() {  # <staged_module_dir>  (also prunes what should not reach the device)
+            rm -f "$1"/bin/*/.gitkeep
+            rm -f "$1"/vdlu/RELEASE.md          # dev doc: not shipped to device, not VDLU-managed (vdlu-pack excludes it too)
+            if python3 .github/scripts/vdlu-pack "$1" "/tmp/bl-$(basename "$1")" vdbackup "$VCODE" \
+                 --version-name "$VER" --channel stable >/dev/null 2>&1 \
+               && [ -f "/tmp/bl-$(basename "$1")/manifest.json" ]; then
+              cp "/tmp/bl-$(basename "$1")/manifest.json" "$1/vdlu/baseline.json"
+            else
+              echo "::warning::vdlu baseline seed failed for $1 - shipping without baseline (engine will from:0)"
+            fi
+          }
           # 1. universal-full: all ABIs, every binary
           cp -a module _m_unifull
+          seed_baseline _m_unifull
           ( cd _m_unifull && zip -r9 "../VD-Backup-${VER}-universal-full.zip" . -x 'bin/*/.gitkeep' )
           # 2. universal-lite: all ABIs, without the two largest binaries (rclone, restic)
           cp -a module _m_unilite
           rm -f _m_unilite/bin/*/rclone _m_unilite/bin/*/restic
+          seed_baseline _m_unilite
           ( cd _m_unilite && zip -r9 "../VD-Backup-${VER}-universal-lite.zip" . -x 'bin/*/.gitkeep' )
           # 3-6. per-ABI full: one ABI dir only, every binary for that architecture
           for abi in arm64-v8a armeabi-v7a x86 x86_64; do
@@ -185,6 +208,7 @@ jobs:
             for d in "_m_$abi"/bin/*/; do
               [ "$(basename "$d")" = "$abi" ] || rm -rf "$d"
             done
+            seed_baseline "_m_$abi"
             ( cd "_m_$abi" && zip -r9 "../VD-Backup-${VER}-$abi-full.zip" . -x 'bin/*/.gitkeep' )
           done
 

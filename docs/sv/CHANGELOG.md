@@ -6,6 +6,12 @@
 
 Alla noterbara ändringar i VDBackup dokumenteras här. Endast engelska.
 
+## v1.09
+
+Tillförlitlighet:
+
+- Att säkerhetskopiera en stor applista slutförs nu tillförlitligt. Steget som tystar varje app innan den säkerhetskopieras gick förr genom Androids ActivityManager, vilket förbi omkring 120 appar uttömde systemets transaktionsgräns och fick resten av körningen att stanna; det stoppar nu appens egna processer direkt, så att en säkerhetskopia av valfritt antal appar slutförs. En avslutad eller avbruten säkerhetskopia släpper också tillförlitligt sin wake lock, så att upprepade säkerhetskopior inte längre håller enheten vaken.
+
 ## v1.08
 
 Uppdateringar:

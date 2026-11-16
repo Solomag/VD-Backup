@@ -235,13 +235,18 @@ ARGS="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
 echo -1000 > /proc/$$/oom_score_adj 2>/dev/null || true
 echo "vdbackup_$OPID" > /sys/power/wake_lock 2>/dev/null || true
 _release_wakelock() { echo "vdbackup_$OPID" > /sys/power/wake_unlock 2>/dev/null || true; }
-# Release on termination signals too, not just a clean exit, so a worker that is asked to
-# stop does not leave its wakelock held and keep the device awake (issue #5). SIGKILL cannot
-# be trapped, but the oom_score_adj above makes the LMK pick something else first.
-trap _release_wakelock EXIT INT TERM HUP
-
-cleanup() { verifier_restore; rm -f "$LOGS/$OPID.pid"; }
+# Release the wakelock + restore state on EVERY exit path. The clean-exit path and the
+# termination signals all run through the single EXIT trap (cleanup). SIGKILL cannot be
+# trapped, but the oom_score_adj above makes the LMK pick something else first.
+# issue #5: a prior `trap _release_wakelock EXIT` here was silently overridden by the
+# `trap cleanup EXIT` that followed (a second trap on a signal REPLACES the first), so a
+# cleanly-finished worker never released its wakelock and kept the device awake. Folding the
+# release into cleanup, and routing the signals into the same trap, fixes it for good.
+cleanup() { _release_wakelock; verifier_restore; rm -f "$LOGS/$OPID.pid"; }
 trap cleanup EXIT
+trap 'exit 143' TERM
+trap 'exit 130' INT
+trap 'exit 129' HUP
 
 jstr() { printf '%s' "$1" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g'; }
 # progx: progress with optional rich fields (speed/ETA/N-of-M/current item) for the
@@ -322,20 +327,24 @@ net_guard() {
 # companion (could be mid-upload) or the framework itself.
 freeze() {
   case "$1" in ru.vd171.vdbackup|android|system|"") return 0 ;; esac
-  # Only force-stop an app that is actually running: a stopped app's data is already at
-  # rest. Force-stopping every app in a bulk backup hammered the ActivityManager until its
-  # binder started failing ("Failed transaction") around ~100 apps, stalling the whole run
-  # and leaking the wakelock of the hung worker (issue #5). This also kills fewer of the
-  # user's live apps. pidof matches the main process name (= package).
+  # Only quiesce an app that is actually running: a stopped app's data is already at rest.
   pidof "$1" >/dev/null 2>&1 || return 0
-  # Bounded and best-effort: a hung ActivityManager (binder "Failed transaction" under
-  # memory pressure, seen in bulk-backup logs) must not freeze the op at "preparing".
-  # Skip and continue if the force-stop stalls or fails; a running app is still backed up.
-  if exec_ns test -x /system/bin/timeout; then
-    fw /system/bin/timeout 30 /system/bin/am force-stop "$1" 2>/dev/null || true
-  else
-    fw /system/bin/am force-stop "$1" 2>/dev/null || true
-  fi
+  # Quiesce by SIGKILLing the app's own processes directly - a kernel syscall, NOT
+  # `am force-stop`. Every `am`/`cmd activity force-stop` is an ActivityManager binder
+  # transaction, and ~100-120 of them in a bulk backup exhaust the binder/transaction buffer
+  # ("Failure calling service activity: Failed transaction (2147483646)"), which failed the
+  # rest of the batch and left the run hung (issue #5). v1.08 cut the count to running apps
+  # only, but the wall merely moved to ~120 - the AMS call itself is the problem. kill makes
+  # ZERO AMS calls, so it scales to any number of apps. Kill every process of the app's uid
+  # (the main process AND its :sub-processes, which a `pidof` comm match alone would miss).
+  _fu="$(stat -c %u "/data/data/$1" 2>/dev/null)"
+  case "$_fu" in
+    ''|*[!0-9]*|0) kill -9 $(pidof "$1" 2>/dev/null) 2>/dev/null || true; return 0 ;;
+  esac
+  for _fd in /proc/[0-9]*; do
+    [ "$(stat -c %u "$_fd" 2>/dev/null)" = "$_fu" ] && kill -9 "${_fd##*/}" 2>/dev/null
+  done
+  return 0
 }
 PM_FLAGS=""
 pm_install_flags() {

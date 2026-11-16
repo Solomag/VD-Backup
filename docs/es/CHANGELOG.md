@@ -6,6 +6,12 @@
 
 Todos los cambios relevantes de VDBackup están documentados aquí. Solo en inglés.
 
+## v1.09
+
+Fiabilidad:
+
+- Respaldar una lista grande de apps ahora termina de forma fiable. El paso que aquieta cada app antes de respaldarla pasaba antes por el ActivityManager de Android, que a partir de unas 120 apps agotaba el límite de transacciones del sistema y dejaba estancado el resto de la ejecución; ahora detiene directamente los propios procesos de la app, así que una copia de cualquier número de apps se completa. Una copia terminada o interrumpida también libera de forma fiable su wake lock, así que las copias repetidas ya no mantienen el dispositivo despierto.
+
 ## v1.08
 
 Actualizaciones:

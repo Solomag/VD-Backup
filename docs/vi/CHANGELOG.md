@@ -6,6 +6,12 @@
 
 Mọi thay đổi đáng chú ý của VDBackup được ghi lại ở đây. Chỉ bằng tiếng Anh.
 
+## v1.09
+
+Độ tin cậy:
+
+- Sao lưu một danh sách ứng dụng lớn giờ hoàn tất một cách đáng tin cậy. Bước làm lặng mỗi ứng dụng trước khi sao lưu nó trước đây đi qua ActivityManager của Android, thứ mà khi vượt khoảng 120 ứng dụng sẽ làm cạn giới hạn giao dịch của hệ thống và khiến phần còn lại của lần chạy bị đình trệ; giờ nó dừng trực tiếp các tiến trình của chính ứng dụng, nên một bản sao lưu với bất kỳ số lượng ứng dụng nào cũng hoàn tất. Một bản sao lưu đã hoàn thành hoặc bị gián đoạn cũng giải phóng wake lock của nó một cách đáng tin cậy, nên các lần sao lưu lặp lại không còn giữ cho thiết bị thức nữa.
+
 ## v1.08
 
 Cập nhật:

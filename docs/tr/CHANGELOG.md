@@ -6,6 +6,12 @@
 
 VDBackup'taki tüm kayda değer değişiklikler burada belgelenir. Yalnızca İngilizce.
 
+## v1.09
+
+Güvenilirlik:
+
+- Büyük bir uygulama listesini yedeklemek artık güvenilir biçimde tamamlanıyor. Her uygulamayı yedeklemeden önce askıya alan adım eskiden Android'in ActivityManager'ı üzerinden geçiyordu; bu, yaklaşık 120 uygulamayı aştığında sistemin işlem sınırını tüketip çalıştırmanın geri kalanını durduruyordu. Artık uygulamanın kendi işlemlerini doğrudan durduruyor, böylece herhangi bir sayıda uygulamanın yedeği tamamlanıyor. Tamamlanan veya kesintiye uğrayan bir yedek de wake lock'ını güvenilir biçimde serbest bırakır, böylece art arda yapılan yedekler artık cihazı uyanık tutmuyor.
+
 ## v1.08
 
 Güncellemeler:

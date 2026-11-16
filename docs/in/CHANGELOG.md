@@ -6,6 +6,12 @@
 
 Semua perubahan penting pada VDBackup didokumentasikan di sini. Hanya dalam bahasa Inggris.
 
+## v1.09
+
+Keandalan:
+
+- Mencadangkan daftar aplikasi yang besar kini selesai dengan andal. Langkah yang menenangkan setiap aplikasi sebelum mencadangkannya dulu melewati ActivityManager milik Android, yang di atas sekitar 120 aplikasi menghabiskan batas transaksi sistem dan menggantung sisa prosesnya; kini ia menghentikan langsung proses-proses milik aplikasi itu sendiri, sehingga pencadangan sejumlah aplikasi berapa pun selesai. Pencadangan yang selesai atau terputus juga melepaskan wake lock-nya dengan andal, sehingga pencadangan berulang tidak lagi membuat perangkat tetap terjaga.
+
 ## v1.08
 
 Pembaruan:
