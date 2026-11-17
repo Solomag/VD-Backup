@@ -6,6 +6,22 @@
 
 Alla noterbara ändringar i VDBackup dokumenteras här. Endast engelska.
 
+## v1.10
+
+Gränssnitt:
+
+- Att öppna WebUI över en långsam eller onåbar anslutning fryser den inte längre. Bakgrundskontrollen efter en nyare version kördes medan applistan och ikonerna fortfarande laddades, över samma kanal som gränssnittet använder för att nå modulen, så ett stoppat nätverk höll upp hela skärmen och det gick inte att navigera. Den körs nu först när gränssnittet är inaktivt och ger upp snabbt, så appen förblir responsiv och du kan navigera direkt, även medan ikonerna laddas.
+
+- Att starta en återställning gör inte längre ingenting utan förklaring. Om bekräftelsen att nuvarande data ersätts ännu inte är ikryssad, säger knappen nu det och markerar rutan, i stället för att tyst inte starta.
+
+Tillförlitlighet:
+
+- Återställningar och säkerhetskopior är säkrare: en åtgärd som inte kan slutföras rapporterar nu felet i stället för att tyst avslutas som om den lyckats, så appen säger aldrig att en återställning lyckades när data inte skrevs klart.
+
+Nytt:
+
+- RCS-chattar (Google Messages) kan nu säkerhetskopieras som en särskild säkerhetskopia - en råkopia som återställs på samma enhet, plus en läsbar export av konversationerna som öppnas på vilken dator som helst. Att migrera RCS mellan enheter är inte garanterat (det registreras om per enhet), så samma enhet är det tillförlitliga fallet.
+
 ## v1.09
 
 Tillförlitlighet:

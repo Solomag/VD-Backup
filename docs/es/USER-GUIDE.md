@@ -268,6 +268,7 @@ Las categorías son:
 | Categoría | Qué es |
 |----------|-----------|
 | **Mensajes (SMS/MMS)** | Tus mensajes de texto. |
+| **Chat RCS (Google Messages)** | Tus chats RCS de Google Messages, como copia en bruto (se restaura en el mismo dispositivo) y una exportación legible. |
 | **Contactos y registro de llamadas** | Tus contactos y tu historial de llamadas. |
 | **Redes Wi-Fi** | Tus redes Wi-Fi guardadas. |
 | **Bluetooth** | Tus emparejamientos Bluetooth. |

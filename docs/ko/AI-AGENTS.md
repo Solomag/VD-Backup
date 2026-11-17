@@ -272,6 +272,7 @@ Mirror 복원)은 먼저 활성 전송 수단을 확인하고, 일치하지 않�
 | 범주 | 무엇인지 | 복원 동작 |
 |------|-----------|-----------|
 | `messages` | SMS/MMS | provider 교체 (지우기 + 추출) |
+| `rcs` | RCS 채팅 (Google Messages, `bugle_db`); `rcs.json`으로도 이식 가능하게 내보냄 | 앱 데이터 교체 (삭제 + 추출), 같은 기기 |
 | `contacts` | 연락처와 통화 기록 | provider 교체 (지우기 + 추출) |
 | `wifi` | 저장된 Wi-Fi 네트워크 | provider 교체 (지우기 + 추출) |
 | `bluetooth` | Bluetooth 페어링 | provider 교체 (지우기 + 추출) |

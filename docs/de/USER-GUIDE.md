@@ -283,6 +283,7 @@ Kategorien sind:
 | Kategorie | Was es ist |
 |----------|-----------|
 | **Nachrichten (SMS/MMS)** | Deine Textnachrichten. |
+| **RCS-Chat (Google Messages)** | Deine RCS-Chats aus Google Messages, als Rohkopie (wird auf demselben Gerät wiederhergestellt) plus ein lesbarer Export. |
 | **Kontakte und Anrufliste** | Deine Kontakte und dein Anrufverlauf. |
 | **WLAN-Netzwerke** | Deine gespeicherten WLAN-Netzwerke. |
 | **Bluetooth** | Deine Bluetooth-Kopplungen. |

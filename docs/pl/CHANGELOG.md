@@ -6,6 +6,22 @@
 
 Wszystkie istotne zmiany w VDBackup są udokumentowane tutaj. Tylko po angielsku.
 
+## v1.10
+
+Interfejs:
+
+- Otwieranie WebUI przy wolnym lub nieosiągalnym połączeniu już go nie zawiesza. Sprawdzanie nowszej wersji w tle działało, gdy lista aplikacji i ikony wciąż się ładowały, przez ten sam kanał, którego interfejs używa do komunikacji z modułem, więc zablokowana sieć wstrzymywała cały ekran i nie dało się nawigować. Teraz działa dopiero, gdy interfejs jest bezczynny, i szybko się poddaje, więc aplikacja pozostaje responsywna i można od razu nawigować, nawet podczas ładowania ikon.
+
+- Rozpoczęcie przywracania nie pozostaje już bez żadnej reakcji bez wyjaśnienia. Jeśli potwierdzenie, że bieżące dane zostaną zastąpione, nie jest jeszcze zaznaczone, przycisk teraz to sygnalizuje i podświetla pole, zamiast po cichu nie startować.
+
+Niezawodność:
+
+- Przywracanie i kopie zapasowe są bezpieczniejsze: operacja, która nie może się zakończyć, teraz zgłasza błąd zamiast po cichu kończyć się tak, jakby się powiodła, więc aplikacja nigdy nie mówi, że przywracanie się udało, gdy dane nie zostały w pełni zapisane.
+
+Nowości:
+
+- Czaty RCS (Google Messages) można teraz kopiować jako kopię specjalną - surowa kopia przywracana na tym samym urządzeniu oraz czytelny eksport rozmów, który otwiera się na każdym komputerze. Migracja RCS między urządzeniami nie jest gwarantowana (rejestruje się na nowo na każdym urządzeniu), więc niezawodnym przypadkiem jest to samo urządzenie.
+
 ## v1.09
 
 Niezawodność:

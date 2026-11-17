@@ -279,6 +279,7 @@ categorías son:
 | Categoría | Qué es | Semántica de restauración |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | reemplazo del proveedor (borra + extrae) |
+| `rcs` | chat RCS (Google Messages, `bugle_db`); también exportado de forma portátil a `rcs.json` | reemplazo de datos de la app (borra + extrae), mismo dispositivo |
 | `contacts` | contactos y registro de llamadas | reemplazo del proveedor (borra + extrae) |
 | `wifi` | redes Wi-Fi guardadas | reemplazo del proveedor (borra + extrae) |
 | `bluetooth` | emparejamientos Bluetooth | reemplazo del proveedor (borra + extrae) |

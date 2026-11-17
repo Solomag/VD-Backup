@@ -285,6 +285,7 @@ backups de app. As categorias são:
 | Categoria | O que é |
 |-----------|---------|
 | **Mensagens (SMS/MMS)** | Suas mensagens de texto. |
+| **Conversa RCS (Google Messages)** | Suas conversas RCS do Google Messages, como cópia crua (restaura no mesmo aparelho) e um export legível. |
 | **Contatos e registro de chamadas** | Seus contatos e histórico de chamadas. |
 | **Redes Wi-Fi** | Suas redes Wi-Fi salvas. |
 | **Bluetooth** | Seus pareamentos Bluetooth. |

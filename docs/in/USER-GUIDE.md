@@ -266,6 +266,7 @@ Kategorinya adalah:
 | Kategori | Apa itu |
 |----------|-----------|
 | **Pesan (SMS/MMS)** | Pesan teks Anda. |
+| **Obrolan RCS (Google Messages)** | Obrolan RCS Anda dari Google Messages, sebagai salinan mentah (dipulihkan di perangkat yang sama) plus ekspor yang bisa dibaca. |
 | **Kontak dan log panggilan** | Kontak dan riwayat panggilan Anda. |
 | **Jaringan Wi-Fi** | Jaringan Wi-Fi tersimpan Anda. |
 | **Bluetooth** | Pemasangan Bluetooth Anda. |

@@ -280,6 +280,7 @@ config フィールドの `network_policy` は、クラウド転送が使える�
 | カテゴリ | それが何か | 復元のセマンティクス |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | provider の置き換え (消去 + 展開) |
+| `rcs` | RCS チャット (Google Messages、`bugle_db`)。`rcs.json` にもポータブルにエクスポート | アプリデータ置換（消去 + 展開）、同一端末 |
 | `contacts` | 連絡先と通話履歴 | provider の置き換え (消去 + 展開) |
 | `wifi` | 保存された Wi-Fi ネットワーク | provider の置き換え (消去 + 展開) |
 | `bluetooth` | Bluetooth のペアリング | provider の置き換え (消去 + 展開) |

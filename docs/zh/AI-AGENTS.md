@@ -245,6 +245,7 @@ config 字段 `network_policy` 控制云端传输可使用哪种连接：`any`�
 | 类别 | 它是什么 | 恢复语义 |
 |------|----------|----------|
 | `messages` | SMS/MMS | 通过 provider 替换（清除 + 提取） |
+| `rcs` | RCS 聊天 (Google Messages，`bugle_db`)；也可移植导出为 `rcs.json` | 替换应用数据（清除 + 解压），同一设备 |
 | `contacts` | 联系人和通话记录 | 通过 provider 替换（清除 + 提取） |
 | `wifi` | 已保存的 Wi-Fi 网络 | 通过 provider 替换（清除 + 提取） |
 | `bluetooth` | 蓝牙配对 | 通过 provider 替换（清除 + 提取） |

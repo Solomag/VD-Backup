@@ -284,6 +284,7 @@ réapplique. Les catégories sont :
 | Catégorie | Ce que c'est | Sémantique de restauration |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | remplacement du fournisseur (effacement + extraction) |
+| `rcs` | chat RCS (Google Messages, `bugle_db`); aussi exporté de façon portable vers `rcs.json` | remplacement des données de l'appli (efface + extrait), même appareil |
 | `contacts` | contacts et journal d'appels | remplacement du fournisseur (effacement + extraction) |
 | `wifi` | réseaux Wi-Fi enregistrés | remplacement du fournisseur (effacement + extraction) |
 | `bluetooth` | appairages Bluetooth | remplacement du fournisseur (effacement + extraction) |

@@ -286,6 +286,7 @@ Kategorien sind:
 | Kategorie | Was es ist | Restore-Semantik |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | Provider-Ersetzung (löschen + extrahieren) |
+| `rcs` | RCS-Chat (Google Messages, `bugle_db`); auch portabel nach `rcs.json` exportiert | App-Daten ersetzen (löschen + extrahieren), dasselbe Gerät |
 | `contacts` | Kontakte und Anrufliste | Provider-Ersetzung (löschen + extrahieren) |
 | `wifi` | gespeicherte WLAN-Netzwerke | Provider-Ersetzung (löschen + extrahieren) |
 | `bluetooth` | Bluetooth-Kopplungen | Provider-Ersetzung (löschen + extrahieren) |

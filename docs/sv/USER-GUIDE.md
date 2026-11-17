@@ -287,6 +287,7 @@ Kategorierna är:
 | Kategori | Vad det är |
 |----------|-----------|
 | **Meddelanden (SMS/MMS)** | Dina textmeddelanden. |
+| **RCS-chatt (Google Messages)** | Dina RCS-chattar från Google Messages, som råkopia (återställs på samma enhet) plus en läsbar export. |
 | **Kontakter och samtalslogg** | Dina kontakter och samtalshistorik. |
 | **Wi-Fi-nätverk** | Dina sparade Wi-Fi-nätverk. |
 | **Bluetooth** | Dina Bluetooth-parkopplingar. |

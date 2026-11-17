@@ -6,6 +6,22 @@
 
 VDBackup'taki tüm kayda değer değişiklikler burada belgelenir. Yalnızca İngilizce.
 
+## v1.10
+
+Arayüz:
+
+- WebUI'yi yavaş veya erişilemeyen bir bağlantıda açmak artık onu dondurmuyor. Daha yeni bir sürüm için arka plandaki denetim, uygulama listesi ve simgeler hâlâ yüklenirken, arayüzün modüle ulaşmak için kullandığı aynı kanal üzerinden çalışıyordu; bu yüzden takılan bir ağ tüm ekranı bekletiyor ve gezinmeyi engelliyordu. Artık yalnızca arayüz boştayken çalışıyor ve hızlıca vazgeçiyor, böylece uygulama yanıt vermeye devam ediyor ve simgeler yüklenirken bile hemen gezinebiliyorsunuz.
+
+- Bir geri yüklemeyi başlatmak artık sebebini açıklamadan hiçbir şey yapmadan durmuyor. Mevcut verilerin değiştirileceğine dair onay henüz işaretli değilse, düğme artık bunu belirtir ve kutuyu vurgular; sessizce başlamamazlık etmez.
+
+Güvenilirlik:
+
+- Geri yüklemeler ve yedekler daha güvenli: tamamlanamayan bir işlem artık başarılı olmuş gibi sessizce bitmek yerine hatayı bildiriyor, böylece uygulama veriler tam yazılmadığı hâlde bir geri yüklemenin başarılı olduğunu asla söylemiyor.
+
+Yenilikler:
+
+- RCS sohbetleri (Google Messages) artık özel yedek olarak yedeklenebilir - aynı cihazda geri yüklenen ham bir kopya ve konuşmaların her bilgisayarda açılan okunabilir bir dışa aktarımı. RCS'yi cihazlar arasında taşımak garanti değildir (her cihazda yeniden kaydolur), bu yüzden güvenilir durum aynı cihazdır.
+
 ## v1.09
 
 Güvenilirlik:

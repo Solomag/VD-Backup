@@ -267,6 +267,7 @@ Kategorie jsou:
 | Kategorie | Co to je |
 |----------|-----------|
 | **Zprávy (SMS/MMS)** | Vaše textové zprávy. |
+| **RCS chat (Google Messages)** | Tvoje RCS chaty z Google Messages, jako surová kopie (obnoví se na stejném zařízení) plus čitelný export. |
 | **Kontakty a seznam hovorů** | Vaše kontakty a historie hovorů. |
 | **Sítě Wi-Fi** | Vaše uložené Wi-Fi sítě. |
 | **Bluetooth** | Vaše Bluetooth párování. |

@@ -6,6 +6,22 @@
 
 Všechny podstatné změny ve VDBackup jsou zdokumentovány zde. Pouze anglicky.
 
+## v1.10
+
+Rozhraní:
+
+- Otevření WebUI přes pomalé nebo nedostupné připojení ho už nezasekne. Kontrola novější verze na pozadí běžela, zatímco se seznam aplikací a ikony ještě načítaly, přes stejný kanál, kterým rozhraní komunikuje s modulem, takže zaseknutá síť zdržela celou obrazovku a nešlo se pohybovat. Teď běží až ve chvíli, kdy je rozhraní nečinné, a rychle to vzdá, takže aplikace zůstává svižná a dá se hned procházet, i když se ikony načítají.
+
+- Spuštění obnovy už nezůstane bez reakce bez vysvětlení. Pokud potvrzení, že se současná data nahradí, ještě není zaškrtnuté, tlačítko to teď oznámí a zvýrazní políčko, místo aby tiše nespustilo.
+
+Spolehlivost:
+
+- Obnovení a zálohy jsou bezpečnější: operace, kterou nelze dokončit, nyní nahlásí chybu místo toho, aby tiše skončila, jako by se povedla, takže aplikace nikdy neřekne, že obnovení proběhlo úspěšně, když data nebyla celá zapsána.
+
+Novinky:
+
+- Chaty RCS (Google Messages) teď lze zálohovat jako speciální zálohu - surová kopie, která se obnoví na stejném zařízení, plus čitelný export konverzací, který se otevře na jakémkoli počítači. Migrace RCS mezi zařízeními není zaručena (znovu se registruje na každém zařízení), takže spolehlivý případ je stejné zařízení.
+
 ## v1.09
 
 Spolehlivost:

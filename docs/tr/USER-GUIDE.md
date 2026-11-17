@@ -294,6 +294,7 @@ arşivlenirler. Kategoriler şunlardır:
 | Kategori | Ne olduğu |
 |----------|-----------|
 | **Mesajlar (SMS/MMS)** | Metin mesajlarınız. |
+| **RCS sohbet (Google Messages)** | Google Messages'tan RCS sohbetleriniz, ham kopya (aynı cihazda geri yüklenir) ve okunabilir bir dışa aktarma olarak. |
 | **Kişiler ve arama günlüğü** | Kişileriniz ve arama geçmişiniz. |
 | **Wi-Fi ağları** | Kaydettiğiniz Wi-Fi ağları. |
 | **Bluetooth** | Bluetooth eşleştirmeleriniz. |

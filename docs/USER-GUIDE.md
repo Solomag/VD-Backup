@@ -290,6 +290,7 @@ categories are:
 | Category | What it is |
 |----------|-----------|
 | **Messages (SMS/MMS)** | Your text messages. |
+| **RCS chat (Google Messages)** | Your RCS chats from Google Messages, as a raw copy (restores on the same device) plus a readable export. |
 | **Contacts and call log** | Your contacts and call history. |
 | **Wi-Fi networks** | Your saved Wi-Fi networks. |
 | **Bluetooth** | Your Bluetooth pairings. |

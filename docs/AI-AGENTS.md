@@ -280,6 +280,7 @@ categories are:
 | Category | What it is | Restore semantics |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | provider replace (wipe + extract) |
+| `rcs` | RCS chat (Google Messages, `bugle_db`); also exported portably to `rcs.json` | app-data replace (wipe + extract), same-device |
 | `contacts` | contacts and call log | provider replace (wipe + extract) |
 | `wifi` | saved Wi-Fi networks | provider replace (wipe + extract) |
 | `bluetooth` | Bluetooth pairings | provider replace (wipe + extract) |

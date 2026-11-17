@@ -278,6 +278,7 @@ fångar dem du skickar i `categories` och `special-restore` återapplicerar dem.
 | Kategori | Vad det är | Återställningssemantik |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | ersättning via provider (radera + extrahera) |
+| `rcs` | RCS-chatt (Google Messages, `bugle_db`); exporteras även portabelt till `rcs.json` | ersätt appdata (rensa + extrahera), samma enhet |
 | `contacts` | kontakter och samtalslogg | ersättning via provider (radera + extrahera) |
 | `wifi` | sparade Wi-Fi-nätverk | ersättning via provider (radera + extrahera) |
 | `bluetooth` | Bluetooth-parkopplingar | ersättning via provider (radera + extrahera) |

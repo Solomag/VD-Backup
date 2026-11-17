@@ -278,6 +278,7 @@ jsou:
 | Kategorie | Co to je | Sémantika obnovy |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | nahrazení provideru (vymazání + extrakce) |
+| `rcs` | RCS chat (Google Messages, `bugle_db`); také přenositelně exportován do `rcs.json` | nahrazení dat aplikace (smaže + rozbalí), stejné zařízení |
 | `contacts` | kontakty a seznam hovorů | nahrazení provideru (vymazání + extrakce) |
 | `wifi` | uložené Wi-Fi sítě | nahrazení provideru (vymazání + extrakce) |
 | `bluetooth` | Bluetooth párování | nahrazení provideru (vymazání + extrakce) |

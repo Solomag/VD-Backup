@@ -6,6 +6,22 @@
 
 Todos los cambios relevantes de VDBackup están documentados aquí. Solo en inglés.
 
+## v1.10
+
+Interfaz:
+
+- Abrir la WebUI con una conexión lenta o inalcanzable ya no la congela. La comprobación en segundo plano de una versión más nueva se ejecutaba mientras la lista de apps y los iconos aún cargaban, por el mismo canal que la interfaz usa para hablar con el módulo, así que una red atascada bloqueaba toda la pantalla y no se podía navegar. Ahora solo se ejecuta cuando la interfaz está inactiva y se rinde rápido, así que la app sigue respondiendo y se puede navegar de inmediato, incluso mientras cargan los iconos.
+
+- Iniciar una restauración ya no se queda sin hacer nada sin explicar por qué. Si aún no has marcado la confirmación de que los datos actuales se reemplazarán, el botón ahora lo indica y resalta la casilla, en lugar de no iniciar en silencio.
+
+Fiabilidad:
+
+- Las restauraciones y copias son más seguras: una operación que no puede terminar ahora informa del error en lugar de acabar en silencio como si hubiera funcionado, así que la app nunca dice que una restauración tuvo éxito cuando los datos no se escribieron por completo.
+
+Novedades:
+
+- Ahora puedes respaldar los chats RCS (Google Messages) como copia especial - una copia en bruto que se restaura en el mismo dispositivo, más una exportación legible de las conversaciones que se abre en cualquier ordenador. Migrar RCS entre dispositivos no está garantizado (se vuelve a registrar en cada uno), así que el caso fiable es el mismo dispositivo.
+
 ## v1.09
 
 Fiabilidad:

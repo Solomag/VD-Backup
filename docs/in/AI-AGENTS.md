@@ -280,6 +280,7 @@ menerapkannya kembali. Kategorinya adalah:
 | Kategori | Apa itu | Semantik restore |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | penggantian provider (hapus + ekstrak) |
+| `rcs` | obrolan RCS (Google Messages, `bugle_db`); juga diekspor secara portabel ke `rcs.json` | ganti data aplikasi (hapus + ekstrak), perangkat yang sama |
 | `contacts` | kontak dan log panggilan | penggantian provider (hapus + ekstrak) |
 | `wifi` | jaringan Wi-Fi tersimpan | penggantian provider (hapus + ekstrak) |
 | `bluetooth` | pemasangan Bluetooth | penggantian provider (hapus + ekstrak) |

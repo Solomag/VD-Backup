@@ -286,6 +286,7 @@ kopie aplikacji. Kategorie to:
 | Kategoria | Czym jest |
 |-----------|-----------|
 | **Wiadomości (SMS/MMS)** | Twoje wiadomości tekstowe. |
+| **Czat RCS (Google Messages)** | Twoje czaty RCS z Google Messages, jako surowa kopia (przywracana na tym samym urządzeniu) plus czytelny eksport. |
 | **Kontakty i rejestr połączeń** | Twoje kontakty i historia połączeń. |
 | **Sieci Wi-Fi** | Twoje zapisane sieci Wi-Fi. |
 | **Bluetooth** | Twoje sparowania Bluetooth. |

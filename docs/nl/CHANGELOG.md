@@ -6,6 +6,22 @@
 
 Alle noemenswaardige wijzigingen aan VDBackup worden hier gedocumenteerd. Alleen in het Engels.
 
+## v1.10
+
+Interface:
+
+- De WebUI openen via een trage of onbereikbare verbinding laat hem niet meer vastlopen. De controle op de achtergrond naar een nieuwere versie liep terwijl de app-lijst en de pictogrammen nog laadden, via hetzelfde kanaal dat de interface gebruikt om de module te bereiken, dus een vastgelopen netwerk hield het hele scherm tegen en je kon niet navigeren. Hij loopt nu pas als de interface inactief is en geeft snel op, dus de app blijft reageren en je kunt meteen navigeren, zelfs terwijl de pictogrammen laden.
+
+- Een herstel starten doet niet langer niets zonder uitleg. Als de bevestiging dat de huidige gegevens worden vervangen nog niet is aangevinkt, geeft de knop dat nu aan en markeert het vakje, in plaats van stilletjes niet te starten.
+
+Betrouwbaarheid:
+
+- Herstel- en back-upbewerkingen zijn veiliger: een bewerking die niet kan voltooien meldt nu de fout in plaats van stilletjes te eindigen alsof het gelukt was, dus de app zegt nooit dat een herstel is geslaagd terwijl de gegevens niet volledig zijn weggeschreven.
+
+Nieuw:
+
+- RCS-chats (Google Messages) kun je nu back-uppen als speciale back-up - een ruwe kopie die op hetzelfde apparaat wordt teruggezet, plus een leesbare export van de gesprekken die op elke computer opent. RCS tussen apparaten migreren is niet gegarandeerd (het registreert zich per apparaat opnieuw), dus hetzelfde apparaat is het betrouwbare geval.
+
 ## v1.09
 
 Betrouwbaarheid:

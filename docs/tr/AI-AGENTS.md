@@ -281,6 +281,7 @@ uygular. Kategoriler şunlardır:
 | Kategori | Ne olduğu | Geri yükleme semantiği |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | provider değiştirme (sil + çıkar) |
+| `rcs` | RCS sohbet (Google Messages, `bugle_db`); ayrıca taşınabilir şekilde `rcs.json`'a aktarılır | uygulama verisi değiştirme (siler + çıkarır), aynı cihaz |
 | `contacts` | kişiler ve arama günlüğü | provider değiştirme (sil + çıkar) |
 | `wifi` | kaydedilmiş Wi-Fi ağları | provider değiştirme (sil + çıkar) |
 | `bluetooth` | Bluetooth eşleştirmeleri | provider değiştirme (sil + çıkar) |

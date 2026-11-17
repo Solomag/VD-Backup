@@ -284,6 +284,7 @@ hạng mục là:
 | Hạng mục | Nó là gì |
 |----------|-----------|
 | **Tin nhắn (SMS/MMS)** | Các tin nhắn văn bản của bạn. |
+| **Trò chuyện RCS (Google Messages)** | Các cuộc trò chuyện RCS của bạn từ Google Messages, dưới dạng bản sao thô (khôi phục trên cùng thiết bị) cùng một bản xuất dễ đọc. |
 | **Danh bạ và nhật ký cuộc gọi** | Danh bạ và lịch sử cuộc gọi của bạn. |
 | **Mạng Wi-Fi** | Các mạng Wi-Fi bạn đã lưu. |
 | **Bluetooth** | Các cặp ghép nối Bluetooth của bạn. |

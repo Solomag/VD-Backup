@@ -269,6 +269,7 @@ optionnel que les sauvegardes d'apps. Les catégories sont :
 | Catégorie | Ce que c'est |
 |----------|-----------|
 | **Messages (SMS/MMS)** | Vos messages texte. |
+| **Chat RCS (Google Messages)** | Vos chats RCS de Google Messages, en copie brute (se restaure sur le même appareil) plus un export lisible. |
 | **Contacts et journal d'appels** | Vos contacts et votre historique d'appels. |
 | **Réseaux Wi-Fi** | Vos réseaux Wi-Fi enregistrés. |
 | **Bluetooth** | Vos appairages Bluetooth. |

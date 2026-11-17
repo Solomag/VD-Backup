@@ -6,6 +6,22 @@
 
 Mọi thay đổi đáng chú ý của VDBackup được ghi lại ở đây. Chỉ bằng tiếng Anh.
 
+## v1.10
+
+Giao diện:
+
+- Mở WebUI trên kết nối chậm hoặc không truy cập được không còn làm nó treo nữa. Việc kiểm tra phiên bản mới hơn ở nền trước đây chạy trong khi danh sách ứng dụng và biểu tượng vẫn đang tải, qua cùng kênh mà giao diện dùng để liên lạc với mô-đun, nên một mạng bị kẹt giữ cả màn hình và không thể điều hướng. Giờ nó chỉ chạy khi giao diện rảnh và bỏ cuộc nhanh, nên ứng dụng vẫn phản hồi và bạn có thể điều hướng ngay, ngay cả khi biểu tượng đang tải.
+
+- Bắt đầu khôi phục không còn im lặng không làm gì mà không giải thích. Nếu xác nhận rằng dữ liệu hiện tại sẽ bị thay thế vẫn chưa được đánh dấu, nút giờ sẽ cho biết điều đó và làm nổi bật ô, thay vì âm thầm không khởi động.
+
+Độ tin cậy:
+
+- Khôi phục và sao lưu an toàn hơn: một thao tác không thể hoàn tất giờ báo lỗi thay vì âm thầm kết thúc như thể đã thành công, nên ứng dụng không bao giờ báo khôi phục thành công khi dữ liệu chưa được ghi đầy đủ.
+
+Mới:
+
+- Giờ bạn có thể sao lưu các cuộc trò chuyện RCS (Google Messages) dưới dạng sao lưu đặc biệt - một bản sao thô khôi phục trên cùng thiết bị, cùng một bản xuất dễ đọc của các cuộc trò chuyện mở được trên mọi máy tính. Di chuyển RCS giữa các thiết bị không được đảm bảo (nó đăng ký lại trên mỗi thiết bị), nên trường hợp đáng tin cậy là cùng một thiết bị.
+
 ## v1.09
 
 Độ tin cậy:

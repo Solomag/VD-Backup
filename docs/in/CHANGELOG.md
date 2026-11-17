@@ -6,6 +6,22 @@
 
 Semua perubahan penting pada VDBackup didokumentasikan di sini. Hanya dalam bahasa Inggris.
 
+## v1.10
+
+Antarmuka:
+
+- Membuka WebUI pada koneksi lambat atau tak terjangkau tidak lagi membekukannya. Pemeriksaan versi lebih baru di latar belakang dulu berjalan saat daftar aplikasi dan ikon masih dimuat, lewat saluran yang sama yang dipakai antarmuka untuk menjangkau modul, sehingga jaringan yang macet menahan seluruh layar dan Anda tidak bisa menavigasi. Kini ia hanya berjalan saat antarmuka sedang diam dan cepat menyerah, jadi aplikasi tetap responsif dan Anda bisa langsung menavigasi, bahkan saat ikon sedang dimuat.
+
+- Memulai pemulihan tidak lagi diam tanpa melakukan apa pun tanpa penjelasan. Jika konfirmasi bahwa data saat ini akan diganti belum dicentang, tombol kini memberi tahu dan menyorot kotaknya, alih-alih diam-diam tidak mulai.
+
+Keandalan:
+
+- Pemulihan dan cadangan lebih aman: operasi yang tidak dapat selesai kini melaporkan kesalahan alih-alih berakhir diam-diam seolah berhasil, jadi aplikasi tidak pernah mengatakan pemulihan berhasil padahal data belum ditulis sepenuhnya.
+
+Baru:
+
+- Obrolan RCS (Google Messages) kini bisa dicadangkan sebagai cadangan khusus - salinan mentah yang dipulihkan di perangkat yang sama, plus ekspor percakapan yang bisa dibaca dan terbuka di komputer mana pun. Migrasi RCS antarperangkat tidak dijamin (ia mendaftar ulang di tiap perangkat), jadi kasus yang andal adalah perangkat yang sama.
+
 ## v1.09
 
 Keandalan:

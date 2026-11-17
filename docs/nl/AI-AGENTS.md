@@ -283,6 +283,7 @@ categorieën zijn:
 | Categorie | Wat het is | Herstelsemantiek |
 |-----------|-----------|------------------|
 | `messages` | SMS/MMS | provider vervangen (wissen + uitpakken) |
+| `rcs` | RCS-chat (Google Messages, `bugle_db`); ook portabel geëxporteerd naar `rcs.json` | app-gegevens vervangen (wissen + uitpakken), zelfde apparaat |
 | `contacts` | contacten en belgeschiedenis | provider vervangen (wissen + uitpakken) |
 | `wifi` | opgeslagen Wi-Fi-netwerken | provider vervangen (wissen + uitpakken) |
 | `bluetooth` | Bluetooth-koppelingen | provider vervangen (wissen + uitpakken) |

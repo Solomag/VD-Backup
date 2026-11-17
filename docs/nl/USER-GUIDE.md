@@ -291,6 +291,7 @@ De categorieën zijn:
 | Categorie | Wat het is |
 |-----------|-----------|
 | **Berichten (SMS/MMS)** | Je tekstberichten. |
+| **RCS-chat (Google Messages)** | Je RCS-chats uit Google Messages, als ruwe kopie (wordt op hetzelfde apparaat teruggezet) plus een leesbare export. |
 | **Contacten en belgeschiedenis** | Je contacten en belgeschiedenis. |
 | **Wi-Fi-netwerken** | Je opgeslagen Wi-Fi-netwerken. |
 | **Bluetooth** | Je Bluetooth-koppelingen. |

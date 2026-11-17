@@ -280,6 +280,7 @@ Kategorie to:
 | Kategoria | Czym jest | Semantyka przywracania |
 |-----------|-----------|------------------------|
 | `messages` | SMS/MMS | zastąpienie w providerze (wyczyszczenie + rozpakowanie) |
+| `rcs` | czat RCS (Google Messages, `bugle_db`); także eksportowany przenośnie do `rcs.json` | zastąpienie danych aplikacji (kasuje + wypakowuje), to samo urządzenie |
 | `contacts` | kontakty i rejestr połączeń | zastąpienie w providerze (wyczyszczenie + rozpakowanie) |
 | `wifi` | zapisane sieci Wi-Fi | zastąpienie w providerze (wyczyszczenie + rozpakowanie) |
 | `bluetooth` | sparowania Bluetooth | zastąpienie w providerze (wyczyszczenie + rozpakowanie) |

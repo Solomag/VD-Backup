@@ -280,6 +280,7 @@ categorie sono :
 | Categoria | Cos'è | Semantica di ripristino |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | sostituzione del provider (cancella + estrai) |
+| `rcs` | chat RCS (Google Messages, `bugle_db`); anche esportato in modo portabile su `rcs.json` | sostituzione dei dati dell'app (cancella + estrae), stesso dispositivo |
 | `contacts` | contatti e registro chiamate | sostituzione del provider (cancella + estrai) |
 | `wifi` | reti Wi-Fi salvate | sostituzione del provider (cancella + estrai) |
 | `bluetooth` | abbinamenti Bluetooth | sostituzione del provider (cancella + estrai) |

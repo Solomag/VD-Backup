@@ -278,6 +278,7 @@ mục là:
 | Danh mục | Nó là gì | Ngữ nghĩa khôi phục |
 |----------|-----------|-------------------|
 | `messages` | SMS/MMS | thay thế qua provider (xóa + giải nén) |
+| `rcs` | trò chuyện RCS (Google Messages, `bugle_db`); cũng được xuất di động sang `rcs.json` | thay thế dữ liệu ứng dụng (xóa + giải nén), cùng thiết bị |
 | `contacts` | danh bạ và nhật ký cuộc gọi | thay thế qua provider (xóa + giải nén) |
 | `wifi` | các mạng Wi-Fi đã lưu | thay thế qua provider (xóa + giải nén) |
 | `bluetooth` | các cặp ghép nối Bluetooth | thay thế qua provider (xóa + giải nén) |
