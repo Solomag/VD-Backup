@@ -398,6 +398,7 @@ Uzak taşıma, paketlenmiş araçlar tarafından ele alınır:
   Google Drive** ve 70'ten fazla başka hizmet.
 - **rsync** ve **ssh/scp/sftp** paketi, delta senkronizasyonu ve düz SSH hedefleri için.
 - **restic**: şifrelenmiş, yineleme giderilmiş **Snapshot** depoları (yerel veya uzak).
+- **Telegram**: yedekleme için kendi Telegram hesabınız (sınırsız dış depolama). **Telegram** hedefini seçin, bir kez giriş yapın (telefon -> kod -> varsa iki faktörlü parola) ve yedekler özel bir kanala yüklenir. Backups sekmesindeki **Restore from Telegram**, bir yedeği bu cihaza geri çeker; orada herhangi bir yerel yedek gibi geri yüklenir. **Aynı cihazda** geri yükleme güvenilir durumdur (oturum o cihazda kalır).
 
 **Bir bulut uzak birimi oluşturma (SSH gerekmez).** Destinations sekmesinde, **rclone**
 hedef türünü seçin ve **Add cloud remote**'u kullanın. **Herhangi bir rclone arka ucunu**

@@ -66,12 +66,13 @@ các bản sao lưu Neo-Backup và Android-DataBackup hiện có để bạn chu
   gắn với phần cứng của thiết bị, nên một bản sao lưu có thể khôi phục trên thiết bị khác hoặc mở trên PC.
 - **Đích đến:** cục bộ, SFTP, SCP, SMB, WebDAV, FTP, S3 và hơn 70 loại khác (`rclone`), cùng với
   kho `rsync` và `restic`. Tùy chọn Google Drive qua một ứng dụng đồng hành nhỏ bật theo lựa chọn.
+- **Telegram:** sao lưu vào một kênh Telegram riêng tư như kho lưu trữ đám mây không giới hạn qua MTProto - khôi phục và xóa cũng từ WebUI.
 - **Tính toàn vẹn:** mọi archive đều được kiểm tra đối chiếu với manifest; dry-run và kiểm thử khôi
   phục cho phép bạn kiểm tra một bản sao lưu mà không đụng chạm đến bất cứ thứ gì.
 - **Khôi phục chọn lọc và hàng loạt:** khôi phục bất kỳ tập con nào các mục của một bản sao lưu,
   hoặc chọn nhiều bản sao lưu và khôi phục tất cả cùng một lúc; xóa các bản sao lưu và giữ một
   nhật ký hoạt động/kiểm toán cho mọi hành động phá hủy.
-- **Sao lưu đặc biệt:** tin nhắn (SMS/MMS), danh bạ và nhật ký cuộc gọi, Wi-Fi và Bluetooth,
+- **Sao lưu đặc biệt:** tin nhắn (SMS/MMS/RCS), danh bạ và nhật ký cuộc gọi, Wi-Fi và Bluetooth,
   với một bản xuất JSON khả chuyển tùy chọn mà bạn có thể mở trên PC.
 - **Lập lịch + tự động hóa:** các tác vụ **sao lưu hoặc khôi phục** định kỳ nhắm tới một ứng
   dụng, một tập hợp, hoặc tất cả ứng dụng, với việc tỉa bớt theo kiểu keep-N, cùng với tự động
@@ -162,4 +163,4 @@ VD Backup là một dự án độc lập, không chính thức. Nó không liê
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

@@ -310,6 +310,8 @@ button { cursor: pointer; font-family: inherit; }
 .modal-card .modal-msg { color: var(--muted); font-size: 14px; }
 .modal-card .modal-err { color: var(--restore); font-size: 14px; }
 .modal-card .modal-err:empty { display: none; }
+@keyframes needsack { 0%, 100% { box-shadow: 0 0 0 0 transparent; } 30%, 70% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--restore) 45%, transparent); } }
+.notice.warn.needsack { border-color: var(--restore); animation: needsack .5s var(--ease, ease) 2; }
 .modal-actions { display: flex; flex-wrap: wrap; gap: 10px; justify-content: stretch; margin-top: 2px; }
 .modal-actions .btn { flex: 1 1 auto; min-width: 0; }
 /* the per-app items + tags dialog is the tallest; its title and actions stay put while

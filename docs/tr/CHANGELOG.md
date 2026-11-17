@@ -17,8 +17,10 @@ Arayüz:
 Güvenilirlik:
 
 - Geri yüklemeler ve yedekler daha güvenli: tamamlanamayan bir işlem artık başarılı olmuş gibi sessizce bitmek yerine hatayı bildiriyor, böylece uygulama veriler tam yazılmadığı hâlde bir geri yüklemenin başarılı olduğunu asla söylemiyor.
+- Özel ROM'larda uygulama başına ağ erişim ilkesinin geri yüklenmesi artık başarıyı bildirmeden önce ilkenin gerçekten uygulandığını doğruluyor, böylece isteği sessizce yok sayan bir ROM artık tamamlanmış bir geri yükleme ile karıştırılmıyor.
 
 Yenilikler:
+- Yedekler artık sınırsız bulut hedefi olarak Telegram'a gönderilebilir. VDBackup hesabınıza giriş yapar ve her yedeği Telegram'ın kendi protokolü üzerinden özel bir kanalda tutar - yedekleme, geri yükleme ve silme, hepsi WebUI'den. Kanalı adlandırabilir veya sabitleyebilirsiniz ve kanal dizindir, böylece yedekleriniz her cihazdan erişilebilir kalır.
 
 - RCS sohbetleri (Google Messages) artık özel yedek olarak yedeklenebilir - aynı cihazda geri yüklenen ham bir kopya ve konuşmaların her bilgisayarda açılan okunabilir bir dışa aktarımı. RCS'yi cihazlar arasında taşımak garanti değildir (her cihazda yeniden kaydolur), bu yüzden güvenilir durum aynı cihazdır.
 

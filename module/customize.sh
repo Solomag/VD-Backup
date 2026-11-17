@@ -165,6 +165,9 @@ set_perm "$MODPATH/service.sh" 0 0 0755
 [ -f "$MODPATH/uninstall.sh" ] && set_perm "$MODPATH/uninstall.sh" 0 0 0755
 [ -f "$MODPATH/vdlu/update.sh" ] && set_perm "$MODPATH/vdlu/update.sh" 0 0 0755
 [ -f "$MODPATH/vdlu/vdlu-verify" ] && set_perm "$MODPATH/vdlu/vdlu-verify" 0 0 0755
+# the ed25519-mini signature verifier is an ELF the verifier execs: it MUST be executable,
+# or set_perm_recursive's 0644 leaves it unrunnable and every hardened VDLU update is rejected
+[ -d "$MODPATH/vdlu/verify" ] && set_perm_recursive "$MODPATH/vdlu/verify" 0 0 0755 0755
 
 # --- ready without a reboot --------------------------------------------
 # VDBackup is self-contained (WebUI + helper + bundled binaries live under the
@@ -178,6 +181,7 @@ if [ "$BOOTMODE" = "true" ] && [ "$MODPATH" != "$ACTIVE" ]; then
   mkdir -p "$ACTIVE"
   cp -afT "$MODPATH" "$ACTIVE" 2>/dev/null || cp -af "$MODPATH"/. "$ACTIVE"/ 2>/dev/null
   chmod 0755 "$ACTIVE"/*.sh "$ACTIVE"/scripts/*.sh "$ACTIVE"/bin/*/* 2>/dev/null
+  chmod 0755 "$ACTIVE"/vdlu/update.sh "$ACTIVE"/vdlu/vdlu-verify "$ACTIVE"/vdlu/verify/*/* 2>/dev/null
   # the manager writes an "update" marker AFTER customize.sh returns; clear it (and
   # kick the scheduler) from a detached job so the module shows as active, not pending.
   setsid sh -c "sleep 4; rm -f '$ACTIVE/update' '$ACTIVE/remove' '$ACTIVE/disable'; '$ACTIVE/scripts/helper.sh' sanitize; '$ACTIVE/scripts/helper.sh' scheduler-tick" >/dev/null 2>&1 &

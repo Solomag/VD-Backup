@@ -17,8 +17,10 @@ Interface:
 Fiabilité:
 
 - Les restaurations et sauvegardes sont plus sûres : une opération qui ne peut pas aboutir signale désormais l'erreur au lieu de se terminer en silence comme si elle avait réussi, donc l'appli ne vous dit jamais qu'une restauration a réussi alors que les données n'ont pas été entièrement écrites.
+- La restauration de la politique d'accès réseau par application sur les ROMs personnalisées vérifie désormais que la politique a bien été appliquée avant de signaler une réussite, de sorte qu'une ROM qui ignore la demande en silence n'est plus confondue avec une restauration terminée.
 
 Nouveautés:
+- Les sauvegardes peuvent désormais être envoyées vers Telegram comme destination cloud illimitée. VDBackup se connecte à votre compte et conserve chaque sauvegarde dans un canal privé via le protocole propre à Telegram - sauvegarder, restaurer et supprimer, le tout depuis la WebUI. Vous pouvez nommer ou épingler le canal, et le canal sert d'index, de sorte que vos sauvegardes restent accessibles depuis n'importe quel appareil.
 
 - Les chats RCS (Google Messages) peuvent désormais être sauvegardés en sauvegarde spéciale - une copie brute qui se restaure sur le même appareil, plus un export lisible des conversations qui s'ouvre sur n'importe quel ordinateur. Migrer le RCS entre appareils n'est pas garanti (il se réenregistre par appareil), donc le cas fiable est le même appareil.
 

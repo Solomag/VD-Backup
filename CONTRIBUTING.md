@@ -76,4 +76,8 @@ AI assistants and agents are first-class contributors here, not an afterthought.
 Look for the `good first issue` and `help wanted` labels. Translations, docs, new
 `rclone` destination presets and WebUI polish are all great starting points.
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome - see [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._

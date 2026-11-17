@@ -391,6 +391,7 @@ Der Remote-Transport wird von den gebündelten Werkzeugen gehandhabt:
   S3, Google Drive** und 70+ weitere Dienste.
 - **rsync** und die **ssh/scp/sftp**-Suite, für Delta-Sync und schlichte SSH-Ziele.
 - **restic**: verschlüsselte, deduplizierte **Snapshot**-Repositories (lokal oder remote).
+- **Telegram**: dein eigenes Telegram-Konto als unbegrenzter externer Speicher. Wähle das Ziel **Telegram**, melde dich einmal an (Telefon -> Code -> Zwei-Faktor-Passwort, falls vorhanden), und Sicherungen werden in einen privaten Kanal hochgeladen. **Restore from Telegram** im Tab Backups holt eine Sicherung zurück auf dieses Gerät, wo sie wie jede lokale wiederhergestellt wird. Die Wiederherstellung auf **demselben Gerät** ist der verlässliche Fall (die Sitzung bleibt auf diesem Gerät).
 
 **Ein Cloud-Remote erstellen (kein SSH nötig).** Wähle im Ziele-Tab den **rclone**-Zieltyp und
 nutze **Cloud-Remote hinzufügen**. Du kannst **jedes rclone-Backend** verbinden: das Dropdown

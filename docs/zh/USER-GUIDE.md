@@ -313,6 +313,7 @@ APK 暂存到一个 VDBackup 叠加子模块中，让 root 管理器从 `/system
   其他服务。
 - **rsync** 和 **ssh/scp/sftp** 套件, 用于增量同步和普通 SSH 目标。
 - **restic**: 加密、去重的 **Snapshot** 仓库（本地或远端）。
+- **Telegram**: 把你自己的 Telegram 账号当作无限的异地存储。选择目标 **Telegram**，登录一次（电话 -> 验证码 -> 两步验证密码（若有）），备份便会上传到一个私有频道。Backups 标签页的 **Restore from Telegram** 会把备份拉回本设备，像任何本地备份一样还原。在**同一设备**还原是可靠的用法（会话留在该设备）。
 
 **创建云端远端（无需 SSH）。** 在 Destinations 标签页中，选择 **rclone** 目标类型并使用
 **Add cloud remote**。你可以连接**任意 rclone 后端**：下拉菜单提供常用的那些（**Google Drive、

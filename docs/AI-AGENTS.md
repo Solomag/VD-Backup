@@ -79,6 +79,12 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | mount an installed app as a system app (systemless sub-module; live via NoMount else next boot) |
 | `companion-status` / `companion-install` | `{}` | Google Drive companion status / on-demand install |
+| `telegram-check` | `{}` | `{ok,user,channel}` (a `null` user means not logged in) - Telegram session status |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram login; `sign-in` returns `2FA_REQUIRED` if the account has 2FA and no `password` was given |
+| `telegram-logout` | `{}` | `{ok,loggedout}` - drop the Telegram session |
+| `telegram-list` | `{}` | `{ok,backups:[{message_id,name,size,date}]}` - backups stored in the Telegram channel (names are `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` download a Telegram backup into local storage (detached); it then restores via the normal `restore` flow |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` delete a backup from the Telegram channel by `message_id` (batch: comma-separated refs) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | destination management |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote management (creates the `rclone.conf` entry a `type:"rclone"` dest points to); `backend` may be any rclone backend, no whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (the engine already opened the phone browser to that consent URL via an Android VIEW intent) or `{ok:false,code:"ERR_AUTHORIZE"}`. Runs `rclone authorize <backend>` on a local callback server (`127.0.0.1:53682`) for on-device OAuth. |

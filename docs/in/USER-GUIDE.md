@@ -365,6 +365,7 @@ Transport remote ditangani oleh alat yang dibundel:
   Google Drive** dan 70+ layanan lainnya.
 - **rsync** dan suite **ssh/scp/sftp**: untuk sinkronisasi delta dan target SSH biasa.
 - **restic**: repositori **Snapshot** terenkripsi dan ter-dedup (lokal atau remote).
+- **Telegram**: akun Telegram Anda sendiri sebagai penyimpanan luar tak terbatas. Pilih tujuan **Telegram**, masuk sekali (telepon -> kode -> kata sandi dua faktor jika ada), dan cadangan diunggah ke kanal privat. **Restore from Telegram** di tab Backups menarik sebuah cadangan kembali ke perangkat ini, lalu dipulihkan seperti cadangan lokal mana pun. Memulihkan di **perangkat yang sama** adalah kasus yang andal (sesi tetap di perangkat itu).
 
 **Membuat remote cloud (tanpa butuh SSH).** Di tab Destinations, pilih tipe tujuan
 **rclone** dan gunakan **Add cloud remote**. Anda bisa menghubungkan **backend rclone apa pun**:

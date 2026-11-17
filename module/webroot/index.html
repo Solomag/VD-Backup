@@ -114,6 +114,7 @@
       </div>
       <ul id="backuplist" class="list"></ul>
       <p id="backups-empty" class="muted" data-i18n="backups_empty">No backups yet.</p>
+      <button id="tg-backups-open" class="btn small" type="button" data-i18n="ui_tg_backups_btn">Restore from Telegram</button>
       <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span><span class="sh-t" data-i18n="ui_import_title">Import from another app</span></h2>
       <div class="field">
         <select id="import-from">
@@ -168,6 +169,7 @@
           <option value="rclone">rclone (SFTP/SMB/WebDAV/Drive/S3/...)</option>
           <option value="restic">restic (snapshot repo)</option>
           <option value="gdrive" data-i18n="ui_dest_gdrive">Google Drive (companion)</option>
+          <option value="telegram" data-i18n="ui_dest_telegram">Telegram (unlimited, via your account)</option>
         </select>
         <select id="d-remote"></select>
         <div id="d-rclone-hint" class="notice" hidden>
@@ -804,13 +806,14 @@
       </div>
       <input id="special-pass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false"
              hidden data-i18n-ph="ui_import_password" placeholder="Backup password">
-      <div class="notice warn">
+      <div class="notice warn" id="special-ack-row">
         <label class="notice-toggle">
           <input type="checkbox" class="switch" id="special-ack">
           <span data-i18n="special_ack_label">I understand this overwrites live system data and needs a reboot</span>
         </label>
         <div class="notice-msg" data-i18n="special_ack_warning">This replaces the current messages, contacts, Wi-Fi or Bluetooth state with the backup. It only applies after a reboot and can only be relied on when restoring to the same device and ROM.</div>
       </div>
+      <div class="modal-err" id="special-err"></div>
       <div class="modal-actions">
         <button class="btn" id="special-cancel" data-i18n="ui_import_cancel">Cancel</button>
         <button class="btn danger" id="special-delete" data-i18n="delete">Delete</button>
@@ -843,6 +846,36 @@
       <div class="modal-actions">
         <button class="btn" id="pb-cancel" data-i18n="ui_import_cancel">Cancel</button>
         <button class="btn go" id="pb-ok" data-i18n="ui_pathbk_do">Back up</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tg-login" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-title" data-i18n="ui_tg_login_title">Connect Telegram</div>
+      <div class="modal-msg" data-i18n="ui_tg_login_msg">Log in to your Telegram account to use it as a backup destination. The login session is stored encrypted on this device.</div>
+      <div id="tg-step-phone">
+        <input id="tg-phone" type="tel" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ph_tg_phone" placeholder="+1 555 123 4567">
+      </div>
+      <div id="tg-step-code" hidden>
+        <input id="tg-code" type="text" inputmode="numeric" autocomplete="off" data-i18n-ph="ph_tg_code" placeholder="login code">
+        <input id="tg-2fa" type="password" autocomplete="off" hidden data-i18n-ph="ph_tg_2fa" placeholder="two-factor password">
+      </div>
+      <div class="modal-err" id="tg-err"></div>
+      <div class="modal-actions">
+        <button class="btn" id="tg-cancel" data-i18n="ui_import_cancel">Cancel</button>
+        <button class="btn go" id="tg-next" data-i18n="ui_tg_send_code">Send code</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tg-backups" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-title" data-i18n="ui_tg_backups_title">Backups in Telegram</div>
+      <div class="modal-msg" data-i18n="ui_tg_backups_msg">Pull a backup from your Telegram channel back to this device; then restore it like any local backup.</div>
+      <ul id="tg-backups-list" class="list"></ul>
+      <div class="modal-actions">
+        <button class="btn" id="tg-backups-close" data-i18n="ui_import_cancel">Cancel</button>
       </div>
     </div>
   </div>

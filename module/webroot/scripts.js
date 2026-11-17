@@ -414,7 +414,7 @@ function startBatchRestore() {
     setBkSelectMode(false);
     // ONE detached op restores the whole list server-side (survives the WebUI closing).
     var args = { refs: refs, ssaid: res.ssaid, netpolicy: res.netpolicy, test: res.test, spoof_installer: res.spoof_installer, deep_spoof: res.deep_spoof };
-    var run = function () { helper("restore-batch", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { batch: true, retry: run }); }); };
+    var run = function () { helper("restore-batch", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { batch: true, retry: run }); else modalAlert(errMsg(r)); }).catch(function () { modalAlert(errMsg()); }); };
     run();
   });
 }
@@ -541,7 +541,7 @@ function startRestore(ref, pkg, items) {
     var args = { ref: ref, ssaid: res.ssaid, netpolicy: res.netpolicy, test: res.test, spoof_installer: res.spoof_installer, deep_spoof: res.deep_spoof };
     if (res.items) args.items = res.items;
     var ctx = { restoreRef: ref, restorePkg: pkg, ssaid: res.ssaid, netpolicy: res.netpolicy, items: res.items, test: res.test, spoof_installer: res.spoof_installer, deep_spoof: res.deep_spoof };
-    ctx.retry = function () { helper("restore", args).then(function (r) { if (r && r.opid) trackOp(r.opid, ctx); }); };
+    ctx.retry = function () { helper("restore", args).then(function (r) { if (r && r.opid) trackOp(r.opid, ctx); else modalAlert(errMsg(r)); }).catch(function () { modalAlert(errMsg()); }); };
     ctx.retry();
   });
 }
@@ -600,7 +600,8 @@ function runImport(from, entry, password, ssaid) {
   helper("import", args).then(function (r) {
     args.password = ""; password = "";
     if (r && r.opid) trackOp(r.opid, { from: from, entry: entry });
-  });
+    else modalAlert(errMsg(r));
+  }).catch(function () { modalAlert(errMsg()); });
 }
 function openOpModal(o) {
   return new Promise(function (resolve) {
@@ -628,7 +629,8 @@ function openOpModal(o) {
     // deep spoof only makes sense with the installer spoof on; follow it.
     spoof.onchange = function () { if (!spoof.checked) deep.checked = false; deep.disabled = !spoof.checked; };
     deep.disabled = !spoof.checked;
-    function syncOk() { okBtn.disabled = (o.overwriteAck && !ack.checked && !(o.allowTest && test.checked)); }
+    function ackOk() { return !o.overwriteAck || ack.checked || (o.allowTest && test.checked); }
+    function syncOk() { if (ackOk()) { errBox.textContent = ""; ackRow.classList.remove("needsack"); } }
     ack.onchange = syncOk; test.onchange = function () { ackRow.hidden = o.overwriteAck && test.checked; syncOk(); };
     syncOk();
     // selective restore: a checkbox per item the backup holds (all ticked by default)
@@ -644,13 +646,18 @@ function openOpModal(o) {
     if (o.needPassword) setTimeout(function () { input.focus(); }, 0);
     function cleanup() {
       input.value = ""; errBox.textContent = ""; modal.hidden = true; input.hidden = false;
-      okBtn.disabled = false; ackRow.hidden = true; ack.onchange = null; itemsBox.hidden = true; itemsBox.innerHTML = ""; ssaidRow.hidden = false; appnetRow.hidden = false;
+      okBtn.disabled = false; ackRow.hidden = true; ackRow.classList.remove("needsack"); ack.onchange = null; itemsBox.hidden = true; itemsBox.innerHTML = ""; ssaidRow.hidden = false; appnetRow.hidden = false;
       testRow.hidden = true; test.onchange = null; spoofRow.hidden = true;
       deepRow.hidden = true; deep.disabled = false; spoof.onchange = null;
       okBtn.onclick = null; $("#pw-cancel").onclick = null; input.onkeydown = null;
     }
     function submit() {
-      if (okBtn.disabled) return;
+      if (!ackOk()) {   // data-loss confirmation required: tell the user instead of doing nothing
+        errBox.textContent = I18N.t("msg_overwrite_ack_required");
+        ackRow.classList.add("needsack");
+        try { ack.focus(); } catch (e) {}
+        return;
+      }
       var r = { password: o.needPassword ? input.value : null, ssaid: ssaid.checked, netpolicy: appnet.checked };
       if (o.allowTest) r.test = test.checked;
       if (o.allowSpoof) { r.spoof_installer = spoof.checked; r.deep_spoof = deep.checked; }
@@ -977,7 +984,8 @@ function syncDestFields() {
   set("#d-remote", type === "rclone");
   set("#d-repo", type === "restic");
   set("#d-pass", type === "restic");
-  set("#d-path", type !== "restic");
+  set("#d-path", type !== "restic");   // telegram reuses this field for the optional channel name/id
+  var _dp = $("#d-path"); if (_dp) _dp.placeholder = I18N.t(type === "telegram" ? "ph_tg_channel" : "ph_dest_path");
   set("#d-browse", type === "local");   // folder browser only makes sense for a local path
   set("#remote-box", type === "rclone");
   var hint = $("#d-rclone-hint"); if (hint) hint.hidden = (type !== "rclone");
@@ -1049,12 +1057,14 @@ function addDest() {
   };
   if (!d.id) return;
   helper("dest-add", d).then(function (r) {
+    if (!r || r.ok === false) { modalAlert(errMsg(r)); return; }   // a failed add looked identical to success (form cleared, no row, no error)
     $("#d-id").value = ""; $("#d-pass").value = ""; loadDests();
     if (type === "gdrive") setupGdrive(d.id);
+    if (type === "telegram") setupTelegram(d.id);
     // removable media (SD/USB) is plaintext at rest; warn (do not block) when the backup
     // itself is not encrypted, so an unencrypted backup on a card is an informed choice.
     if (r && r.removable && !CFG.encrypt_data) modalAlert(I18N.t("msg_removable_unencrypted"), I18N.t("ui_removable_title"));
-  });
+  }).catch(function () { modalAlert(errMsg()); });
 }
 function testDest(id) {
   var d = destById(id);
@@ -1095,7 +1105,7 @@ function openHmaList() {
 }
 function launchConsent() {
   var res = "/data/data/" + COMPANION_PKG + "/files/consent." + Date.now();
-  return execCommand("env -u LD_LIBRARY_PATH -u LD_PRELOAD /system/bin/am start -n " + COMPANION_PKG + "/.ConsentActivity -e result " + shq(res));
+  return execCommand("env -u LD_LIBRARY_PATH -u LD_PRELOAD /system/bin/am start -n " + shq(COMPANION_PKG + "/.ConsentActivity") + " -e result " + shq(res));
 }
 function driveTest(id) {
   return helper("dest-test", { id: id }).then(function (r) {
@@ -1125,6 +1135,91 @@ function setupGdrive(id) {
       return driveTest(id);
     });
   });
+}
+
+// Telegram destination: after adding it, make sure the account is logged in (the session
+// lives encrypted on-device); if not, drive the phone -> code -> 2FA login flow.
+function setupTelegram(id) {
+  return helper("telegram-check").then(function (r) {
+    if (r && r.ok && r.is_auth) return true;   // check-auth reports .is_auth (bool), not a user field
+    return openTelegramLogin();
+  }).catch(function () { return openTelegramLogin(); });
+}
+function openTelegramLogin() {
+  return new Promise(function (resolve) {
+    var m = $("#tg-login"), phoneStep = $("#tg-step-phone"), codeStep = $("#tg-step-code");
+    var phone = $("#tg-phone"), code = $("#tg-code"), tfa = $("#tg-2fa"), err = $("#tg-err"), next = $("#tg-next");
+    var state = "phone", ph = "";
+    phone.value = ""; code.value = ""; tfa.value = ""; tfa.hidden = true; err.textContent = "";
+    phoneStep.hidden = false; codeStep.hidden = true; next.disabled = false;
+    next.textContent = I18N.t("ui_tg_send_code");
+    m.hidden = false; setTimeout(function () { phone.focus(); }, 0);
+    function close(v) { m.hidden = true; next.onclick = null; $("#tg-cancel").onclick = null; resolve(v); }
+    $("#tg-cancel").onclick = function () { close(false); };
+    next.onclick = function () {
+      err.textContent = "";
+      if (state === "phone") {
+        ph = phone.value.trim(); if (!ph) { err.textContent = I18N.t("msg_err_invalid_phone"); return; }
+        next.disabled = true;
+        helper("telegram-send-code", { phone: ph }).then(function (r) {
+          next.disabled = false;
+          if (!r || r.ok === false) { err.textContent = errMsg(r); return; }
+          state = "code"; phoneStep.hidden = true; codeStep.hidden = false;
+          next.textContent = I18N.t("ui_tg_sign_in"); setTimeout(function () { code.focus(); }, 0);
+        }).catch(function () { next.disabled = false; err.textContent = errMsg(); });
+      } else {
+        var cd = code.value.trim(); if (!cd) { err.textContent = I18N.t("ph_tg_code"); return; }
+        var args = { phone: ph, code: cd }; if (!tfa.hidden && tfa.value) args.password = tfa.value;
+        next.disabled = true;
+        helper("telegram-sign-in", args).then(function (r) {
+          next.disabled = false;
+          if (r && r.ok && r.user) { close(true); return; }
+          if (r && r.code === "2FA_REQUIRED") { tfa.hidden = false; err.textContent = I18N.t("msg_tg_2fa_needed"); setTimeout(function () { tfa.focus(); }, 0); return; }
+          err.textContent = errMsg(r);
+        }).catch(function () { next.disabled = false; err.textContent = errMsg(); });
+      }
+    };
+  });
+}
+
+// list the backups stored in the Telegram channel and let the user PULL one back to local
+// storage (where the normal restore flow then handles it). Not logged in -> run the login first.
+function openTelegramBackups() {
+  var m = $("#tg-backups"), box = $("#tg-backups-list");
+  box.innerHTML = "<li class='muted'>" + I18N.t("apps_loading") + "</li>"; m.hidden = false;
+  $("#tg-backups-close").onclick = function () { m.hidden = true; };
+  helper("telegram-check").then(function (c) {
+    if (!c || !c.ok || !c.is_auth) { m.hidden = true; openTelegramLogin().then(function (ok) { if (ok) openTelegramBackups(); }); return; }
+    helper("telegram-list").then(function (r) {
+      box.innerHTML = "";
+      var items = ((r && r.ok && r.backups) ? r.backups : []).filter(function (b) { return /\.vdb\.tar$/.test(b.name || ""); });
+      if (!items.length) { box.innerHTML = "<li class='muted'>" + I18N.t("ui_tg_no_backups") + "</li>"; return; }
+      items.forEach(function (b) {
+        var mt = (b.name || "").match(/^(.+)__([^_]+)_(\d+)\.vdb\.tar$/);
+        var li = el("li", "row");
+        li.appendChild(el("div", "grow", (mt ? mt[1] : b.name)));
+        var btn = el("button", "btn small go", I18N.t("ui_tg_pull"));
+        btn.onclick = function () {
+          m.hidden = true;
+          helper("telegram-pull", { message_id: b.message_id, name: b.name }).then(function (op) {
+            if (op && op.opid) trackOp(op.opid, { onDone: function (p) { if (p.ok) { loadBackups(); modalAlert(I18N.t("msg_tg_pulled")); } } });
+            else modalAlert(errMsg(op));
+          }).catch(function () { modalAlert(errMsg()); });
+        };
+        var del = el("button", "btn small danger", I18N.t("delete"));
+        del.onclick = function () {
+          modalConfirm(I18N.t("msg_tg_delete_confirm"), I18N.t("delete")).then(function (yes) {
+            if (!yes) return;
+            helper("telegram-delete", { message_id: b.message_id }).then(function (r) {
+              if (r && r.ok) { modalAlert(I18N.t("msg_tg_deleted")); openTelegramBackups(); }
+              else modalAlert(errMsg(r));
+            }).catch(function () { modalAlert(errMsg()); });
+          });
+        };
+        li.appendChild(del); li.appendChild(btn); box.appendChild(li);
+      });
+    }).catch(function () { box.innerHTML = "<li class='muted'>" + errMsg() + "</li>"; });
+  }).catch(function () { box.innerHTML = "<li class='muted'>" + errMsg() + "</li>"; });
 }
 
 // --- operations (detached; survive WebUI close) -------------------------
@@ -1175,7 +1270,7 @@ function startBackup(pkg, label) {
   openBackupModal(pkg, label).then(function (res) {
     if (!res) return;
     var args = backupArgs(pkg, res, true);
-    var run = function () { helper("backup", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { retry: run }); }); };
+    var run = function () { helper("backup", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { retry: run }); else modalAlert(errMsg(r)); }).catch(function () { modalAlert(errMsg()); }); };
     run();
   });
 }
@@ -1195,7 +1290,7 @@ function startBatchBackup() {
 function runBatchBackup(pkgs, res) {
   var args = backupArgs(pkgs[0], res);   // shared settings (items/mode/dest/pass/verify/user)
   delete args.package; args.packages = pkgs;
-  var run = function () { helper("backup-batch", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { batch: true, retry: run }); }); };
+  var run = function () { helper("backup-batch", args).then(function (r) { if (r && r.opid) trackOp(r.opid, { batch: true, retry: run }); else modalAlert(errMsg(r)); }).catch(function () { modalAlert(errMsg()); }); };
   run();
 }
 function phaseLabel(ph) {
@@ -1239,7 +1334,9 @@ function fetchCloudThenRetry(retryFn) {
     });
   });
 }
+var _curOpId = null;   // the op the single #ops slot is showing; a newer trackOp supersedes it
 function trackOp(opid, ctx) {
+  _curOpId = opid;
   var box = $("#ops"); box.hidden = false;
   box.innerHTML = "";
   var label = el("div", null, I18N.t("op_running"));
@@ -1248,6 +1345,7 @@ function trackOp(opid, ctx) {
   box.appendChild(label); box.appendChild(bar); box.appendChild(sub);
   var missing = 0, stuck = 0;
   var timer = setInterval(function () {
+    if (_curOpId !== opid) { clearInterval(timer); return; }   // a newer op took the slot: stop this poller so it neither leaks nor hides the current op
     helper("progress", opid, true).then(function (p) {
       if (!p || (!p.phase && !p.done)) {   // op vanished (finished + cleaned, or never started)
         if (++missing >= 3) { clearInterval(timer); box.hidden = true; }
@@ -1273,7 +1371,8 @@ function trackOp(opid, ctx) {
             if (ctx.specialSysset) a.system_settings = true;
             helper("special-restore", a).then(function (r) {
               if (r && r.opid) trackOp(r.opid, ctx);
-            });
+              else modalAlert(errMsg(r));
+            }).catch(function () { modalAlert(errMsg()); });
           });
           return;
         }
@@ -1730,7 +1829,11 @@ function importConfig() {
   });
 }
 function runConfigImport(ex) {
-  openOpModal({ needPassword: true, allowSsaid: false, titleKey: "settings_config_import",
+  // importing a settings bundle overwrites config + jobs + destinations + saved credentials:
+  // an explicit, dismissible confirmation before the (decryption) password step.
+  modalConfirm(I18N.t("msg_config_import_confirm", { name: ex.name }), I18N.t("settings_config_import")).then(function (yes) {
+    if (!yes) return;
+    openOpModal({ needPassword: true, allowSsaid: false, titleKey: "settings_config_import",
                 msg: I18N.t("settings_config_import_msg", { name: ex.name }),
                 confirmKey: "settings_config_import" }).then(function (res) {
     if (res == null) return;
@@ -1745,6 +1848,7 @@ function runConfigImport(ex) {
       } });
       else $("#cfg-config-status").textContent = errMsg(r);
     });
+  });
   });
 }
 function wipeCredentials() {
@@ -1773,7 +1877,9 @@ function setBlock(pkg, on) {
   else if (!on && i >= 0) CFG.blocklist.splice(i, 1);
   persistBlocklist(); updateBlockCount();
 }
-function persistBlocklist() { helper("config-set", CFG).then(function () {}); }
+// persist CFG; surface a failure instead of letting the in-memory toggle silently diverge from disk
+function saveCfg() { helper("config-set", CFG).then(function (r) { if (r && r.ok === false) modalAlert(errMsg(r)); }).catch(function () { modalAlert(errMsg()); }); }
+function persistBlocklist() { saveCfg(); }
 function buildBlockPicker() {
   var ul = $("#block-applist"); if (!ul) return;
   if (iconObserver) _blockIcons.forEach(function (ic) { iconObserver.unobserve(ic); });
@@ -1832,7 +1938,7 @@ function setAppItems(pkg, items) {
   CFG.app_items = CFG.app_items || {};
   if (!items || !items.length || items.length === AI_ITEMS.length) delete CFG.app_items[pkg];
   else CFG.app_items[pkg] = items;
-  helper("config-set", CFG).then(function () {});
+  saveCfg();
   updateAiCount();
 }
 function openAppItemsModal(pkg, label) {
@@ -1894,7 +2000,7 @@ function allTags() {   // only tags carried by a currently-listed app, so uninst
 function setAppTagList(pkg, tags) {
   CFG.app_tags = CFG.app_tags || {};
   if (!tags || !tags.length) delete CFG.app_tags[pkg]; else CFG.app_tags[pkg] = tags;
-  helper("config-set", CFG).then(function () {});
+  saveCfg();
 }
 function addAppTag(pkg, t) {
   t = (t || "").trim(); if (!t || !pkg) return;
@@ -1945,7 +2051,7 @@ function startTagBackup() {
 // --- backup presets (named item-sets; create in Settings, apply in the backup dialog) --
 // Store is CFG.presets = [{id,name,items[]}]. No worker change: a preset just pre-fills the
 // item checkboxes of the backup dialog, which already drives the per-op items.
-function persistPresets() { helper("config-set", CFG).then(function () {}); }
+function persistPresets() { saveCfg(); }
 function presetById(id) { return (CFG.presets || []).filter(function (p) { return p.id === id; })[0]; }
 function buildPresetsList() {
   var ul = $("#presets-list"); if (!ul) return;
@@ -2040,7 +2146,8 @@ function startSpecialBackup() {
     helper("special-backup", args).then(function (r) {
       args.password = "";
       if (r && r.opid) trackOp(r.opid, { onDone: loadSpecial });
-    });
+      else modalAlert(errMsg(r));
+    }).catch(function () { modalAlert(errMsg()); });
   };
   if (enc) openOpModal({ needPassword: true, titleKey: "backup", confirmKey: "backup",
                          msg: I18N.t("special_pass_msg") }).then(function (res) { if (res != null) go(res.password); });
@@ -2048,6 +2155,7 @@ function startSpecialBackup() {
 }
 function openSpecialRestore(bk) {
   var m = $("#special-modal"), ack = $("#special-ack"), ok = $("#special-ok"), pass = $("#special-pass");
+  var err = $("#special-err"), ackRow = $("#special-ack-row");
   $("#special-modal-sub").textContent = (bk.categories || []).join(", ") + "  -  " + shortDate(bk.created_at);
   var box = $("#special-modal-cats"); box.innerHTML = "";
   var ssBox = $("#special-modal-syssettings"), ssCb = $("#special-modal-ss-cb");
@@ -2062,7 +2170,8 @@ function openSpecialRestore(bk) {
     lab.appendChild(cb); lab.appendChild(sp); box.appendChild(lab);
   });
   ack.checked = false; pass.value = ""; pass.hidden = true;
-  ok.disabled = true; ack.onchange = function () { ok.disabled = !ack.checked; };
+  err.textContent = ""; ackRow.classList.remove("needsack");
+  ack.onchange = function () { if (ack.checked) { err.textContent = ""; ackRow.classList.remove("needsack"); } };
   m.hidden = false;
   $("#special-cancel").onclick = function () { m.hidden = true; };
   $("#special-delete").onclick = function () {
@@ -2072,7 +2181,12 @@ function openSpecialRestore(bk) {
     });
   };
   ok.onclick = function () {
-    if (ok.disabled) return;
+    if (!ack.checked) {   // data-loss confirmation required: tell the user instead of doing nothing
+      err.textContent = I18N.t("msg_overwrite_ack_required");
+      ackRow.classList.add("needsack");
+      try { ack.focus(); } catch (e) {}
+      return;
+    }
     var cats = Array.prototype.map.call(box.querySelectorAll("input:checked"), function (c) { return c.dataset.cat; });
     var ssOn = hasSS && ssCb.checked;
     if (ssOn) cats.push("system_settings");
@@ -2082,7 +2196,8 @@ function openSpecialRestore(bk) {
     m.hidden = true;
     helper("special-restore", args).then(function (r) {
       if (r && r.opid) trackOp(r.opid, { specialRef: bk.ref, specialCats: cats, specialSysset: ssOn });
-    });
+      else modalAlert(errMsg(r));
+    }).catch(function () { modalAlert(errMsg()); });
   };
 }
 
@@ -2306,12 +2421,22 @@ function checkForUpdates() {
 // Shows the banner only when a newer version exists; never alerts, never nags,
 // and fails silently (offline shows nothing). The manual button is unaffected.
 var UPDATE_CHECK_THROTTLE_MS = 3600000;
+// The update check is a NETWORK call (it fetches the published manifest). The root manager's
+// exec bridge serializes shell calls, so running it inline on load let a slow or unreachable
+// network hold the queue for the whole timeout and freeze the app list, icons and navigation
+// (they all go through the same bridge). So it runs DEFERRED, once the UI is idle, and with a
+// short timeout; a finished or failed check only ever raises the "update available" banner,
+// never blocks. (issue: WebUI froze on bad internet while icons were loading.)
+function deferredUpdateCheck() {
+  if (window.requestIdleCallback) requestIdleCallback(autoCheckUpdates, { timeout: 6000 });
+  else setTimeout(autoCheckUpdates, 4000);
+}
 function autoCheckUpdates() {
   var now = Date.now(), last = 0;
   try { last = parseInt(localStorage.getItem("vdb_update_last_check"), 10) || 0; } catch (e) {}
   if (now - last < UPDATE_CHECK_THROTTLE_MS) return;
   try { localStorage.setItem("vdb_update_last_check", String(now)); } catch (e) {}
-  helper("update-check").then(function (r) {
+  helper("update-check", { timeout: 8 }).then(function (r) {
     if (r && r.ok !== false && r.update_available) showUpdateBanner(r, false);
   }).catch(function () {});
 }
@@ -2341,6 +2466,7 @@ function boot() {
   $("#bk-selall").onclick = function () { (BACKUPS || []).forEach(function (b) { bkSelected[b.ref] = { ref: b.ref, package: b.package, items: b.items }; }); updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-selnone").onclick = function () { bkSelected = {}; updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-restoresel").onclick = startBatchRestore;
+  if ($("#tg-backups-open")) $("#tg-backups-open").onclick = openTelegramBackups;
   $("#job-save").onclick = saveJob;
   $("#job-all").onchange = updateJobForm;
   $("#job-action").onchange = updateJobForm;
@@ -2407,7 +2533,7 @@ function boot() {
   initVdlu();   // VDLU: evaluate reboot banner + auto_on_webui_open on load (panel mounts on tab open)
 
   helper("config-get").then(function (c) { CFG = c || {}; activeUser = (CFG.user != null) ? (CFG.user | 0) : 0; return I18N.init(CFG.language || "auto"); })
-    .then(function () { I18N.apply(); loadDests(); loadSettings(); loadUsers(); loadOverview(); reattachOps(); recoverPendingAuth(); autoCheckUpdates(); });
+    .then(function () { I18N.apply(); loadDests(); loadSettings(); loadUsers(); loadOverview(); reattachOps(); recoverPendingAuth(); deferredUpdateCheck(); });
 
   helper("ping").then(function (r) {
     if (r && r.version) { $("#ver").textContent = r.version; if ($("#about-ver")) $("#about-ver").textContent = r.version + " - " + (r.abi || ""); }

@@ -17,8 +17,10 @@ Giao diện:
 Độ tin cậy:
 
 - Khôi phục và sao lưu an toàn hơn: một thao tác không thể hoàn tất giờ báo lỗi thay vì âm thầm kết thúc như thể đã thành công, nên ứng dụng không bao giờ báo khôi phục thành công khi dữ liệu chưa được ghi đầy đủ.
+- Việc khôi phục chính sách truy cập mạng theo ứng dụng trên ROM tùy chỉnh giờ đây kiểm tra xem chính sách đã thực sự được áp dụng chưa trước khi báo thành công, nên một ROM âm thầm bỏ qua yêu cầu không còn bị nhầm là khôi phục hoàn tất.
 
 Mới:
+- Giờ đây có thể gửi bản sao lưu tới Telegram như một đích lưu trữ đám mây không giới hạn. VDBackup đăng nhập vào tài khoản của bạn và giữ mỗi bản sao lưu trong một kênh riêng tư qua giao thức riêng của Telegram - sao lưu, khôi phục và xóa, tất cả từ WebUI. Bạn có thể đặt tên hoặc ghim kênh, và kênh chính là chỉ mục, nên các bản sao lưu của bạn luôn truy cập được từ mọi thiết bị.
 
 - Giờ bạn có thể sao lưu các cuộc trò chuyện RCS (Google Messages) dưới dạng sao lưu đặc biệt - một bản sao thô khôi phục trên cùng thiết bị, cùng một bản xuất dễ đọc của các cuộc trò chuyện mở được trên mọi máy tính. Di chuyển RCS giữa các thiết bị không được đảm bảo (nó đăng ký lại trên mỗi thiết bị), nên trường hợp đáng tin cậy là cùng một thiết bị.
 

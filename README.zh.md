@@ -64,9 +64,10 @@ VDBackup 是一个 root **WebUI 模块**，用于备份和还原你的应用及�
   另一台设备上还原或在 PC 上打开。
 - **目标位置:** 本地、SFTP、SCP、SMB、WebDAV、FTP、S3 以及 70 多种 (`rclone`)，外加 `rsync`
   和 `restic` 仓库。还可通过一个小型的选择加入配套应用选用 Google Drive。
+- **Telegram:** 通过 MTProto 备份到私有 Telegram 频道作为无限云存储 - 恢复和删除也可在 WebUI 中完成。
 - **完整性:** 每个归档都会对照清单进行校验；试运行和还原测试让你无需改动任何东西即可检查备份。
 - **选择性与批量还原:** 还原备份项目的任意子集，或多选多个备份并一次性全部还原；删除备份，并为每一次破坏性操作保留活动/审计日志。
-- **特殊备份:** 短信 (SMS/MMS)、联系人和通话记录、Wi-Fi 和蓝牙，还可选地导出一份可在 PC 上打开的可移植 JSON。
+- **特殊备份:** 短信 (SMS/MMS/RCS)、联系人和通话记录、Wi-Fi 和蓝牙，还可选地导出一份可在 PC 上打开的可移植 JSON。
 - **调度 + 自动化:** 针对单个应用、一组应用或所有应用的周期性**备份或恢复**任务，以 keep-N 修剪，外加选择加入的安装/更新时自动备份和一份排除应用列表。
 - **安装来源:** 还原的应用默认把 Play Store 报告为其安装来源 (可切换)；一个高级的选择加入项还会伪造发起方软件包和来源。
 - **系统应用挂载:** 无需触碰真实的 `/system` 分区即可把已安装的应用挂载为系统应用 (无系统修改的叠加子模块，支持 NoMount)。
@@ -148,4 +149,4 @@ VD Backup 是一个独立的非官方项目。它与 Google LLC 或任何其他�
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

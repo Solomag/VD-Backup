@@ -66,12 +66,13 @@ Neo-Backup ve Android-DataBackup yedeklerini içe aktarabilir.
   donanımına bağlı değildir, böylece bir yedek başka bir cihazda geri yüklenir veya bir PC'de açılır.
 - **Hedefler:** yerel, SFTP, SCP, SMB, WebDAV, FTP, S3 ve 70'ten fazlası (`rclone`),
   ayrıca `rsync` ve `restic` depoları. Küçük, tercihe bağlı bir yardımcı ile isteğe bağlı Google Drive.
+- **Telegram:** özel bir Telegram kanalına MTProto üzerinden sınırsız bulut depolama olarak yedekle - geri yükleme ve silme de WebUI'den.
 - **Bütünlük:** her arşiv manifest'e karşı doğrulanır; dry-run ve geri yükleme testi, hiçbir şeye
   dokunmadan bir yedeği denetlemenizi sağlar.
 - **Seçmeli ve toplu geri yükleme:** bir yedeğin öğelerinden herhangi bir alt kümeyi geri
   yükleyin veya birden çok yedeği seçip hepsini tek seferde geri yükleyin; yedekleri silin ve
   her yıkıcı eylemin bir etkinlik/denetim günlüğünü tutun.
-- **Özel yedekler:** mesajlar (SMS/MMS), kişiler ve arama günlüğü, Wi-Fi ve Bluetooth;
+- **Özel yedekler:** mesajlar (SMS/MMS/RCS), kişiler ve arama günlüğü, Wi-Fi ve Bluetooth;
   bir PC'de açabileceğiniz isteğe bağlı taşınabilir bir JSON dışa aktarımıyla.
 - **Zamanlama + otomasyon:** tek bir uygulamayı, bir kümeyi veya tüm uygulamaları hedefleyen
   **yedekleme veya geri yükleme** için yinelenen işler, keep-N budamayla, ayrıca
@@ -164,4 +165,4 @@ VD Backup bağımsız, resmi olmayan bir projedir. Google LLC veya başka herhan
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

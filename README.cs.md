@@ -66,12 +66,13 @@ importovat existující zálohy Neo-Backup a Android-DataBackup, abyste mohli p�
   na hardware zařízení, takže se záloha obnoví na jiném zařízení nebo otevře na počítači.
 - **Cíle:** místní, SFTP, SCP, SMB, WebDAV, FTP, S3 a dalších 70+ (`rclone`),
   plus repozitáře `rsync` a `restic`. Volitelně Google Drive přes drobného volitelného společníka.
+- **Telegram:** zálohuj do soukromého kanálu Telegramu jako neomezené cloudové úložiště přes MTProto - obnovení i mazání také z WebUI.
 - **Integrita:** každý archiv je ověřen proti manifestu; zkušební běh (dry-run) a test
   obnovy umožňují zkontrolovat zálohu, aniž byste cokoli změnili.
 - **Selektivní a dávková obnova:** obnovte libovolnou podmnožinu položek zálohy nebo vyberte
   více záloh a obnovte je všechny najednou; mažte zálohy a veďte protokol aktivity/auditu
   každé destruktivní akce.
-- **Speciální zálohy:** zprávy (SMS/MMS), kontakty a seznam hovorů, Wi-Fi a Bluetooth,
+- **Speciální zálohy:** zprávy (SMS/MMS/RCS), kontakty a seznam hovorů, Wi-Fi a Bluetooth,
   s volitelným přenosným exportem do JSON, který otevřete na PC.
 - **Plánování + automatizace:** opakující se úlohy **zálohy nebo obnovy** cílící na jednu
   aplikaci, sadu nebo všechny aplikace, s prořezáváním keep-N, plus volitelná automatická
@@ -163,4 +164,4 @@ VD Backup je nezávislý, neoficiální projekt. Není spojen se společností G
 
 ## Tagy
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

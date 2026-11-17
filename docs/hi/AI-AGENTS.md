@@ -78,6 +78,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | किसी इंस्टॉल्ड ऐप को सिस्टम ऐप के रूप में माउंट करें (systemless उप-मॉड्यूल; NoMount के ज़रिए live अन्यथा अगले बूट पर) |
 | `companion-status` / `companion-install` | `{}` | Google Drive साथी स्थिति / ऑन-डिमांड इंस्टॉल |
+| `telegram-check` | `{}` | टेलीग्राम सत्र स्थिति (`user` null = लॉग इन नहीं) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | टेलीग्राम लॉगिन; यदि खाते में 2FA है और `password` नहीं है तो `sign-in` `2FA_REQUIRED` लौटाता है |
+| `telegram-logout` | `{}` | टेलीग्राम सत्र समाप्त करता है |
+| `telegram-list` | `{}` | टेलीग्राम चैनल में बैकअप (नाम `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` टेलीग्राम से एक बैकअप स्थानीय संग्रहण में डाउनलोड करता है (detached); फिर सामान्य `restore` प्रवाह से पुनर्स्थापित होता है |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id` से टेलीग्राम चैनल से एक बैकअप हटाता है (बैच: अल्पविराम से अलग) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | गंतव्य प्रबंधन |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote प्रबंधन (वह `rclone.conf` प्रविष्टि बनाता है जिसकी ओर `type:"rclone"` dest इशारा करता है); `backend` कोई भी rclone backend हो सकता है, कोई श्वेतसूची नहीं |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (इंजन पहले ही Android VIEW intent के ज़रिए फ़ोन का ब्राउज़र उस सहमति URL पर खोल चुका है) या `{ok:false,code:"ERR_AUTHORIZE"}`। ऑन-डिवाइस OAuth के लिए एक स्थानीय callback सर्वर (`127.0.0.1:53682`) पर `rclone authorize <backend>` चलाता है। |

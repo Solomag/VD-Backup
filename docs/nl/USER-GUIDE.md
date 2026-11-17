@@ -398,6 +398,7 @@ Remote-transport wordt afgehandeld door de gebundelde tools:
   Drive** en 70+ meer diensten.
 - **rsync** en de **ssh/scp/sftp**-suite, voor delta-sync en gewone SSH-doelen.
 - **restic**: versleutelde, gededupliceerde **Snapshot**-repositories (lokaal of op afstand).
+- **Telegram**: je eigen Telegram-account als onbeperkte offsite-opslag. Kies de bestemming **Telegram**, log één keer in (telefoon -> code -> tweefactorwachtwoord als je dat hebt), en back-ups worden naar een privékanaal geüpload. **Restore from Telegram** op het tabblad Backups haalt een back-up terug naar dit apparaat, waar hij als elke lokale back-up wordt teruggezet. Terugzetten op **hetzelfde apparaat** is het betrouwbare geval (de sessie blijft op dat apparaat).
 
 **Een cloud-remote aanmaken (geen SSH nodig).** Kies in het Bestemmingen-tabblad het
 **rclone**-bestemmingstype en gebruik **Cloud-remote toevoegen**. Je kunt **elke rclone-backend**

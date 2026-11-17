@@ -66,12 +66,13 @@ mengimpor cadangan Neo-Backup dan Android-DataBackup yang sudah ada agar Anda bi
   terikat ke perangkat keras, sehingga sebuah cadangan dapat dipulihkan di perangkat lain atau dibuka di PC.
 - **Tujuan:** lokal, SFTP, SCP, SMB, WebDAV, FTP, S3 dan 70+ lainnya (`rclone`),
   ditambah repo `rsync` dan `restic`. Google Drive opsional melalui pendamping kecil yang opt-in.
+- **Telegram:** cadangkan ke saluran Telegram pribadi sebagai penyimpanan cloud tanpa batas melalui MTProto - pulihkan dan hapus juga dari WebUI.
 - **Integritas:** setiap arsip diverifikasi terhadap manifes; dry-run dan restore-test memungkinkan
   Anda memeriksa sebuah cadangan tanpa menyentuh apa pun.
 - **Pemulihan selektif & massal:** pulihkan subset mana pun dari item sebuah cadangan, atau pilih beberapa
   cadangan sekaligus dan pulihkan semuanya dalam satu kali; hapus cadangan dan simpan log aktivitas/audit dari
   setiap tindakan destruktif.
-- **Cadangan khusus:** pesan (SMS/MMS), kontak dan log panggilan, Wi-Fi dan Bluetooth,
+- **Cadangan khusus:** pesan (SMS/MMS/RCS), kontak dan log panggilan, Wi-Fi dan Bluetooth,
   dengan ekspor JSON portabel opsional yang dapat Anda buka di PC.
 - **Penjadwalan + otomasi:** tugas **backup atau restore** berulang yang menargetkan satu aplikasi, sekumpulan,
   atau semua aplikasi, dengan pemangkasan keep-N, ditambah pencadangan otomatis opt-in saat pemasangan/pembaruan
@@ -162,4 +163,4 @@ VD Backup adalah proyek independen dan tidak resmi. Proyek ini tidak berafiliasi
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

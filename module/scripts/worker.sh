@@ -155,8 +155,8 @@ netpolicy_restore() {   # <pkg> <user> <policy-int>
   if [ -f "$MODDIR/etc/vdbackup_helper.dex" ]; then
     _hr="$(LD_LIBRARY_PATH= app_process -Djava.class.path="$MODDIR/etc/vdbackup_helper.dex" \
         /system/bin ru.vd171.vdbackup.Helper netpolicy-set "$_nuid" "$_pol" 2>/dev/null)"
-    case "$_hr" in *'"ok":true'*) audit "netpolicy restored via framework $_p uid=$_nuid policy=$_pol"; return 0 ;; esac
-    audit "netpolicy framework set failed, falling back to xml $_p"
+    case "$_hr" in *'"ok":true'*) audit "netpolicy restored via framework $_p uid=$_nuid policy=$_pol resp=$_hr"; return 0 ;; esac
+    audit "netpolicy framework did not stick ($_hr), falling back to xml $_p"
   fi
   _f=/data/system/netpolicy.xml; [ -f "$_f" ] || { audit "netpolicy no file $_p"; return 0; }
   _abx=no; is_abx "$_f" && _abx=yes
@@ -577,12 +577,14 @@ fwstate_apply() {   # <json-file>; uses $PKG $U
 SCRIPT="$(bin_or script)"
 enc_age() { # <outfile> ; reads plaintext on stdin, writes an age scrypt file
   _ep="$STATE/staging/enc.$OPID.$$"; cat > "$_ep"
-  printf '%s\n%s\n' "$PW" "$PW" | "$SCRIPT" -qec "$AGE -p -o \"$1\" \"$_ep\"" /dev/null >/dev/null 2>&1
+  # paths go through the environment, never spliced into the -c string: a path with a
+  # double-quote would otherwise break out and run as root inside `script`.
+  printf '%s\n%s\n' "$PW" "$PW" | AGE_BIN="$AGE" AGE_IN="$_ep" AGE_OUT="$1" "$SCRIPT" -qec 'exec "$AGE_BIN" -p -o "$AGE_OUT" "$AGE_IN"' /dev/null >/dev/null 2>&1
   _er=$?; rm -f "$_ep"; return $_er
 }
 dec_age() { # <infile> ; writes the decrypted plaintext of an age scrypt file to stdout
   _dp="$STATE/staging/dec.$OPID.$$"
-  printf '%s\n' "$PW" | "$SCRIPT" -qec "$AGE -d -o \"$_dp\" \"$1\"" /dev/null >/dev/null 2>&1
+  printf '%s\n' "$PW" | AGE_BIN="$AGE" AGE_IN="$1" AGE_OUT="$_dp" "$SCRIPT" -qec 'exec "$AGE_BIN" -d -o "$AGE_OUT" "$AGE_IN"' /dev/null >/dev/null 2>&1
   cat "$_dp" 2>/dev/null; rm -f "$_dp"
 }
 # Passphrase encryption needs the bundled `age` AND a pty provider (`script`): age reads
@@ -682,6 +684,19 @@ drive_cmd() {                               # drive_cmd <op> [extra -e args...] 
   else exec_ns rm -f "$_res" "$_res.done" 2>/dev/null; printf '{"ok":false,"code":"ERR_DRIVE_TIMEOUT"}\n'; fi
 }
 drive_ok() { printf '%s' "$1" | "$JQ" -e '.ok==true' >/dev/null 2>&1; }
+
+# Telegram destination: the backup lands in a private Telegram channel via the bundled
+# mtproto-store binary (static Go, runs as root). The session is a sensitive credential, so
+# STATE points at CE ($SECRETS), never DE. TAG=VDB keeps the VDBackup channel separate from
+# the generic store. The binary reads only $STATE/staging (root-visible) + the network.
+TGBIN="$(bin_or mtproto-store)"
+TG_STATE="$SECRETS/telegram"
+tg_cmd() { MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$TG_STATE" "$TGBIN" "$@" 2>/dev/null; }
+tg_ok() { printf '%s' "$1" | "$JQ" -e '.ok==true' >/dev/null 2>&1; }
+# check-auth returns ok:true even with no session, with a boolean .is_auth (and user/channel
+# only once logged in). The real auth gate is .is_auth==true, not .ok. (Verified against the
+# v1.0.0 binary on arm64; its CONTRACT.md's user/null shape does not match the shipped build.)
+tg_authed() { tg_cmd check-auth | "$JQ" -e '.ok==true and .is_auth==true' >/dev/null 2>&1; }
 
 # resolve the destination (from dests/<id>.json) into DTYPE/DREMOTE/DPATH/DREPO
 resolve_dest() {
@@ -805,7 +820,7 @@ rclone_check_seal() {   # <localdir> <remote:path>; 0 = verified or skipped, 1 =
 
 # Full mode: ship the just-built local backup dir to a remote destination
 transfer_full() {
-  case "$DTYPE" in rclone|gdrive) net_guard || return 1 ;; esac
+  case "$DTYPE" in rclone|gdrive|telegram) net_guard || return 1 ;; esac
   case "$DTYPE" in
     rclone) [ -n "$DREMOTE" ] || { audit "rclone dest without remote $PKG"; finish false ERR_NO_DEST; return 1; }
             _tneed="$(du -s -B1 "$DEST" 2>/dev/null | cut -f1)"; _tneed="${_tneed:-0}"
@@ -835,6 +850,22 @@ transfer_full() {
               exec_ns rm -f "$_sf"
             done
             exec_ns rm -rf "$_stg" ;;
+    telegram) [ -x "$TGBIN" ] || { audit "telegram binary missing $PKG"; finish false ERR_TG_BIN; return 1; }
+            tg_authed || { audit "telegram not authenticated $PKG"; finish false ERR_TG_AUTH; return 1; }
+            # optional channel config (dest .path): a numeric value pins a specific channel by id
+            # (--channel-id), text names the channel on first creation (--title). Empty = auto.
+            if [ -z "$DPATH" ]; then tg_cmd init-storage >/dev/null 2>&1
+            else case "$DPATH" in *[!0-9-]*) tg_cmd init-storage --title "$DPATH" >/dev/null 2>&1 ;;
+                                   *) tg_cmd init-storage --channel-id "$DPATH" >/dev/null 2>&1 ;; esac; fi
+            # Telegram stores by message-id, not path: pack the whole backup dir into ONE
+            # self-describing archive (name encodes pkg/timestamp/versioncode) so list-remote
+            # alone identifies it; the channel is the authoritative index (restorable offsite).
+            _tstg="$STATE/staging/tgup.$OPID"; rm -rf "$_tstg"; mkdir -p "$_tstg"
+            exec_ns "$TAR" -C "$DEST" -c -f "$_tstg/${PKG}__${TS}_${VC}.vdb.tar" . \
+              || { rm -rf "$_tstg"; audit "telegram pack failed $PKG"; finish false ERR_TRANSFER; return 1; }
+            tg_ok "$(tg_cmd upload --dir "$_tstg" --opid "$OPID")" \
+              || { rm -rf "$_tstg"; audit "telegram upload failed $PKG"; finish false ERR_TRANSFER; return 1; }
+            rm -rf "$_tstg" ;;
     local)  if [ -n "$DPATH" ] && [ "$DPATH" != "$BACKUPS" ]; then
               safe_local_dest "$DPATH" || { audit "refused unsafe local dest $DPATH $PKG"; finish false ERR_DEST_UNSAFE; return 1; }
               _lsz="$(du -s -B1 "$DEST" 2>/dev/null | cut -f1)"; _lfree="$(fs_free "$DPATH")"
@@ -893,11 +924,12 @@ do_mirror() {
     esac
     rm -rf "$apkdir"
   fi
+  _bfail=0
   sync_one() { # <label> <src> <basepct>
     [ -e "$2" ] || return 0
     case "$DTYPE" in
-      rclone) rclone_live "mirror $1" "${3:-50}" sync "$2" "$DREMOTE:$(remote_pfx)/$PKG/$1" ;;
-      local)  mkdir -p "$(remote_pfx)/$PKG/$1" && exec_ns "$RSYNC" -a --delete "$2/" "$(remote_pfx)/$PKG/$1/" >/dev/null 2>&1 ;;
+      rclone) rclone_live "mirror $1" "${3:-50}" sync "$2" "$DREMOTE:$(remote_pfx)/$PKG/$1" || { _bfail=1; audit "mirror sync failed $PKG ($1)"; } ;;
+      local)  { mkdir -p "$(remote_pfx)/$PKG/$1" && exec_ns "$RSYNC" -a --delete "$2/" "$(remote_pfx)/$PKG/$1/" >/dev/null 2>&1; } || { _bfail=1; audit "mirror sync failed $PKG ($1)"; } ;;
     esac
   }
   prog 30 mirror data;     echo " $ITEMS " | grep -q ' data '     && sync_one data     "/data/user/$U/$PKG" 30
@@ -913,7 +945,9 @@ do_mirror() {
     rclone) exec_ns "$RCLONE" --config "$SECRETS/rclone.conf" copyto "$_mmeta" "$DREMOTE:$(remote_pfx)/$PKG/meta.json" >/dev/null 2>&1 ;;
   esac
   rm -f "$_mmeta"
-  prog 98 verify "$PKG"; audit "mirror $PKG -> ${DREMOTE:-$DPATH}"; notify backup_done "$PKG"; finish true ERR_NONE
+  prog 98 verify "$PKG"
+  [ "$_bfail" = 0 ] || { audit "mirror $PKG completed with sync errors"; finish false ERR_TRANSFER; return; }
+  audit "mirror $PKG -> ${DREMOTE:-$DPATH}"; notify backup_done "$PKG"; finish true ERR_NONE
 }
 
 # ----------------------------------------------------------------------
@@ -1122,9 +1156,13 @@ backup() {
     for p in $(fw pm path --all "$PKG" 2>/dev/null | sed 's/^package://'); do
       name="$(basename "$p")"
       if use_apk_age; then
-        "$ZSTD" -q "-$APKLEVEL" -c "$p" | enc_age "$DEST/${name}.zst.age"; an="${name}.zst.age"
+        "$ZSTD" -q "-$APKLEVEL" -c "$p" | enc_age "$DEST/${name}.zst.age" \
+          || { audit "backup apk write failed $PKG ($name)"; finish false ERR_BACKUP; return; }
+        an="${name}.zst.age"
       else
-        "$ZSTD" -q "-$APKLEVEL" -c "$p" > "$DEST/${name}.zst"; an="${name}.zst"
+        "$ZSTD" -q "-$APKLEVEL" -c "$p" > "$DEST/${name}.zst" \
+          || { audit "backup apk write failed $PKG ($name)"; finish false ERR_BACKUP; return; }
+        an="${name}.zst"
       fi
       APKS="$(printf '%s' "$APKS" | "$JQ" --arg a "$an" '. + [$a]')"
     done
@@ -1276,6 +1314,7 @@ backup() {
 do_restore_snapshot() {
   DESTID="$(jget "$ARGS" '.dest')"; SNAP="$(jget "$ARGS" '.snapshot')"
   PKG="$(jget "$ARGS" '.package')"; U="$(jget "$ARGS" '.user // 0')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac
+  case "$PKG" in ''|null|*/*|*' '*) finish false ERR_NO_PACKAGE; return ;; esac   # same guard as backup()/restore(): a package with a slash feeds rm -rf "/data/user/$U/$PKG"
   is_root_manager "$PKG" && { audit "refused root manager restore: $PKG"; finish false ERR_ROOT_MANAGER; return; }
   { [ -z "$SNAP" ] || [ "$SNAP" = null ]; } && SNAP=latest
   resolve_dest
@@ -1287,11 +1326,14 @@ do_restore_snapshot() {
   freeze "$PKG"
   ST="$STATE/staging/restore.$OPID"; rm -rf "$ST"; mkdir -p "$ST"
   prog 30 restoring "$PKG"
-  exec_ns "$RESTIC" -r "$DREPO" restore "$SNAP" --target "$ST" \
+  # --tag pins `latest` to THIS package's snapshots: a shared restic repo dedups across
+  # apps, so a bare `latest` is whatever app was backed up last, not this one.
+  exec_ns "$RESTIC" -r "$DREPO" restore "$SNAP" --tag "vdbackup,$PKG" --target "$ST" \
     --include "/data/user/$U/$PKG" --include "/data/user_de/$U/$PKG" \
     --include "/data/media/$U/Android/data/$PKG" --include "/data/media/$U/Android/obb/$PKG" \
     --include "/data/media/$U/Android/media/$PKG" --include "/data/app" \
-    --include "$STATE/snapmeta/$PKG.json" >/dev/null 2>&1
+    --include "$STATE/snapmeta/$PKG.json" >/dev/null 2>&1 \
+    || { audit "restore-snapshot restic failed $PKG"; finish false ERR_RESTORE; return; }
   # install APKs found in the restored tree
   prog 55 installing "$PKG"
   verifier_off
@@ -1309,7 +1351,8 @@ do_restore_snapshot() {
   for rel in "data/user/$U/$PKG" "data/user_de/$U/$PKG" "data/media/$U/Android/data/$PKG" \
              "data/media/$U/Android/obb/$PKG" "data/media/$U/Android/media/$PKG"; do
     src="$ST/$rel"; dst="/$rel"; [ -d "$src" ] || continue
-    rm -rf "$dst"; mkdir -p "$(dirname "$dst")"; cp -a "$src" "$dst"
+    rm -rf "$dst"; mkdir -p "$(dirname "$dst")"
+    cp -a "$src" "$dst" || { audit "restore-snapshot copy failed $PKG ($rel)"; finish false ERR_RESTORE; return; }
     case "$rel" in
       data/user/*)       _rt=data ;;
       data/user_de/*)    _rt=data_de ;;
@@ -1329,6 +1372,7 @@ do_restore_snapshot() {
 # Restore from a Mirror: pm install the mirrored APKs, rsync the data dirs back, remap.
 do_restore_mirror() {
   DESTID="$(jget "$ARGS" '.dest')"; PKG="$(jget "$ARGS" '.package')"; U="$(jget "$ARGS" '.user // 0')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac
+  case "$PKG" in ''|null|*/*|*' '*) finish false ERR_NO_PACKAGE; return ;; esac   # same guard as backup()/restore(): a package with a slash feeds rm -rf / rsync --delete on "/data/user/$U/$PKG"
   is_root_manager "$PKG" && { audit "refused root manager restore: $PKG"; finish false ERR_ROOT_MANAGER; return; }
   resolve_dest
   transport_guard mirror || return
@@ -1336,7 +1380,10 @@ do_restore_mirror() {
   prog 5 fetching "$PKG"; audit "restore-mirror start $PKG"; notify restore_start "$PKG"
   if [ "$DTYPE" = local ]; then SRC="$(remote_pfx)/$PKG"
   else SRC="$STATE/staging/mrestore.$OPID"; rm -rf "$SRC"; mkdir -p "$SRC"
-       exec_ns "$RCLONE" --config "$SECRETS/rclone.conf" copy "$DREMOTE:$(remote_pfx)/$PKG" "$SRC" >/dev/null 2>&1; fi
+       # a partial/failed download must abort BEFORE the rsync --delete below, or --delete
+       # against an incomplete source wipes live files that the full backup still holds.
+       exec_ns "$RCLONE" --config "$SECRETS/rclone.conf" copy "$DREMOTE:$(remote_pfx)/$PKG" "$SRC" >/dev/null 2>&1 \
+         || { audit "restore-mirror fetch failed $PKG"; finish false ERR_TRANSFER; return; }; fi
   [ -d "$SRC" ] || { finish false ERR_NO_BACKUP; return; }
   freeze "$PKG"
   prog 35 installing "$PKG"
@@ -1353,9 +1400,11 @@ do_restore_mirror() {
   LIVEU="$(stat -c %u "/data/user/$U/$PKG" 2>/dev/null || echo 0)"; LIVEG="$(stat -c %g "/data/user/$U/$PKG" 2>/dev/null || echo 0)"
   LIVECTX="$(exec_ns ls -Zd "/data/user/$U/$PKG" 2>/dev/null | cut -d' ' -f1)"
   prog 70 extracting "$PKG"
+  _mfail=0
   restore_one() { # <label> <dst>
     [ -d "$SRC/$1" ] || return 0
-    mkdir -p "$2"; exec_ns "$RSYNC" -a --delete "$SRC/$1/" "$2/" >/dev/null 2>&1
+    mkdir -p "$2"
+    exec_ns "$RSYNC" -a --delete "$SRC/$1/" "$2/" >/dev/null 2>&1 || { _mfail=1; audit "restore-mirror rsync failed $PKG ($1)"; }
     remap_restored "$1" "$2"
   }
   restore_one data     "/data/user/$U/$PKG"
@@ -1365,7 +1414,9 @@ do_restore_mirror() {
   restore_one media    "/data/media/$U/Android/media/$PKG"
   prog 90 framework "$PKG"; [ -f "$SRC/meta.json" ] && fwstate_apply "$SRC/meta.json"
   [ "$DTYPE" = local ] || rm -rf "$SRC"
-  prog 97 framework "$PKG"; audit "restore-mirror done $PKG"; notify restore_done "$PKG"
+  prog 97 framework "$PKG"
+  [ "$_mfail" = 0 ] || { audit "restore-mirror completed with rsync errors $PKG"; finish false ERR_RESTORE; return; }
+  audit "restore-mirror done $PKG"; notify restore_done "$PKG"
   finish true ERR_NONE
 }
 
@@ -1763,6 +1814,7 @@ do_import_neo() {
 special_paths() {   # <category>; echoes each existing owned path, one per line
   case "$1" in
     messages)  set -- "/data/user/${U:-0}/com.android.providers.telephony" "/data/user_de/${U:-0}/com.android.providers.telephony" ;;
+    rcs)       set -- "/data/user/${U:-0}/com.google.android.apps.messaging" "/data/user_de/${U:-0}/com.google.android.apps.messaging" ;;   # RCS lives in Google Messages' own data (bugle_db), not the telephony provider
     contacts)  set -- "/data/user/${U:-0}/com.android.providers.contacts"  "/data/user_de/${U:-0}/com.android.providers.contacts" ;;
     wifi)      set -- /data/misc/wifi /data/misc/apexdata/com.android.wifi ;;          # device-level, not per-user
     bluetooth) set -- /data/misc/bluedroid /data/misc/bluetooth "/data/user/${U:-0}/com.android.bluetooth" ;;
@@ -1801,6 +1853,14 @@ special_export() {   # <category> <dest-dir>
       exec_ns test -f "$_db" && { _copy "$_db"; _jexport "$_stg/mmssms.db" \
         "SELECT _id,thread_id,address,person,date,date_sent,protocol,read,status,type,subject,body,service_center FROM sms ORDER BY date;" \
         "$_ed/sms.json"; } ;;
+    rcs)
+      # Google Messages (Bugle): bugle_db holds RCS + the app's SMS/MMS, told apart by message_protocol.
+      # WAL mode -> copy the -wal/-shm too so recent messages are included. Timestamps are Bugle epoch
+      # (microseconds). Body text lives in `parts`, sender in `participants`.
+      _db=/data/data/com.google.android.apps.messaging/databases/bugle_db
+      exec_ns test -f "$_db" && { _copy "$_db"; _copy "$_db-wal"; _copy "$_db-shm"; _jexport "$_stg/bugle_db" \
+        "SELECT m._id,m.conversation_id,m.message_protocol,CASE m.message_protocol WHEN 3 THEN 'RCS' WHEN 0 THEN 'SMS/MMS' ELSE 'other('||m.message_protocol||')' END AS kind,m.sent_timestamp,m.received_timestamp,m.read,(SELECT send_destination FROM participants WHERE _id=m.sender_id) AS sender,(SELECT group_concat(text,char(10)) FROM parts WHERE message_id=m._id AND text IS NOT NULL AND text<>'') AS text FROM messages m ORDER BY COALESCE(NULLIF(m.received_timestamp,0),m.sent_timestamp);" \
+        "$_ed/rcs.json"; } ;;
     contacts)
       _cl=/data/data/com.android.providers.contacts/databases/calllog.db
       exec_ns test -f "$_cl" && { _copy "$_cl"; _jexport "$_stg/calllog.db" \
@@ -1957,6 +2017,10 @@ do_special_restore() {
   case "$REF" in /data/media/*/VDBackup/.special/*) : ;; *) finish false ERR_BAD_REF; return ;; esac
   U="$(printf '%s' "$REF" | sed -n 's#^/data/media/\([0-9][0-9]*\)/VDBackup/.*#\1#p')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac   # restore to the user that owns this backup
   M="$REF/manifest.json"; [ -f "$M" ] || { finish false ERR_NO_BACKUP; return; }
+  if [ -f "$M.sha256" ]; then   # manifest lives on user-writable /sdcard: reject a tampered one before trusting source_path for rm -rf (same check main/path restore do)
+    want="$(cat "$M.sha256")"; got="$(sha256sum "$M" | cut -d' ' -f1)"
+    [ "$want" = "$got" ] || { finish false ERR_MANIFEST_SHA; return; }
+  fi
   [ "$(jget "$ARGS" '.confirm')" = true ] || { finish false ERR_CONFIRM; return; }   # heavy-friction gate
   PW="$(jget "$ARGS" '.password')"; [ "$PW" = null ] && PW=""
   if "$JQ" -e '[.items[]?|select(.encryption=="age-scrypt")]|length>0' "$M" >/dev/null 2>&1 && [ -z "$PW" ]; then
@@ -1990,7 +2054,7 @@ do_special_restore() {
     fi
     { [ -z "$arc" ] || [ -z "$src" ]; } && continue
     want_cat "$cat" || continue
-    case "$src" in /data/*) : ;; *) audit "special-restore skip unsafe path $src"; continue ;; esac
+    case "$src" in *..*) audit "special-restore skip traversal $src"; continue ;; /data/*) : ;; *) audit "special-restore skip unsafe path $src"; continue ;; esac
     parent="$(dirname "$src")"; base="$(basename "$src")"
     prog $(( 10 + i * 80 / (n>0?n:1) )) extracting "$cat"
     # anti-traversal: reject a tampered archive BEFORE the destructive wipe
@@ -2277,7 +2341,31 @@ echo $$ > /sys/fs/cgroup/cgroup.procs 2>/dev/null || true
 
 # mark the operation live immediately, before any (possibly slow) validation, so the
 # UI never sits on a stale "starting" while the first guard/dumpsys runs.
-case "$VERB" in backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import) prog 2 preparing "" ;; esac
+do_telegram_pull() {   # download a backup from Telegram into local storage; it then restores via the normal flow
+  MID="$(jget "$ARGS" '.message_id')"; case "$MID" in ''|*[!0-9-]*) finish false ERR_INVALID_REF; return ;; esac
+  NAME="$(jget "$ARGS" '.name')"
+  U="$(jget "$ARGS" '.user // 0')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac
+  case "$NAME" in *__*.vdb.tar) : ;; *) finish false ERR_INVALID_REF; return ;; esac
+  _rest="${NAME%.vdb.tar}"; PKG="${_rest%%__*}"; _tsvc="${_rest#*__}"
+  case "$PKG" in ''|null|*/*|*' '*) finish false ERR_NO_PACKAGE; return ;; esac
+  case "$_tsvc" in ''|*/*|*..*|*' '*) finish false ERR_INVALID_REF; return ;; esac   # feeds a backups path
+  net_guard || return
+  [ -x "$TGBIN" ] || { finish false ERR_TG_BIN; return; }
+  tg_authed || { finish false ERR_TG_AUTH; return; }
+  BACKUPS="$(backups_dir "$U")"; _ddir="$BACKUPS/$PKG/$_tsvc"
+  _dl="$STATE/staging/tgpull.$OPID"; rm -rf "$_dl"; mkdir -p "$_dl"
+  prog 10 fetching "$PKG"; audit "telegram-pull start $PKG msg $MID"
+  tg_ok "$(tg_cmd download --ref "$MID" --out "$_dl/$NAME" --opid "$OPID")" \
+    || { rm -rf "$_dl"; audit "telegram-pull download failed $PKG"; finish false ERR_DOWNLOAD; return; }
+  prog 75 extracting "$PKG"
+  media_own "$BACKUPS"; media_own "$BACKUPS/$PKG"; rm -rf "$_ddir"; mkdir -p "$_ddir"
+  exec_ns "$TAR" -C "$_ddir" -x -f "$_dl/$NAME" \
+    || { rm -rf "$_dl" "$_ddir"; audit "telegram-pull extract failed $PKG"; finish false ERR_RESTORE; return; }
+  rm -rf "$_dl"; media_own -R "$_ddir"
+  prog 97 done "$PKG"; audit "telegram-pull done $PKG -> $_ddir"
+  finish true ERR_NONE
+}
+case "$VERB" in backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import|telegram-pull) prog 2 preparing "" ;; esac
 case "$VERB" in
   backup)          backup ;;
   backup-batch)    backup_batch ;;
@@ -2291,5 +2379,6 @@ case "$VERB" in
   cloud-fetch)     do_cloud_fetch ;;
   path-backup)     do_path_backup ;;
   path-restore)    do_path_restore ;;
+  telegram-pull)   do_telegram_pull ;;
   *)               finish false ERR_UNKNOWN_VERB ;;
 esac

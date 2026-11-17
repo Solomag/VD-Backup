@@ -78,6 +78,12 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | 설치된 앱을 시스템 앱으로 마운트 (시스템리스 서브모듈; NoMount로 라이브, 아니면 다음 부팅 시) |
 | `companion-status` / `companion-install` | `{}` | Google Drive 컴패니언 상태 / 온디맨드 설치 |
+| `telegram-check` | `{}` | Telegram 세션 상태 (`user`가 null = 미로그인) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram 로그인; 계정에 2FA가 있고 `password`가 없으면 `sign-in`이 `2FA_REQUIRED` 반환 |
+| `telegram-logout` | `{}` | Telegram 세션 종료 |
+| `telegram-list` | `{}` | Telegram 채널의 백업 (이름 `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` Telegram 백업을 로컬 저장소로 다운로드(detached); 이후 일반 `restore` 흐름으로 복원 |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id`로 Telegram 채널에서 백업 삭제 (일괄: 쉼표 구분) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 대상 관리 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone 원격 관리 (`type:"rclone"` 대상이 가리키는 `rclone.conf` 항목을 생성); `backend`는 임의의 rclone backend일 수 있으며 화이트리스트가 없음 |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (엔진이 Android VIEW 인텐트를 통해 해당 동의 URL을 이미 휴대폰 브라우저에서 열었음) 또는 `{ok:false,code:"ERR_AUTHORIZE"}`. 기기 내 OAuth를 위해 로컬 콜백 서버(`127.0.0.1:53682`)에서 `rclone authorize <backend>`를 실행. |

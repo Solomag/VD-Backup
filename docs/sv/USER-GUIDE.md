@@ -391,6 +391,7 @@ Fjärrtransport hanteras av de medföljande verktygen:
   Google Drive** och 70+ fler tjänster.
 - **rsync** och **ssh/scp/sftp**-sviten, för deltasynk och vanliga SSH-mål.
 - **restic**: krypterade, av-duplicerade **Snapshot**-arkiv (lokala eller fjärr).
+- **Telegram**: ditt eget Telegram-konto som obegränsad extern lagring. Välj målet **Telegram**, logga in en gång (telefon -> kod -> tvåfaktorslösenord om du har ett), och kopior laddas upp till en privat kanal. **Restore from Telegram** på fliken Backups hämtar en kopia tillbaka till den här enheten, där den återställs som vilken lokal som helst. Att återställa på **samma enhet** är det tillförlitliga fallet (sessionen stannar på den enheten).
 
 **Skapa en moln-fjärrplats (ingen SSH behövs).** I Destinations-fliken, välj
 **rclone**-destinationstypen och använd **Add cloud remote**. Du kan ansluta **vilken

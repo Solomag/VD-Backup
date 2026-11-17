@@ -391,6 +391,7 @@ Transport zdalny jest obsługiwany przez dołączone narzędzia:
   Google Drive** i 70+ innych usług.
 - **rsync** oraz pakiet **ssh/scp/sftp**: dla delta sync i zwykłych celów SSH.
 - **restic**: zaszyfrowane, deduplikowane repozytoria **Snapshot** (lokalne lub zdalne).
+- **Telegram**: twoje własne konto Telegram jako nielimitowana pamięć zdalna. Wybierz cel **Telegram**, zaloguj się raz (telefon -> kod -> hasło dwuskładnikowe, jeśli je masz), a kopie trafiają do prywatnego kanału. **Restore from Telegram** w zakładce Backups pobiera kopię z powrotem na to urządzenie, gdzie przywraca się jak każda lokalna. Przywracanie na **tym samym urządzeniu** to niezawodny przypadek (sesja zostaje na tym urządzeniu).
 
 **Tworzenie zdalnego chmurowego (SSH niepotrzebne).** W zakładce Destinations wybierz
 typ celu **rclone** i użyj **Add cloud remote**. Możesz połączyć **dowolny backend rclone**:

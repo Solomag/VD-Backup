@@ -66,12 +66,13 @@ importare i backup esistenti di Neo-Backup e Android-DataBackup così da poter m
   legata all'hardware del dispositivo, così un backup si ripristina su un altro dispositivo o si apre su un PC.
 - **Destinazioni:** locale, SFTP, SCP, SMB, WebDAV, FTP, S3 e oltre 70 (`rclone`),
   oltre ai repository `rsync` e `restic`. Google Drive opzionale tramite un piccolo companion opt-in.
+- **Telegram:** esegui il backup su un canale Telegram privato come archiviazione cloud illimitata tramite MTProto - ripristino ed eliminazione anche dalla WebUI.
 - **Integrità:** ogni archivio è verificato rispetto al manifest; dry-run e
   restore-test ti permettono di controllare un backup senza toccare nulla.
 - **Ripristino selettivo e in blocco:** ripristina qualsiasi sottoinsieme degli elementi di un backup, oppure
   seleziona più backup e ripristinali tutti in una volta; elimina i backup e mantieni un log di attività/audit di
   ogni azione distruttiva.
-- **Backup speciali:** messaggi (SMS/MMS), contatti e registro chiamate, Wi-Fi e Bluetooth,
+- **Backup speciali:** messaggi (SMS/MMS/RCS), contatti e registro chiamate, Wi-Fi e Bluetooth,
   con un'esportazione JSON portatile opzionale che puoi aprire su un PC.
 - **Pianificazione + automazione:** job ricorrenti di **backup o ripristino** con bersaglio una singola app, un
   insieme, o tutte le app, con pruning keep-N, più backup automatico opt-in all'installazione/aggiornamento e un
@@ -163,4 +164,4 @@ VD Backup è un progetto indipendente e non ufficiale. Non è affiliato, approva
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

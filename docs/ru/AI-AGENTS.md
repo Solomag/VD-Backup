@@ -78,6 +78,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | монтирует установленное приложение как системное (безсистемный подмодуль; вживую через NoMount, иначе при следующей загрузке) |
 | `companion-status` / `companion-install` | `{}` | статус компаньона Google Drive / установка по требованию |
+| `telegram-check` | `{}` | состояние сессии Telegram (`user` null = не выполнен вход) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | вход в Telegram; `sign-in` возвращает `2FA_REQUIRED`, если у аккаунта есть 2FA и нет `password` |
+| `telegram-logout` | `{}` | завершает сессию Telegram |
+| `telegram-list` | `{}` | копии в канале Telegram (имена `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` загружает копию из Telegram в локальное хранилище (detached); затем восстанавливается обычным потоком `restore` |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` удаляет копию из канала Telegram по `message_id` (пакетно: через запятую) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | управление назначениями |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | управление удалёнными хранилищами rclone (создаёт запись `rclone.conf`, на которую указывает назначение `type:"rclone"`); `backend` может быть любым бэкендом rclone, без белого списка |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (движок уже открыл браузер телефона по этому URL согласия через Android VIEW-интент) или `{ok:false,code:"ERR_AUTHORIZE"}`. Запускает `rclone authorize <backend>` на локальном сервере обратного вызова (`127.0.0.1:53682`) для OAuth на устройстве. |

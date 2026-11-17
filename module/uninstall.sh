@@ -27,6 +27,10 @@
 # reinstall finds the same setup. The CE secrets are left untouched on purpose (permanent).
 # Remove only transient runtime state (staging, per-op logs, icon cache).
 STATE_DIR=/data/adb/vdbackup
+# stop the detached scheduler heartbeat first, so it does not keep spinning every 900s
+# against a helper.sh that uninstall is about to remove (harmless but noisy until reboot).
+_lp="$(cat "$STATE_DIR/logs/scheduler.loop.pid" 2>/dev/null)"
+case "$_lp" in ''|*[!0-9]*) : ;; *) kill "$_lp" 2>/dev/null ;; esac
 rm -rf "$STATE_DIR/staging" "$STATE_DIR/iconcache" 2>/dev/null
 rm -f "$STATE_DIR/logs"/*.pid "$STATE_DIR/logs"/*.out "$STATE_DIR/logs"/progress-*.json 2>/dev/null
 exit 0

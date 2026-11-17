@@ -98,7 +98,11 @@ def walk_files(tree):
             # Dev / release docs and repo files are never on the installed device (the build strips them;
             # some are gitignored). Listing them serves useless blobs AND makes a doc edit churn the signed
             # canon on every release. Not VDLU content.
-            if os.path.basename(rel) in ("RELEASE.md", "CLAUDE.md", ".gitignore"):
+            # update.json / update-mmrl.json are filled with size/sha AFTER the zips+baseline are built,
+            # so the shipped copy and the feed copy differ -> a phantom single-file fetch on the first
+            # self-update of every install. On device they are vestigial anyway (the manager's update
+            # check reads the remote raw URL, not the local file), so keep them out of the VDLU feed.
+            if os.path.basename(rel) in ("RELEASE.md", "CLAUDE.md", ".gitignore", "update.json", "update-mmrl.json"):
                 log("skip dev/doc file (not shipped to device): " + rel)
                 continue
             if os.path.islink(ap):

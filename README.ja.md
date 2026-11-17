@@ -66,12 +66,13 @@ Android-DataBackup のバックアップをインポートして移行するこ�
   ハードウェアに紐付かないため、バックアップを別のデバイスで復元したり PC で開いたりできます。
 - **保存先:** ローカル、SFTP、SCP、SMB、WebDAV、FTP、S3 ほか 70 以上 (`rclone`)、さらに `rsync`
   および `restic` リポジトリ。小さなオプトインのコンパニオンによる Google Drive も任意で利用できます。
+- **Telegram:** プライベートな Telegram チャンネルへ MTProto 経由で無制限のクラウドストレージとしてバックアップ - 復元と削除も WebUI から。
 - **整合性:** すべてのアーカイブはマニフェストと照合して検証されます。dry-run と復元テストにより、
   何も変更せずにバックアップを確認できます。
 - **選択的復元と一括復元:** バックアップの項目の任意の一部を復元でき、あるいは複数のバックアップを
   まとめて選んで一度に復元でき、バックアップの削除や、すべての破壊的な操作の活動/監査ログの保持も
   行えます。
-- **特殊バックアップ:** メッセージ (SMS/MMS)、連絡先と通話履歴、Wi-Fi と Bluetooth。PC で開ける
+- **特殊バックアップ:** メッセージ (SMS/MMS/RCS)、連絡先と通話履歴、Wi-Fi と Bluetooth。PC で開ける
   ポータブルな JSON エクスポートも任意で付けられます。
 - **スケジュール + 自動化:** 単一のアプリ, 集合, またはすべてのアプリを対象とする **バックアップまたは復元**
   の定期ジョブ (keep-N 方式で古い世代を刈り込み) に加え、インストール/更新時のオプトインの自動バックアップと
@@ -164,4 +165,4 @@ VD Backup は独立した非公式のプロジェクトです。Google LLC そ�
 
 ## タグ
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

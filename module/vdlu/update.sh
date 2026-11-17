@@ -195,9 +195,9 @@ fetch_url() { # url dest
 		file://*) src=${url#file://}; cp -f "$src" "$dest" 2>/dev/null ;;
 		http://*|https://*)
 			if [ -n "$CURL" ]; then
-				if [ -n "$CAPATH" ]; then "$CURL" -fsSL --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
-				else "$CURL" -fsSL --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
-			elif [ -n "$WGET" ]; then "$WGET" -q -O "$dest" "$url"
+				if [ -n "$CAPATH" ]; then "$CURL" -fsSL --connect-timeout 15 --speed-limit 1 --speed-time 60 --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+				else "$CURL" -fsSL --connect-timeout 15 --speed-limit 1 --speed-time 60 --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
+			elif [ -n "$WGET" ]; then "$WGET" -q --connect-timeout=15 --read-timeout=60 -O "$dest" "$url"
 			else echo "VDLU: no curl/wget available" >&2; return 1; fi ;;
 		*) echo "VDLU: unsupported source url: $url" >&2; return 1 ;;
 	esac
@@ -213,7 +213,7 @@ dl_manifest() {
 # ---- signature / meta -----------------------------------------------------
 verify_manifest() {
 	local prof keyring v pd
-	prof=$(cfg profile trusted)
+	prof=$(cfg profile hardened)   # fail-closed default: a config without a profile line REFUSES an unsigned manifest (was 'trusted' = fail-open RCE vector). Aligned with canonical VDLiveUpdate 9a9a824.
 	pd=$(cfg pubkey_dir keyring); case "$pd" in ''|*/*|*..*) pd=keyring ;; esac
 	keyring="$MODULE_DIR/vdlu/$pd"
 	v="$MODULE_DIR/vdlu/vdlu-verify"
@@ -240,7 +240,7 @@ validate_meta() {
 	isnum "$ver" || { echo "VDLU: manifest version not numeric" >&2; return 1; }
 	wantch=$(cfg channel stable)
 	[ -z "$ch" ] || [ "$ch" = "$wantch" ] || { echo "VDLU: channel mismatch ($ch != $wantch)" >&2; return 1; }
-	prof=$(cfg profile trusted)
+	prof=$(cfg profile hardened)   # fail-closed default: a config without a profile line REFUSES an unsigned manifest (was 'trusted' = fail-open RCE vector). Aligned with canonical VDLiveUpdate 9a9a824.
 	if [ "$prof" = hardened ] && [ -f "$CURRENT" ] && isnum "$FROMVER"; then
 		[ "$ver" -ge "$FROMVER" ] || { echo "VDLU: downgrade blocked ($ver < $FROMVER)" >&2; return 4; }
 	fi

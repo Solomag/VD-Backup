@@ -80,6 +80,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | インストール済みアプリをシステムアプリとしてマウント (systemless サブモジュール; NoMount でライブ、なければ次回ブート) |
 | `companion-status` / `companion-install` | `{}` | Google Drive コンパニオンの状態 / オンデマンドのインストール |
+| `telegram-check` | `{}` | Telegram セッションの状態（`user` が null = 未ログイン） |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram ログイン。アカウントに 2FA があり `password` がない場合、`sign-in` は `2FA_REQUIRED` を返す |
+| `telegram-logout` | `{}` | Telegram セッションを終了 |
+| `telegram-list` | `{}` | Telegram チャンネル内のバックアップ（名前は `<pkg>__<ts>_<vc>.vdb.tar`） |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` Telegram のバックアップをローカルストレージにダウンロード（detached）。その後は通常の `restore` フローで復元 |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id` で Telegram チャンネルからバックアップを削除（一括: カンマ区切り） |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 宛先の管理 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote の管理 (`type:"rclone"` の宛先が指す `rclone.conf` エントリを作成する); `backend` は任意の rclone backend でよく、ホワイトリストはない |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (エンジンは Android の VIEW intent 経由で、その同意 URL を電話のブラウザですでに開いている) または `{ok:false,code:"ERR_AUTHORIZE"}`。端末上の OAuth のため、ローカルのコールバックサーバー (`127.0.0.1:53682`) で `rclone authorize <backend>` を実行する。 |

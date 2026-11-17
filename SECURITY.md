@@ -40,4 +40,8 @@ soon as we can and credit you if you wish.
   recorded SHA-256, and the manifest ships on-device, so the bundled payload can be
   audited and reproduced. See [docs/BINARIES.md](docs/BINARIES.md).
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._

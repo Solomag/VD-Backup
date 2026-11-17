@@ -65,12 +65,13 @@ Android-DataBackup**: การรวมสิ่งที่ทั้งสา�
   ฮาร์ดแวร์ของอุปกรณ์ จึงกู้คืนการสำรองข้อมูลบนอุปกรณ์อื่นหรือเปิดบน PC ได้.
 - **ปลายทาง:** ในเครื่อง, SFTP, SCP, SMB, WebDAV, FTP, S3 และอีกกว่า 70 แบบ (`rclone`),
   รวมถึงที่เก็บ `rsync` และ `restic` ด้วย. เลือกใช้ Google Drive ได้ผ่านแอปคู่เล็ก ๆ แบบเลือกเปิดใช้.
+- **Telegram:** สำรองข้อมูลไปยังช่อง Telegram ส่วนตัวเป็นที่เก็บบนคลาวด์แบบไม่จำกัดผ่าน MTProto - กู้คืนและลบได้จาก WebUI เช่นกัน
 - **ความสมบูรณ์:** ทุกไฟล์ archive จะถูกตรวจสอบเทียบกับ manifest; dry-run และการทดสอบกู้คืนให้คุณ
   ตรวจสอบการสำรองข้อมูลได้โดยไม่แตะต้องสิ่งใด.
 - **การกู้คืนแบบเลือกได้และแบบกลุ่ม:** กู้คืนชุดย่อยใด ๆ ของ items ในการสำรองข้อมูล หรือเลือกหลายการสำรอง
   ข้อมูลพร้อมกันแล้วกู้คืนทั้งหมดในครั้งเดียว; ลบการสำรองข้อมูลและเก็บบันทึกกิจกรรม/การตรวจสอบของทุกการกระทำ
   ที่ทำลายข้อมูล.
-- **การสำรองข้อมูลพิเศษ:** ข้อความ (SMS/MMS), รายชื่อติดต่อและบันทึกการโทร, Wi-Fi และ Bluetooth
+- **การสำรองข้อมูลพิเศษ:** ข้อความ (SMS/MMS/RCS), รายชื่อติดต่อและบันทึกการโทร, Wi-Fi และ Bluetooth
   พร้อมการส่งออก JSON แบบพกพาที่เป็นตัวเลือกซึ่งคุณเปิดบน PC ได้.
 - **การตั้งเวลา + การทำงานอัตโนมัติ:** งานที่ทำซ้ำสำหรับ **การสำรองข้อมูลหรือการกู้คืน** โดยกำหนดเป้าหมาย
   เป็นแอปเดียว ชุดของแอป หรือแอปทั้งหมด พร้อมการตัดแต่งแบบ keep-N บวกกับการสำรองข้อมูลอัตโนมัติแบบเลือก
@@ -170,4 +171,4 @@ VD Backup เป็นโปรเจกต์อิสระที่ไม่�
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

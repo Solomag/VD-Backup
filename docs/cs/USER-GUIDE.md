@@ -366,6 +366,7 @@ Vzdálený transport zpracovávají přibalené nástroje:
   Google Drive** a 70+ dalších služeb.
 - **rsync** a sada **ssh/scp/sftp**: pro delta sync a prosté SSH cíle.
 - **restic**: šifrované, deduplikované **Snapshot** repozitáře (lokální nebo vzdálené).
+- **Telegram**: tvůj vlastní účet Telegram jako neomezené vzdálené úložiště. Vyber cíl **Telegram**, přihlas se jednou (telefon -> kód -> dvoufaktorové heslo, pokud ho máš), a zálohy se nahrají do soukromého kanálu. **Restore from Telegram** na kartě Backups stáhne zálohu zpět do tohoto zařízení, kde se obnoví jako každá místní. Obnova na **stejném zařízení** je spolehlivý případ (relace zůstává na tom zařízení).
 
 **Vytvoření cloudového remotu (není potřeba SSH).** V záložce Destinations vyberte
 typ cíle **rclone** a použijte **Add cloud remote**. Můžete připojit **libovolný rclone

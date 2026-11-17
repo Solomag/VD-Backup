@@ -17,8 +17,10 @@ Gränssnitt:
 Tillförlitlighet:
 
 - Återställningar och säkerhetskopior är säkrare: en åtgärd som inte kan slutföras rapporterar nu felet i stället för att tyst avslutas som om den lyckats, så appen säger aldrig att en återställning lyckades när data inte skrevs klart.
+- Återställning av en apps nätverksåtkomstpolicy på anpassade ROM:ar kontrollerar nu att policyn verkligen tillämpades innan den rapporterar att det lyckats, så en ROM som tyst ignorerar begäran förväxlas inte längre med en slutförd återställning.
 
 Nytt:
+- Säkerhetskopior kan nu skickas till Telegram som en obegränsad molndestination. VDBackup loggar in på ditt konto och sparar varje säkerhetskopia i en privat kanal via Telegrams eget protokoll - säkerhetskopiera, återställ och ta bort, allt från WebUI. Du kan namnge eller fästa kanalen, och kanalen är indexet, så dina säkerhetskopior förblir åtkomliga från vilken enhet som helst.
 
 - RCS-chattar (Google Messages) kan nu säkerhetskopieras som en särskild säkerhetskopia - en råkopia som återställs på samma enhet, plus en läsbar export av konversationerna som öppnas på vilken dator som helst. Att migrera RCS mellan enheter är inte garanterat (det registreras om per enhet), så samma enhet är det tillförlitliga fallet.
 

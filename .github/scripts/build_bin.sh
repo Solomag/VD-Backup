@@ -171,6 +171,24 @@ fetch_abx() {
   fi
 }
 
-for abi in $ABIS; do build_abi "$abi"; fetch_abx "$abi"; write_provenance "$abi"; done
+mtproto_asset() { case "$1" in arm64-v8a) echo linux-arm64 ;; armeabi-v7a) echo linux-armv7 ;; x86) echo linux-386 ;; x86_64) echo linux-amd64 ;; esac; }
+MTPROTO_RELEASE="v1.1.0"   # mtproto-store: Telegram-destination binary; bump with the module when it updates (v1.1.0: delete verb + rename-robust init-storage + --channel-id)
+# mtproto-store: static Go binary (Telegram as a backup destination via MTProto); fetched from its GitHub release
+fetch_mtproto() {
+  local abi="$1" asset out bin url
+  asset="$(mtproto_asset "$abi")"; [ -n "$asset" ] || return 0
+  out="$OUT_BASE/$abi"; bin="$WORK/$abi/mtproto-store"
+  url="https://github.com/VictorGabriel7Dev/mtproto-store/releases/download/$MTPROTO_RELEASE/mtproto-store-$asset"
+  if curl -fsSL "$url" -o "$bin" 2>/dev/null; then
+    printf '{"type": "mtproto-store", "project": "VictorGabriel7Dev/mtproto-store", "release": "%s", "url": "%s", "archive_sha256": "%s"}\n' \
+      "$MTPROTO_RELEASE" "$url" "$(sha "$bin")" >> "$WORK/$abi/src.jsonl"
+    cp "$bin" "$out/mtproto-store"; chmod 0755 "$out/mtproto-store"
+    echo "  mtproto-store: fetched ($asset)"
+  else
+    echo "  mtproto-store: skipped (download failed)"
+  fi
+}
+
+for abi in $ABIS; do build_abi "$abi"; fetch_abx "$abi"; fetch_mtproto "$abi"; write_provenance "$abi"; done
 echo "done. binaries + libs under $OUT_BASE/<abi>/ (engine sets LD_LIBRARY_PATH=bin/<abi>/lib)"
 echo "each bin/<abi>/ carries PROVENANCE.json (source + sha256 of every shipped file)"

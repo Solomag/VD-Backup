@@ -78,6 +78,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | تركيب تطبيق مثبّت كتطبيق نظام (وحدة فرعية بلا نظام؛ حي عبر NoMount وإلا في الإقلاع التالي) |
 | `companion-status` / `companion-install` | `{}` | حالة مرافق Google Drive / التثبيت عند الطلب |
+| `telegram-check` | `{}` | حالة جلسة تيليجرام (`user` فارغ = غير مسجّل الدخول) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | تسجيل الدخول إلى تيليجرام؛ يُرجِع `sign-in` قيمة `2FA_REQUIRED` إذا كان الحساب يستخدم المصادقة الثنائية ولم يُمرَّر `password` |
+| `telegram-logout` | `{}` | إنهاء جلسة تيليجرام |
+| `telegram-list` | `{}` | النسخ في قناة تيليجرام (الأسماء `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` يُنزّل نسخة من تيليجرام إلى التخزين المحلي (detached)؛ ثم تُستعاد عبر مسار `restore` المعتاد |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` يحذف نسخة من قناة تيليجرام عبر `message_id` (دُفعة: مفصولة بفواصل) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | إدارة الوجهات |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | إدارة أجهزة rclone البعيدة (تنشئ إدخال `rclone.conf` الذي تشير إليه وجهة من نوع `type:"rclone"`)؛ قد يكون `backend` أي backend من rclone، بلا قائمة سماح |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (فتح المحرك بالفعل متصفح الهاتف على عنوان الموافقة ذاك عبر نية Android VIEW) أو `{ok:false,code:"ERR_AUTHORIZE"}`. يشغّل `rclone authorize <backend>` على خادم رد نداء محلي (`127.0.0.1:53682`) من أجل OAuth على الجهاز. |

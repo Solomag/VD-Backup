@@ -77,6 +77,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | เมานต์แอปที่ติดตั้งให้เป็นแอประบบ (โมดูลย่อยแบบ systemless; มีผลทันทีผ่าน NoMount มิฉะนั้นเมื่อบูตครั้งถัดไป) |
 | `companion-status` / `companion-install` | `{}` | สถานะ / การติดตั้งตามความต้องการของตัวเสริม Google Drive |
+| `telegram-check` | `{}` | สถานะเซสชัน Telegram (`user` เป็น null = ยังไม่เข้าสู่ระบบ) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | การเข้าสู่ระบบ Telegram; `sign-in` คืนค่า `2FA_REQUIRED` หากบัญชีมี 2FA และไม่มี `password` |
+| `telegram-logout` | `{}` | ปิดเซสชัน Telegram |
+| `telegram-list` | `{}` | การสำรองข้อมูลในช่อง Telegram (ชื่อ `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` ดาวน์โหลดการสำรองข้อมูลจาก Telegram ไปยังที่เก็บในเครื่อง (detached) แล้วกู้คืนผ่านโฟลว์ `restore` ปกติ |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` ลบการสำรองข้อมูลจากช่อง Telegram ด้วย `message_id` (ชุด: คั่นด้วยจุลภาค) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | การจัดการปลายทาง |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | การจัดการ rclone remote (สร้างรายการใน `rclone.conf` ที่ปลายทาง `type:"rclone"` ชี้ไป); `backend` เป็น rclone backend ใดก็ได้ ไม่มี whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (เอนจินได้เปิดเบราว์เซอร์ของโทรศัพท์ไปยัง URL ขอความยินยอมนั้นแล้วผ่าน Android VIEW intent) หรือ `{ok:false,code:"ERR_AUTHORIZE"}` รัน `rclone authorize <backend>` บน callback server ในเครื่อง (`127.0.0.1:53682`) เพื่อทำ OAuth บนอุปกรณ์ |

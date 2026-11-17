@@ -66,12 +66,13 @@ importar backups existentes do Neo-Backup e do Android-DataBackup para que você
   atrelada ao hardware do dispositivo, então um backup restaura em outro dispositivo ou abre num PC.
 - **Destinos:** local, SFTP, SCP, SMB, WebDAV, FTP, S3 e mais de 70 (`rclone`),
   além de repositórios `rsync` e `restic`. Google Drive opcional via um pequeno complemento opt-in.
+- **Telegram:** faça backup para um canal privado do Telegram como armazenamento de nuvem ilimitado via MTProto - restaurar e apagar também pela WebUI.
 - **Integridade:** todo arquivo é verificado contra o manifesto; dry-run e
   restore-test deixam você conferir um backup sem tocar em nada.
 - **Restauração seletiva e em lote:** restaure qualquer subconjunto dos itens de um backup, ou
   selecione vários backups e restaure todos de uma vez; apague backups e mantenha um log de
   atividade/auditoria de toda ação destrutiva.
-- **Backups especiais:** mensagens (SMS/MMS), contatos e registro de chamadas, Wi-Fi e Bluetooth,
+- **Backups especiais:** mensagens (SMS/MMS/RCS), contatos e registro de chamadas, Wi-Fi e Bluetooth,
   com uma exportação JSON portátil opcional que você pode abrir num PC.
 - **Agendamento + automação:** jobs recorrentes de **backup ou restauração** com alvo de um
   app, um conjunto, ou todos os apps, com poda keep-N, mais auto-backup opt-in ao
@@ -174,4 +175,4 @@ O VD Backup é um projeto independente e não oficial. Não é afiliado, endossa
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

@@ -17,8 +17,10 @@ Rozhraní:
 Spolehlivost:
 
 - Obnovení a zálohy jsou bezpečnější: operace, kterou nelze dokončit, nyní nahlásí chybu místo toho, aby tiše skončila, jako by se povedla, takže aplikace nikdy neřekne, že obnovení proběhlo úspěšně, když data nebyla celá zapsána.
+- Obnovení zásady přístupu k síti pro aplikaci na vlastních ROM nyní ověří, zda se zásada skutečně použila, než nahlásí úspěch, takže ROM, který požadavek tiše ignoruje, už není zaměněn za dokončené obnovení.
 
 Novinky:
+- Zálohy lze nyní odesílat do Telegramu jako neomezené cloudové úložiště. VDBackup se přihlásí k vašemu účtu a uchovává každou zálohu v soukromém kanálu přes vlastní protokol Telegramu - zálohování, obnovení i mazání, vše z WebUI. Kanál můžete pojmenovat nebo připnout a kanál je rejstřík, takže vaše zálohy zůstanou dostupné z libovolného zařízení.
 
 - Chaty RCS (Google Messages) teď lze zálohovat jako speciální zálohu - surová kopie, která se obnoví na stejném zařízení, plus čitelný export konverzací, který se otevře na jakémkoli počítači. Migrace RCS mezi zařízeními není zaručena (znovu se registruje na každém zařízení), takže spolehlivý případ je stejné zařízení.
 

@@ -66,12 +66,13 @@ importera befintliga säkerhetskopior från Neo-Backup och Android-DataBackup s�
   till enhetens hårdvara, så att en säkerhetskopia återställs på en annan enhet eller öppnas på en dator.
 - **Destinationer:** lokalt, SFTP, SCP, SMB, WebDAV, FTP, S3 och 70+ till (`rclone`),
   plus `rsync`- och `restic`-förråd. Valfritt Google Drive via en pytteliten valfri följeslagare.
+- **Telegram:** säkerhetskopiera till en privat Telegram-kanal som obegränsad molnlagring via MTProto - återställ och ta bort även från WebUI.
 - **Integritet:** varje arkiv verifieras mot manifestet; torrkörning (dry-run) och
   återställningstest låter dig kontrollera en säkerhetskopia utan att röra något.
 - **Selektiv återställning och batchåterställning:** återställ valfri delmängd av en säkerhetskopias
   objekt, eller markera flera säkerhetskopior och återställ dem alla på en gång; radera säkerhetskopior
   och för en aktivitets-/revisionslogg över varje destruktiv åtgärd.
-- **Särskilda säkerhetskopior:** meddelanden (SMS/MMS), kontakter och samtalslogg, Wi-Fi och
+- **Särskilda säkerhetskopior:** meddelanden (SMS/MMS/RCS), kontakter och samtalslogg, Wi-Fi och
   Bluetooth, med en valfri portabel JSON-export som du kan öppna på en PC.
 - **Schemaläggning + automatisering:** återkommande jobb för **säkerhetskopiering eller återställning**
   mot en app, en uppsättning, eller alla appar, med keep-N-gallring, plus valfri auto-säkerhetskopiering
@@ -175,4 +176,4 @@ VD Backup är ett oberoende, inofficiellt projekt. Det är inte anslutet till, r
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

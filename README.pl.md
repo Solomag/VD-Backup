@@ -72,7 +72,7 @@ importować istniejące kopie zapasowe Neo-Backup i Android-DataBackup, abyś m�
 - **Przywracanie selektywne i wsadowe:** przywróć dowolny podzbiór elementów kopii albo zaznacz wiele
   kopii i przywróć je wszystkie naraz; usuwaj kopie i prowadź dziennik aktywności/audytu każdej
   destrukcyjnej akcji.
-- **Kopie specjalne:** wiadomości (SMS/MMS), kontakty i rejestr połączeń, Wi-Fi i Bluetooth,
+- **Kopie specjalne:** wiadomości (SMS/MMS/RCS), kontakty i rejestr połączeń, Wi-Fi i Bluetooth,
   z opcjonalnym przenośnym eksportem do JSON, który otworzysz na komputerze.
 - **Harmonogram + automatyzacja:** cykliczne zadania **kopii lub przywracania** wymierzone w jedną
   aplikację, zestaw lub wszystkie aplikacje, z przycinaniem keep-N, a także opcjonalna automatyczna kopia
@@ -174,7 +174,8 @@ nawet jako usługę, musisz udostępnić jej kod źródłowy.
 ## Znaki towarowe
 
 VD Backup to niezależny, nieoficjalny projekt. Nie jest powiązany z firmą Google LLC ani żadnym innym dostawcą, nie jest przez nich wspierany ani sponsorowany. "Google Drive", "Android" oraz powiązane nazwy i logotypy są znakami towarowymi odpowiednich właścicieli. VD Backup działa na Twoim urządzeniu i wysyła dane wyłącznie do miejsc docelowych, które skonfigurujesz.
+- **Telegram:** twórz kopie na prywatnym kanale Telegrama jako nieograniczony magazyn w chmurze przez MTProto - przywracanie i usuwanie także z WebUI.
 
 ## Tagi
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

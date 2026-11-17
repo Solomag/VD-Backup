@@ -83,6 +83,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | سوار کردن یک برنامه نصب‌شده به‌عنوان برنامه سیستمی (زیرماژول بدون‌سیستم؛ زنده از طریق NoMount وگرنه در راه‌اندازی بعدی) |
 | `companion-status` / `companion-install` | `{}` | وضعیت همراه Google Drive / نصب درخواستی |
+| `telegram-check` | `{}` | وضعیت نشست تلگرام (`user` تهی = وارد نشده) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | ورود به تلگرام؛ اگر حساب 2FA داشته باشد و `password` نباشد، `sign-in` مقدار `2FA_REQUIRED` برمی‌گرداند |
+| `telegram-logout` | `{}` | نشست تلگرام را می‌بندد |
+| `telegram-list` | `{}` | پشتیبان‌ها در کانال تلگرام (نام‌ها `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` یک پشتیبان را از تلگرام به حافظهٔ محلی دانلود می‌کند (detached)؛ سپس با جریان عادی `restore` بازیابی می‌شود |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` یک پشتیبان را از کانال تلگرام با `message_id` حذف می‌کند (دسته‌ای: جداشده با کاما) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | مدیریت مقصد |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | مدیریت ریموت rclone (ورودی `rclone.conf` را می‌سازد که مقصدی از نوع `type:"rclone"` به آن اشاره می‌کند)؛ `backend` می‌تواند هر backendِ rclone باشد، بدون فهرست سفید |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (موتور همین حالا مرورگر گوشی را از طریق یک Intent از نوع VIEW در اندروید روی آن URLِ رضایت باز کرده است) یا `{ok:false,code:"ERR_AUTHORIZE"}`. برای OAuthِ روی‌دستگاه، `rclone authorize <backend>` را روی یک سرور callback محلی (`127.0.0.1:53682`) اجرا می‌کند. |

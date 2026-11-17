@@ -17,8 +17,10 @@ Interfaccia:
 Affidabilità:
 
 - Ripristini e backup sono più sicuri: un'operazione che non può concludersi ora segnala l'errore invece di terminare in silenzio come se fosse riuscita, così l'app non dice mai che un ripristino è andato a buon fine quando i dati non sono stati scritti del tutto.
+- Il ripristino del criterio di accesso alla rete per app sulle ROM personalizzate ora verifica che il criterio sia stato davvero applicato prima di segnalare il successo, così una ROM che ignora silenziosamente la richiesta non viene più scambiata per un ripristino completato.
 
 Novità:
+- I backup ora possono essere inviati a Telegram come destinazione cloud illimitata. VDBackup accede al tuo account e conserva ogni backup in un canale privato tramite il protocollo di Telegram - backup, ripristino ed eliminazione, tutto dalla WebUI. Puoi dare un nome o fissare il canale, e il canale è l'indice, così i tuoi backup restano raggiungibili da qualsiasi dispositivo.
 
 - Le chat RCS (Google Messages) ora si possono salvare come backup speciale - una copia grezza che si ripristina sullo stesso dispositivo, più un'esportazione leggibile delle conversazioni che si apre su qualsiasi computer. Migrare l'RCS tra dispositivi non è garantito (si riregistra su ogni dispositivo), quindi il caso affidabile è lo stesso dispositivo.
 

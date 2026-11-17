@@ -17,8 +17,10 @@ Antarmuka:
 Keandalan:
 
 - Pemulihan dan cadangan lebih aman: operasi yang tidak dapat selesai kini melaporkan kesalahan alih-alih berakhir diam-diam seolah berhasil, jadi aplikasi tidak pernah mengatakan pemulihan berhasil padahal data belum ditulis sepenuhnya.
+- Pemulihan kebijakan akses jaringan per aplikasi pada ROM khusus kini memverifikasi bahwa kebijakan benar-benar diterapkan sebelum melaporkan keberhasilan, sehingga ROM yang diam-diam mengabaikan permintaan tidak lagi dikira sebagai pemulihan yang selesai.
 
 Baru:
+- Cadangan kini dapat dikirim ke Telegram sebagai tujuan cloud tanpa batas. VDBackup masuk ke akun Anda dan menyimpan setiap cadangan di saluran pribadi melalui protokol Telegram sendiri - mencadangkan, memulihkan, dan menghapus, semuanya dari WebUI. Anda dapat memberi nama atau menyematkan saluran, dan saluran itu adalah indeksnya, sehingga cadangan Anda tetap dapat diakses dari perangkat mana pun.
 
 - Obrolan RCS (Google Messages) kini bisa dicadangkan sebagai cadangan khusus - salinan mentah yang dipulihkan di perangkat yang sama, plus ekspor percakapan yang bisa dibaca dan terbuka di komputer mana pun. Migrasi RCS antarperangkat tidak dijamin (ia mendaftar ulang di tiap perangkat), jadi kasus yang andal adalah perangkat yang sama.
 

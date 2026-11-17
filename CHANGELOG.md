@@ -6,6 +6,24 @@
 
 All notable changes to VDBackup are documented here. English only.
 
+## v1.10
+
+Interface:
+
+- Opening the WebUI over a slow or unreachable connection no longer freezes it. The background check for a newer version used to run while the app list and icons were still loading, over the same channel the interface uses to reach the module, so a stalled network held the whole screen up and you could not navigate. It now runs only once the interface is idle and gives up quickly, so the app stays responsive and you can move around right away, even while icons load.
+
+- Starting a restore no longer does nothing without explaining why. If you have not yet ticked the confirmation that the current data will be replaced, the button now says so and highlights the box, instead of silently not starting.
+
+Reliability:
+
+- Restores and backups are safer: an operation that cannot finish now reports the error instead of quietly ending as if it had worked, so the app never tells you a restore succeeded when the data was not fully written.
+- Restoring a per-app network-access policy on custom ROMs now verifies the policy actually applied before reporting success, so a ROM that silently ignores the request is no longer mistaken for a completed restore.
+
+New:
+- Backups can now be sent to Telegram as an unlimited cloud destination. VDBackup signs in to your account and keeps each backup in a private channel over Telegram's own protocol - back up, restore and delete, all from the WebUI. You can name or pin the channel, and the channel is the index, so your backups stay reachable from any device.
+
+- RCS chats (Google Messages) can now be backed up as a special backup - a raw copy that restores on the same device, plus a readable export of the conversations that opens on any computer. Migrating RCS between devices is not guaranteed (it re-registers per device), so same-device is the reliable case.
+
 ## v1.09
 
 Reliability:
@@ -311,4 +329,8 @@ AI-friendly and i18n:
 - Rich app listing and Neo decryption run through a dex helper driven as root
   (`IPackageManager` via ServiceManager), so they work where ActivityThread hangs.
 
-*This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).*
+<!-- doc-footer -->
+
+---
+
+> _This documentation was generated with Claude (Anthropic) and is maintained by VD171. Corrections and improvements are welcome; see [CONTRIBUTING.md](CONTRIBUTING.md)._

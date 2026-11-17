@@ -78,6 +78,12 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | gắn một ứng dụng đã cài làm ứng dụng hệ thống (mô-đun con không-hệ-thống; trực tiếp qua NoMount, nếu không thì ở lần khởi động kế tiếp) |
 | `companion-status` / `companion-install` | `{}` | trạng thái / cài đặt theo yêu cầu của ứng dụng đồng hành Google Drive |
+| `telegram-check` | `{}` | trạng thái phiên Telegram (`user` null = chưa đăng nhập) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | đăng nhập Telegram; `sign-in` trả về `2FA_REQUIRED` nếu tài khoản có 2FA và thiếu `password` |
+| `telegram-logout` | `{}` | kết thúc phiên Telegram |
+| `telegram-list` | `{}` | bản sao lưu trong kênh Telegram (tên `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` tải một bản sao lưu từ Telegram về bộ nhớ cục bộ (detached); rồi khôi phục qua luồng `restore` thông thường |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` xóa một bản sao lưu khỏi kênh Telegram theo `message_id` (hàng loạt: ngăn bằng dấu phẩy) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | quản lý đích |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | quản lý remote rclone (tạo mục `rclone.conf` mà một đích `type:"rclone"` trỏ tới); `backend` có thể là bất kỳ backend rclone nào, không có whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (engine đã mở trình duyệt của điện thoại đến URL đồng ý đó qua một Android VIEW intent) hoặc `{ok:false,code:"ERR_AUTHORIZE"}`. Chạy `rclone authorize <backend>` trên một callback server cục bộ (`127.0.0.1:53682`) để OAuth ngay trên thiết bị. |

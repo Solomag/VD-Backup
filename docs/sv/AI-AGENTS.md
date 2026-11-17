@@ -78,6 +78,12 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | montera en installerad app som en systemapp (systemlös undermodul; live via NoMount annars nästa uppstart) |
 | `companion-status` / `companion-install` | `{}` | status för Google Drive-companion / installation på begäran |
+| `telegram-check` | `{}` | status för Telegram-sessionen (`user` null = inte inloggad) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram-inloggning; `sign-in` returnerar `2FA_REQUIRED` om kontot har 2FA och `password` saknas |
+| `telegram-logout` | `{}` | avslutar Telegram-sessionen |
+| `telegram-list` | `{}` | säkerhetskopior i Telegram-kanalen (namn `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` hämtar en Telegram-kopia till lokal lagring (detached); den återställs sedan via det vanliga `restore`-flödet |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` tar bort en säkerhetskopia från Telegram-kanalen via `message_id` (batch: kommaseparerat) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | destinationshantering |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | hantering av rclone-fjärrplatser (skapar `rclone.conf`-posten som en `type:"rclone"`-destination pekar på); `backend` kan vara vilken rclone-backend som helst, ingen vitlista |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (motorn har redan öppnat telefonens webbläsare på den samtyckes-URL:en via en Android VIEW-intent) eller `{ok:false,code:"ERR_AUTHORIZE"}`. Kör `rclone authorize <backend>` på en lokal callback-server (`127.0.0.1:53682`) för OAuth på enheten. |

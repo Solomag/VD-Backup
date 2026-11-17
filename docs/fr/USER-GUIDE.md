@@ -375,6 +375,7 @@ Le transport distant est géré par les outils empaquetés :
   Google Drive** et plus de 70 autres services.
 - **rsync** et la suite **ssh/scp/sftp**: pour la synchro delta et les cibles SSH simples.
 - **restic**: des dépôts **Snapshot** chiffrés et dédupliqués (locaux ou distants).
+- **Telegram**: votre propre compte Telegram comme stockage distant illimité. Choisissez la destination **Telegram**, connectez-vous une fois (téléphone -> code -> mot de passe à deux facteurs si vous en avez un), et les sauvegardes sont envoyées dans un canal privé. **Restore from Telegram** dans l'onglet Backups récupère une sauvegarde sur cet appareil, où elle se restaure comme toute sauvegarde locale. Restaurer sur le **même appareil** est le cas fiable (la session reste sur cet appareil).
 
 **Créer un remote cloud (pas de SSH nécessaire).** Dans l'onglet Destinations, choisissez le
 type de destination **rclone** et utilisez **Add cloud remote**. Vous pouvez connecter

@@ -78,6 +78,12 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | pasang aplikasi terpasang sebagai aplikasi sistem (sub-modul systemless; live via NoMount jika tidak maka boot berikutnya) |
 | `companion-status` / `companion-install` | `{}` | status pendamping Google Drive / pemasangan sesuai permintaan |
+| `telegram-check` | `{}` | status sesi Telegram (`user` null = belum masuk) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | login Telegram; `sign-in` mengembalikan `2FA_REQUIRED` jika akun punya 2FA dan `password` tidak ada |
+| `telegram-logout` | `{}` | mengakhiri sesi Telegram |
+| `telegram-list` | `{}` | cadangan di kanal Telegram (nama `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` mengunduh cadangan dari Telegram ke penyimpanan lokal (detached); lalu dipulihkan lewat alur `restore` normal |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` menghapus cadangan dari kanal Telegram berdasarkan `message_id` (batch: dipisah koma) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | pengelolaan tujuan |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | pengelolaan remote rclone (membuat entri `rclone.conf` yang ditunjuk oleh dest `type:"rclone"`); `backend` bisa berupa backend rclone apa pun, tanpa daftar putih |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (mesin sudah membuka browser ponsel ke URL persetujuan itu lewat Android VIEW intent) atau `{ok:false,code:"ERR_AUTHORIZE"}`. Menjalankan `rclone authorize <backend>` pada server callback lokal (`127.0.0.1:53682`) untuk OAuth di perangkat. |

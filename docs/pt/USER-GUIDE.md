@@ -389,6 +389,7 @@ O transporte remoto é feito pelas ferramentas embarcadas:
   Google Drive** e mais de 70 outros serviços.
 - **rsync** e a suíte **ssh/scp/sftp**: para delta sync e alvos SSH simples.
 - **restic**: repositórios **Snapshot** criptografados e de-duplicados (locais ou remotos).
+- **Telegram**: sua própria conta do Telegram como armazenamento offsite ilimitado. Escolha o destino **Telegram**, faça login uma vez (telefone -> código -> senha de dois fatores se tiver), e os backups sobem pra um canal privado. **Restore from Telegram** na aba Backups baixa um backup de volta pro aparelho, onde ele restaura como qualquer local. Restaurar no **mesmo aparelho** é o caso confiável (a sessão fica nesse aparelho).
 
 **Criando um remoto de nuvem (sem SSH necessário).** Na aba Destinations, escolha o
 tipo de destino **rclone** e use **Add cloud remote**. Você pode conectar **qualquer backend

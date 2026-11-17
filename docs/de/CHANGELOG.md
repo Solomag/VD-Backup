@@ -17,8 +17,10 @@ Oberfläche:
 Zuverlässigkeit:
 
 - Wiederherstellungen und Backups sind sicherer: Ein Vorgang, der nicht abgeschlossen werden kann, meldet jetzt den Fehler, statt stillschweigend zu enden, als hätte er funktioniert. So behauptet die App nie, eine Wiederherstellung sei gelungen, wenn die Daten nicht vollständig geschrieben wurden.
+- Beim Wiederherstellen der App-Netzwerkrichtlinie auf benutzerdefinierten ROMs wird jetzt geprüft, ob die Richtlinie wirklich angewendet wurde, bevor Erfolg gemeldet wird, sodass ein ROM, das die Anfrage still ignoriert, nicht mehr mit einer abgeschlossenen Wiederherstellung verwechselt wird.
 
 Neu:
+- Backups können jetzt an Telegram als unbegrenztes Cloud-Ziel gesendet werden. VDBackup meldet sich bei deinem Konto an und speichert jedes Backup in einem privaten Kanal über Telegrams eigenes Protokoll - Sichern, Wiederherstellen und Löschen, alles aus der WebUI. Du kannst den Kanal benennen oder anheften, und der Kanal ist der Index, sodass deine Backups von jedem Gerät erreichbar bleiben.
 
 - RCS-Chats (Google Messages) lassen sich jetzt als spezielle Sicherung sichern - eine Rohkopie, die auf demselben Gerät wiederhergestellt wird, plus ein lesbarer Export der Unterhaltungen, der sich auf jedem Computer öffnen lässt. Das Migrieren von RCS zwischen Geräten ist nicht garantiert (es registriert sich pro Gerät neu), daher ist dasselbe Gerät der verlässliche Fall.
 

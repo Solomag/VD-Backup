@@ -78,6 +78,12 @@ Backup/Restore benötigt; nur Cloud-Ziele (`rclone`/`restic`/ssh) sprechen mit d
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | eine installierte App als System-App einhängen (systemloses Submodul; live über NoMount, sonst beim nächsten Start) |
 | `companion-status` / `companion-install` | `{}` | Status des Google-Drive-Begleiters / Installation bei Bedarf |
+| `telegram-check` | `{}` | Status der Telegram-Sitzung (`user` null = nicht angemeldet) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram-Anmeldung; `sign-in` gibt `2FA_REQUIRED` zurück, wenn das Konto 2FA hat und `password` fehlt |
+| `telegram-logout` | `{}` | beendet die Telegram-Sitzung |
+| `telegram-list` | `{}` | Sicherungen im Telegram-Kanal (Namen `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` lädt eine Telegram-Sicherung in den lokalen Speicher (detached); sie wird dann über den normalen `restore`-Ablauf wiederhergestellt |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` löscht eine Sicherung aus dem Telegram-Kanal per `message_id` (Batch: kommagetrennt) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | Zielverwaltung |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone-Remote-Verwaltung (erstellt den `rclone.conf`-Eintrag, auf den ein `type:"rclone"`-Ziel zeigt); `backend` kann jedes rclone-Backend sein, keine Whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (die Engine hat den Telefon-Browser bereits über einen Android-VIEW-Intent auf dieser Zustimmungs-URL geöffnet) oder `{ok:false,code:"ERR_AUTHORIZE"}`. Führt `rclone authorize <backend>` auf einem lokalen Callback-Server (`127.0.0.1:53682`) für On-Device-OAuth aus. |

@@ -66,12 +66,13 @@ bestaande back-ups van Neo-Backup en Android-DataBackup importeren zodat je kunt
   gebonden aan de apparaathardware, zodat een back-up op een ander apparaat wordt hersteld of op een pc wordt geopend.
 - **Bestemmingen:** lokaal, SFTP, SCP, SMB, WebDAV, FTP, S3 en 70+ meer (`rclone`),
   plus `rsync`- en `restic`-repository's. Optioneel Google Drive via een piepkleine optionele begeleider.
+- **Telegram:** maak een back-up naar een prive Telegram-kanaal als onbeperkte cloudopslag via MTProto - herstellen en verwijderen ook vanuit de WebUI.
 - **Integriteit:** elk archief wordt geverifieerd tegen het manifest; droogloop (dry-run)
   en hersteltest laten je een back-up controleren zonder iets aan te raken.
 - **Selectief herstel en herstel in batch:** herstel een willekeurige deelverzameling van de items van
   een back-up, of selecteer meerdere back-ups en herstel ze allemaal tegelijk; verwijder back-ups en
   houd een activiteiten-/auditlogboek bij van elke destructieve actie.
-- **Speciale back-ups:** berichten (SMS/MMS), contacten en belgeschiedenis, Wi-Fi en Bluetooth,
+- **Speciale back-ups:** berichten (SMS/MMS/RCS), contacten en belgeschiedenis, Wi-Fi en Bluetooth,
   met een optionele draagbare JSON-export die je op een pc kunt openen.
 - **Planning + automatisering:** terugkerende **back-up- of hersteltaken** gericht op een app, een set,
   of alle apps, met keep-N-opschoning, plus optionele automatische back-up bij installatie/update en een
@@ -175,4 +176,4 @@ VD Backup is een onafhankelijk, onofficieel project. Het is niet verbonden met, 
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

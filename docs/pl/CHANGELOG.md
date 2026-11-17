@@ -17,8 +17,10 @@ Interfejs:
 Niezawodność:
 
 - Przywracanie i kopie zapasowe są bezpieczniejsze: operacja, która nie może się zakończyć, teraz zgłasza błąd zamiast po cichu kończyć się tak, jakby się powiodła, więc aplikacja nigdy nie mówi, że przywracanie się udało, gdy dane nie zostały w pełni zapisane.
+- Przywracanie zasady dostępu do sieci dla aplikacji na niestandardowych ROM-ach sprawdza teraz, czy zasada faktycznie została zastosowana, zanim zgłosi sukces, więc ROM, który po cichu ignoruje żądanie, nie jest już mylony z ukończonym przywracaniem.
 
 Nowości:
+- Kopie zapasowe można teraz wysyłać do Telegrama jako nieograniczone miejsce docelowe w chmurze. VDBackup loguje się na Twoje konto i przechowuje każdą kopię w prywatnym kanale za pomocą własnego protokołu Telegrama - tworzenie kopii, przywracanie i usuwanie, wszystko z poziomu WebUI. Możesz nazwać lub przypiąć kanał, a kanał jest indeksem, więc Twoje kopie pozostają dostępne z dowolnego urządzenia.
 
 - Czaty RCS (Google Messages) można teraz kopiować jako kopię specjalną - surowa kopia przywracana na tym samym urządzeniu oraz czytelny eksport rozmów, który otwiera się na każdym komputerze. Migracja RCS między urządzeniami nie jest gwarantowana (rejestruje się na nowo na każdym urządzeniu), więc niezawodnym przypadkiem jest to samo urządzenie.
 

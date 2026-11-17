@@ -353,6 +353,7 @@ KernelSU에서 **NoMount**가 있으면 라이브로 적용되고, 그렇지 않
   Drive** 및 70개 이상의 서비스.
 - **rsync**와 **ssh/scp/sftp** 모음, 델타 동기화와 평범한 SSH 대상을 위한 것.
 - **restic**: 암호화되고 중복이 제거된 **Snapshot** 저장소(로컬 또는 원격).
+- **Telegram**: 무제한 오프사이트 저장소로서의 내 Telegram 계정. 대상 **Telegram**을 고르고 한 번 로그인(전화 -> 코드 -> 2단계 비밀번호가 있으면)하면 백업이 비공개 채널에 업로드됩니다. Backups 탭의 **Restore from Telegram**은 백업을 이 기기로 가져오며, 로컬 백업처럼 복원됩니다. **같은 기기**에서의 복원이 신뢰할 수 있는 경우입니다(세션이 그 기기에 남음).
 
 **클라우드 원격 만들기(SSH 불필요).** Destinations 탭에서 **rclone** 대상 유형을 고르고
 **Add cloud remote**를 사용하세요. **임의의 rclone backend**를 연결할 수 있습니다: 드롭다운에는

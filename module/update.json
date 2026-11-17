@@ -1,9 +1,9 @@
 {
-  "version": "v1.09",
-  "versionCode": 10900,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.09/VD-Backup-v1.09-universal-full.zip",
+  "version": "v1.10",
+  "versionCode": 11000,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.10/VD-Backup-v1.10-universal-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "Reliability: backing up a large app list now finishes reliably. The step that quiesces each app before backing it up no longer goes through Android's ActivityManager (which past about 120 apps exhausted the system's transaction limit and stalled the rest of the run); it now stops the app's processes directly, so a backup of any number of apps completes. A finished or interrupted backup also reliably releases its wake lock, so repeated backups no longer keep the device awake.",
-  "size": 243456918,
-  "sha256": "87ff3fc65e9ccf448b86708be306378240b218c680c0a5c5d4147006a61b1474"
+  "notes": "",
+  "size": 0,
+  "sha256": ""
 }

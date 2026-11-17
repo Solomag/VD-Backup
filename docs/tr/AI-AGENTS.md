@@ -78,6 +78,12 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | kurulu bir uygulamayı sistem uygulaması olarak bağlar (sistemsiz alt-modül; NoMount ile canlı, yoksa sonraki açılışta) |
 | `companion-status` / `companion-install` | `{}` | Google Drive eşlikçi durumu / istek üzerine kurulum |
+| `telegram-check` | `{}` | Telegram oturum durumu (`user` null = oturum açılmamış) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram girişi; hesapta 2FA varsa ve `password` yoksa `sign-in` `2FA_REQUIRED` döndürür |
+| `telegram-logout` | `{}` | Telegram oturumunu kapatır |
+| `telegram-list` | `{}` | Telegram kanalındaki yedekler (adlar `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` bir Telegram yedeğini yerel depolamaya indirir (detached); sonra normal `restore` akışıyla geri yüklenir |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` Telegram kanalından `message_id` ile bir yedeği siler (toplu: virgülle ayrılmış) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | hedef yönetimi |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone uzak yönetimi (bir `type:"rclone"` hedefinin işaret ettiği `rclone.conf` girdisini oluşturur); `backend` herhangi bir rclone backend'i olabilir, whitelist yok |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (motor, telefon tarayıcısını o onay URL'sine bir Android VIEW intent ile zaten açtı) veya `{ok:false,code:"ERR_AUTHORIZE"}`. Cihaz üzerinde OAuth için yerel bir geri çağırma sunucusunda (`127.0.0.1:53682`) `rclone authorize <backend>` çalıştırır. |

@@ -153,18 +153,27 @@ public final class Helper {
     // it live and persists it to netpolicy.xml itself - unlike editing that file behind the
     // service, which NPMS overwrites, so the restore never took (issue #9). The policy int is
     // the exact mask captured at backup time (e.g. a custom-ROM "block all networks" value).
-    private static void netpolicySet(int uid, int policy) throws Exception {
+    private static int netpolicySet(int uid, int policy) throws Exception {
         Class<?> sm = Class.forName("android.os.ServiceManager");
         IBinder binder = (IBinder) sm.getMethod("getService", String.class).invoke(null, "netpolicy");
         if (binder == null) throw new IllegalStateException("netpolicy service unavailable");
         Class<?> stub = Class.forName("android.net.INetworkPolicyManager$Stub");
         Object inpm = stub.getMethod("asInterface", IBinder.class).invoke(null, binder);
-        Method sup = null;
+        Method sup = null, gup = null;
         for (Method m : inpm.getClass().getMethods()) {
-            if ("setUidPolicy".equals(m.getName()) && m.getParameterTypes().length == 2) { sup = m; break; }
+            if ("setUidPolicy".equals(m.getName()) && m.getParameterTypes().length == 2) sup = m;
+            if ("getUidPolicy".equals(m.getName()) && m.getParameterTypes().length == 1) gup = m;
         }
         if (sup == null) throw new NoSuchMethodException("setUidPolicy");
         sup.invoke(inpm, uid, policy);
+        // Read back: a non-throwing setUidPolicy does not prove the policy took - some ROMs mask
+        // or drop custom policy bits (e.g. a "block all networks" value). Return the live policy
+        // so the caller can tell a real apply from a silent no-op (issue #9). -1 = unreadable.
+        if (gup != null) {
+            Object v = gup.invoke(inpm, uid);
+            if (v instanceof Integer) return (Integer) v;
+        }
+        return -1;
     }
 
     // APK resources through a bare AssetManager (no Context, so systemMain() never runs).
@@ -310,8 +319,10 @@ public final class Helper {
                 // framework. Context-free (ServiceManager only), never touches systemMain().
                 int uid = Integer.parseInt(args[1]);
                 int policy = Integer.parseInt(args[2]);
-                netpolicySet(uid, policy);
-                System.out.println("{\"ok\":true,\"verb\":\"netpolicy-set\",\"uid\":" + uid + ",\"policy\":" + policy + "}");
+                int readback = netpolicySet(uid, policy);
+                boolean ok = (readback == policy);
+                System.out.println("{\"ok\":" + ok + ",\"verb\":\"netpolicy-set\",\"uid\":" + uid
+                    + ",\"policy\":" + policy + ",\"readback\":" + readback + "}");
                 System.out.flush();
                 System.exit(0);
                 return;

@@ -17,8 +17,10 @@ Interface:
 Betrouwbaarheid:
 
 - Herstel- en back-upbewerkingen zijn veiliger: een bewerking die niet kan voltooien meldt nu de fout in plaats van stilletjes te eindigen alsof het gelukt was, dus de app zegt nooit dat een herstel is geslaagd terwijl de gegevens niet volledig zijn weggeschreven.
+- Bij het herstellen van het netwerktoegangsbeleid per app op aangepaste ROM's wordt nu gecontroleerd of het beleid echt is toegepast voordat succes wordt gemeld, zodat een ROM die het verzoek stil negeert niet meer wordt aangezien voor een voltooide herstelbewerking.
 
 Nieuw:
+- Back-ups kunnen nu naar Telegram worden gestuurd als onbeperkte cloudbestemming. VDBackup meldt zich aan bij je account en bewaart elke back-up in een privekanaal via het eigen protocol van Telegram - back-uppen, herstellen en verwijderen, allemaal vanuit de WebUI. Je kunt het kanaal een naam geven of vastzetten, en het kanaal is de index, zodat je back-ups vanaf elk apparaat bereikbaar blijven.
 
 - RCS-chats (Google Messages) kun je nu back-uppen als speciale back-up - een ruwe kopie die op hetzelfde apparaat wordt teruggezet, plus een leesbare export van de gesprekken die op elke computer opent. RCS tussen apparaten migreren is niet gegarandeerd (het registreert zich per apparaat opnieuw), dus hetzelfde apparaat is het betrouwbare geval.
 

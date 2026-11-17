@@ -76,6 +76,12 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | 把已安装的应用挂载为系统应用（无系统修改的子模块；通过 NoMount 实时生效，否则下次开机生效） |
 | `companion-status` / `companion-install` | `{}` | Google Drive 配套应用状态 / 按需安装 |
+| `telegram-check` | `{}` | Telegram 会话状态（`user` 为 null = 未登录） |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | Telegram 登录；若账号启用 2FA 且缺少 `password`，`sign-in` 返回 `2FA_REQUIRED` |
+| `telegram-logout` | `{}` | 结束 Telegram 会话 |
+| `telegram-list` | `{}` | Telegram 频道中的备份（名称 `<pkg>__<ts>_<vc>.vdb.tar`） |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` 将 Telegram 备份下载到本地存储（detached）；随后通过正常的 `restore` 流程还原 |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` 按 `message_id` 从 Telegram 频道删除备份（批量：逗号分隔） |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 目标管理 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone 远端管理（创建 `type:"rclone"` 目标所指向的 `rclone.conf` 条目）；`backend` 可以是任意 rclone 后端，无白名单 |
 | `remote-authorize` | `{backend}` | `{ok:true,url}`（引擎已通过 Android VIEW intent 将手机浏览器打开到该同意 URL）或 `{ok:false,code:"ERR_AUTHORIZE"}`。在本地回调服务器（`127.0.0.1:53682`）上运行 `rclone authorize <backend>` 以进行设备端 OAuth。 |

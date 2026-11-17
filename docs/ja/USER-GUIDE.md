@@ -344,6 +344,7 @@ root マネージャーがそれを `/system/app` (または `/system/priv-app`)
   70 以上のサービス。
 - **rsync** と **ssh/scp/sftp** スイート, 差分 sync とプレーンな SSH ターゲット用。
 - **restic**: 暗号化され de-duplicate された **Snapshot** リポジトリ (ローカルまたはリモート)。
+- **Telegram**: 無制限のオフサイト保存先としての自分の Telegram アカウント。宛先 **Telegram** を選び、一度ログイン（電話 -> コード -> 二要素パスワードがあれば）すると、バックアップは非公開チャンネルにアップロードされます。Backups タブの **Restore from Telegram** はバックアップをこの端末に取り戻し、ローカルと同様に復元します。**同じ端末**での復元が確実な方法です（セッションはその端末に残ります）。
 
 **cloud remote の作成 (SSH 不要)。** Destinations タブで **rclone** の宛先タイプを選び、
 **Add cloud remote** を使います。**任意の rclone backend** を接続できます: ドロップダウンには主要な

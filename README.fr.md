@@ -66,12 +66,13 @@ importer les sauvegardes existantes de Neo-Backup et d'Android-DataBackup pour q
   lié au matériel de l'appareil, de sorte qu'une sauvegarde se restaure sur un autre appareil ou s'ouvre sur un PC.
 - **Destinations :** local, SFTP, SCP, SMB, WebDAV, FTP, S3 et plus de 70 (`rclone`),
   ainsi que les dépôts `rsync` et `restic`. Google Drive en option via un petit compagnon opt-in.
+- **Telegram :** sauvegardez vers un canal Telegram privé comme stockage cloud illimité via MTProto - restauration et suppression aussi depuis la WebUI.
 - **Intégrité :** chaque archive est vérifiée par rapport au manifeste ; dry-run et
   restore-test vous permettent de contrôler une sauvegarde sans rien toucher.
 - **Restauration sélective et par lot :** restaurez n'importe quel sous-ensemble des éléments d'une sauvegarde,
   ou sélectionnez plusieurs sauvegardes et restaurez-les toutes en une fois ; supprimez des sauvegardes et
   conservez un journal d'activité/d'audit de chaque action destructrice.
-- **Sauvegardes spéciales :** messages (SMS/MMS), contacts et journal d'appels, Wi-Fi et Bluetooth,
+- **Sauvegardes spéciales :** messages (SMS/MMS/RCS), contacts et journal d'appels, Wi-Fi et Bluetooth,
   avec une exportation JSON portable optionnelle que vous pouvez ouvrir sur un PC.
 - **Planification + automatisation :** tâches récurrentes de **sauvegarde ou de restauration** ciblant une
   seule appli, un ensemble, ou toutes les applis, avec élagage keep-N, plus une sauvegarde automatique opt-in à
@@ -163,4 +164,4 @@ VD Backup est un projet indépendant et non officiel. Il n'est pas affilié à G
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

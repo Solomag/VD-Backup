@@ -66,12 +66,13 @@ vorhandene Backups von Neo-Backup und Android-DataBackup importieren, damit du u
   an die Geräte-Hardware gebunden, sodass ein Backup sich auf einem anderen Gerät wiederherstellen oder auf einem PC öffnen lässt.
 - **Ziele:** lokal, SFTP, SCP, SMB, WebDAV, FTP, S3 und 70+ weitere (`rclone`),
   dazu `rsync`- und `restic`-Repos. Google Drive optional über einen winzigen opt-in-Begleiter.
+- **Telegram:** sichere in einen privaten Telegram-Kanal als unbegrenzten Cloud-Speicher über MTProto - Wiederherstellen und Löschen ebenfalls aus der WebUI.
 - **Integrität:** jedes Archiv wird gegen das Manifest geprüft; Dry-Run und
   Restore-Test lassen dich ein Backup kontrollieren, ohne etwas anzufassen.
 - **Selektive & stapelweise Wiederherstellung:** stelle eine beliebige Teilmenge der Elemente
   eines Backups wieder her oder wähle mehrere Backups aus und stelle sie alle auf einmal wieder
   her; lösche Backups und führe ein Aktivitäts-/Audit-Protokoll jeder destruktiven Aktion.
-- **Spezial-Backups:** Nachrichten (SMS/MMS), Kontakte und Anrufliste, WLAN und Bluetooth,
+- **Spezial-Backups:** Nachrichten (SMS/MMS/RCS), Kontakte und Anrufliste, WLAN und Bluetooth,
   mit einem optionalen portablen JSON-Export, den du auf einem PC öffnen kannst.
 - **Zeitplanung + Automatisierung:** wiederkehrende **Backup- oder Wiederherstellungs**-Jobs,
   die auf eine App, einen Satz oder alle Apps zielen, mit keep-N-Bereinigung, dazu
@@ -164,4 +165,4 @@ VD Backup ist ein unabhängiges, inoffizielles Projekt. Es ist weder mit Google 
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

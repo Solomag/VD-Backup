@@ -60,7 +60,7 @@ case "${1:-read}" in
   read)  echo "version=$(fmt "$major" "$counter" "$patch") versionCode=$(code "$major" "$counter" "$patch")"; exit 0 ;;
   bump)  counter=$((counter+1)); patch=0; if [ "$counter" -ge 100 ]; then major=$((major+1)); counter=0; fi ;;
   major) major=$((major+1)); counter=0; patch=0 ;;
-  patch) patch=$((patch+1)) ;;
+  patch) patch=$((patch+1)); if [ "$patch" -ge 100 ]; then counter=$((counter+1)); patch=0; if [ "$counter" -ge 100 ]; then major=$((major+1)); counter=0; fi; fi ;;   # patch rolls into counter at 100 so versionCode (major*10000+counter*100+patch) never collides
   *) echo "usage: version.sh read|bump|major|patch" >&2; exit 2 ;;
 esac
 

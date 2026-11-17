@@ -66,11 +66,12 @@ WebUI के साथ उपलब्ध हो।
   से बँधा नहीं, इसलिए बैकअप किसी दूसरे डिवाइस पर पुनर्स्थापित होता है या किसी PC पर खुलता है।
 - **गंतव्य:** लोकल, SFTP, SCP, SMB, WebDAV, FTP, S3 और 70+ और (`rclone`),
   साथ ही `rsync` और `restic` रिपॉज़िटरी। एक छोटे, ऑप्ट-इन साथी के ज़रिए वैकल्पिक Google Drive।
+- **Telegram:** MTProto के ज़रिए एक निजी Telegram चैनल में असीमित क्लाउड स्टोरेज के रूप में बैकअप लें - पुनर्स्थापना और हटाना भी WebUI से।
 - **अखंडता:** हर आर्काइव को मैनिफ़ेस्ट के विरुद्ध सत्यापित किया जाता है; dry-run और restore-test आपको
   किसी बैकअप को बिना कुछ छुए जाँचने देते हैं।
 - **चयनात्मक और बैच पुनर्स्थापना:** किसी बैकअप के आइटम का कोई भी उपसमुच्चय पुनर्स्थापित करें, या कई बैकअप मल्टी-सेलेक्ट
   करके उन सभी को एक साथ पुनर्स्थापित करें; बैकअप हटाएँ और हर विध्वंसक क्रिया का एक गतिविधि/ऑडिट लॉग रखें।
-- **विशेष बैकअप:** संदेश (SMS/MMS), संपर्क और कॉल लॉग, Wi-Fi और Bluetooth, एक वैकल्पिक पोर्टेबल JSON
+- **विशेष बैकअप:** संदेश (SMS/MMS/RCS), संपर्क और कॉल लॉग, Wi-Fi और Bluetooth, एक वैकल्पिक पोर्टेबल JSON
   निर्यात के साथ जिसे आप किसी PC पर खोल सकते हैं।
 - **शेड्यूलिंग + ऑटोमेशन:** एक अकेले ऐप, एक समूह, या सभी ऐप्स को लक्षित करने वाले दोहराए जाने वाले **बैकअप या restore**
   कार्य, keep-N छँटाई के साथ, साथ ही इंस्टॉल/अपडेट पर ऑप्ट-इन स्वचालित बैकअप और एक बहिष्कृत-ऐप्स सूची।
@@ -161,4 +162,4 @@ VD Backup एक स्वतंत्र, अनौपचारिक परि
 
 ## Tags
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

@@ -78,6 +78,12 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | připojí nainstalovanou aplikaci jako systémovou (bezsystémový podmodul; živě přes NoMount, jinak při příštím bootu) |
 | `companion-status` / `companion-install` | `{}` | stav společníka Google Drive / instalace na vyžádání |
+| `telegram-check` | `{}` | stav relace Telegramu (`user` null = nepřihlášen) |
+| `telegram-send-code` / `telegram-sign-in` | `{phone}` / `{phone,code,password?}` | přihlášení k Telegramu; `sign-in` vrací `2FA_REQUIRED`, pokud účet má 2FA a chybí `password` |
+| `telegram-logout` | `{}` | ukončí relaci Telegramu |
+| `telegram-list` | `{}` | zálohy v kanálu Telegram (názvy `<pkg>__<ts>_<vc>.vdb.tar`) |
+| `telegram-pull` | `{message_id,name}` | `{ok,opid}` stáhne zálohu z Telegramu do místního úložiště (detached); pak se obnoví normálním tokem `restore` |
+| `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` smaže zálohu z kanálu Telegram podle `message_id` (dávka: oddělené čárkou) |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | správa cílů |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | správa rclone remotů (vytvoří záznam v `rclone.conf`, na který cíl `type:"rclone"` ukazuje); `backend` může být libovolný rclone backend, bez whitelistu |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (engine už otevřel prohlížeč telefonu na této URL souhlasu přes Android VIEW intent) nebo `{ok:false,code:"ERR_AUTHORIZE"}`. Spustí `rclone authorize <backend>` na místním callback serveru (`127.0.0.1:53682`) pro OAuth na zařízení. |

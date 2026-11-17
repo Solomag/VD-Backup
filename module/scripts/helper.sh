@@ -332,6 +332,10 @@ case "$verb" in
     # bundled rclone's on-the-fly http backend (no remote config needed), so the check
     # works on any device with network, not only where curl is shipped.
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    # network timeout (seconds). The auto-check on load passes a short one so a slow or
+    # unreachable connection never holds the manager's serial exec queue (which would freeze
+    # the app list, icons and navigation); a manual check omits it and gets the longer 20s.
+    _ut="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.timeout // empty' 2>/dev/null)"; case "$_ut" in ''|*[!0-9]*|0) _ut=20 ;; esac
     cur_ver="$(sed -n 's/^version=//p' "$MODDIR/module.prop")"
     cur_code="$(sed -n 's/^versionCode=//p' "$MODDIR/module.prop")"; case "$cur_code" in ''|*[!0-9]*) cur_code=0 ;; esac
     url="$(sed -n 's/^updateJson=//p' "$MODDIR/module.prop")"
@@ -339,11 +343,11 @@ case "$verb" in
     j=""
     if [ -x "$BIN/curl" ] || [ -x "$STATE/bin/curl" ] || command -v curl >/dev/null 2>&1; then
       _curl="$(command -v "$BIN/curl" 2>/dev/null || command -v "$STATE/bin/curl" 2>/dev/null || echo curl)"
-      j="$("$_curl" -fsSL --max-time 20 "$url" 2>/dev/null)"
+      j="$("$_curl" -fsSL --max-time "$_ut" "$url" 2>/dev/null)"
     fi
     if [ -z "$j" ]; then
       _rcl="$(command -v "$BIN/rclone" 2>/dev/null || command -v "$STATE/bin/rclone" 2>/dev/null || echo rclone)"
-      j="$("$_rcl" cat ":http:${url##*/}" --http-url "${url%/*}" --timeout 20s 2>/dev/null)"
+      j="$("$_rcl" cat ":http:${url##*/}" --http-url "${url%/*}" --timeout "${_ut}s" 2>/dev/null)"
     fi
     [ -n "$j" ] || { err ERR_UPDATE_CHECK "could not fetch the update manifest"; exit 0; }
     lv="$(printf '%s' "$j" | "$JQ" -r '.version // empty' 2>/dev/null)"
@@ -479,10 +483,61 @@ case "$verb" in
     done
     printf '}}\n' ;;
 
-  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import)
+  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import|telegram-pull)
     opid="$(new_opid)"
     detach "$opid" "$verb" "$ARGS_B64"
     ok "\"opid\":\"$opid\"" ;;
+
+  telegram-list)
+    # list backups stored in the Telegram channel (the authoritative offsite index). Pass the
+    # engine's list-remote JSON through; the WebUI parses the self-describing <pkg>__<ts>_<vc>.vdb.tar names.
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" list-remote 2>/dev/null)"
+    [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_TG_LIST "could not list the Telegram channel" ;;
+
+  # ---- Telegram login flow (the session lands in CE $SECRETS/telegram) ----
+  # Each passes the engine's JSON straight through so the WebUI can read user/channel/code.
+  telegram-check)
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" check-auth 2>/dev/null)"
+    [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_TG_BIN "telegram binary missing" ;;
+
+  telegram-send-code)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    _ph="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.phone // empty' 2>/dev/null)"
+    [ -n "$_ph" ] || { err ERR_INVALID_PHONE "no phone"; exit 0; }
+    _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" send-code --phone "$_ph" 2>/dev/null)"
+    [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_SEND_CODE "send-code failed" ;;
+
+  telegram-sign-in)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    _ph="$(printf '%s' "$_a" | "$JQ" -r '.phone // empty' 2>/dev/null)"
+    _cd="$(printf '%s' "$_a" | "$JQ" -r '.code // empty' 2>/dev/null)"
+    _pw="$(printf '%s' "$_a" | "$JQ" -r '.password // empty' 2>/dev/null)"
+    { [ -n "$_ph" ] && [ -n "$_cd" ]; } || { err ERR_INVALID_ARGS "phone and code required"; exit 0; }
+    # --password (2FA) is on argv: acceptable here (root-local; only root reads /proc/pid/cmdline).
+    if [ -n "$_pw" ]; then
+      _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" sign-in --phone "$_ph" --code "$_cd" --password "$_pw" 2>/dev/null)"
+    else
+      _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" sign-in --phone "$_ph" --code "$_cd" 2>/dev/null)"
+    fi
+    [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_SIGN_IN "sign-in failed" ;;
+
+  telegram-logout)
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" logout 2>/dev/null
+    ok "\"loggedout\":true" ;;
+
+  telegram-delete)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+    _mid="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.message_id // empty' 2>/dev/null)"
+    case "$_mid" in ''|*[!0-9,]*) err ERR_INVALID_REF "invalid message_id"; exit 0 ;; esac   # digits (+ comma for batch); it feeds --ref
+    _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" delete --ref "$_mid" 2>/dev/null)"
+    [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_TG_DELETE "delete failed" ;;
 
   config-exports)
     # list the encrypted config bundles available to import (newest first).
@@ -527,6 +582,7 @@ case "$verb" in
     case "$u" in ''|*[!0-9]*) u=0 ;; esac
     avail() { for p in "$@"; do [ -e "$p" ] && { echo true; return; }; done; echo false; }
     m="$(avail "/data/user/$u/com.android.providers.telephony" "/data/user_de/$u/com.android.providers.telephony")"
+    rcs="$(avail "/data/user/$u/com.google.android.apps.messaging" "/data/user_de/$u/com.google.android.apps.messaging")"
     c="$(avail "/data/user/$u/com.android.providers.contacts" "/data/user_de/$u/com.android.providers.contacts")"
     w="$(avail /data/misc/wifi /data/misc/apexdata/com.android.wifi)"
     b="$(avail /data/misc/bluedroid /data/misc/bluetooth "/data/user/$u/com.android.bluetooth")"
@@ -534,7 +590,7 @@ case "$verb" in
     wp="$(avail "/data/system/users/$u/wallpaper" "/data/system/users/$u/wallpaper_lock" "/data/system/users/$u/wallpaper_info.xml")"
     dnsmode="$(env -u LD_LIBRARY_PATH /system/bin/settings get global private_dns_mode 2>/dev/null)"
     dns=false; case "$dnsmode" in ''|null) ;; *) dns=true ;; esac
-    printf '{"ok":true,"categories":[{"id":"messages","available":%s},{"id":"contacts","available":%s},{"id":"wifi","available":%s},{"id":"bluetooth","available":%s},{"id":"calendar","available":%s},{"id":"wallpaper","available":%s},{"id":"dns","available":%s},{"id":"system_settings","available":true,"opt_in":true}]}\n' "$m" "$c" "$w" "$b" "$cal" "$wp" "$dns" ;;
+    printf '{"ok":true,"categories":[{"id":"messages","available":%s},{"id":"rcs","available":%s},{"id":"contacts","available":%s},{"id":"wifi","available":%s},{"id":"bluetooth","available":%s},{"id":"calendar","available":%s},{"id":"wallpaper","available":%s},{"id":"dns","available":%s},{"id":"system_settings","available":true,"opt_in":true}]}\n' "$m" "$rcs" "$c" "$w" "$b" "$cal" "$wp" "$dns" ;;
 
   special-list)
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
@@ -553,12 +609,15 @@ case "$verb" in
 
   progress)
     opid="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    case "$opid" in ''|*[!A-Za-z0-9._-]*) err ERR_BAD_OPID "invalid opid"; exit 0 ;; esac   # same charset guard as detach(): opid feeds a path
     f="$LOGS/progress-$opid.json"
     if [ -s "$f" ]; then cat "$f"; else ok "\"opid\":\"$(jstr "$opid")\",\"percent\":0,\"phase\":\"starting\""; fi ;;
 
   cancel)
     opid="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    case "$opid" in ''|*[!A-Za-z0-9._-]*) err ERR_BAD_OPID "invalid opid"; exit 0 ;; esac   # opid feeds a path
     pid="$(cat "$LOGS/$opid.pid" 2>/dev/null)"
+    case "$pid" in ''|*[!0-9]*) pid="" ;; esac   # a non-numeric pid would make kill -"$pid" target a signal/arbitrary group
     if [ -n "$pid" ]; then kill -TERM -"$pid" 2>/dev/null || kill "$pid" 2>/dev/null; fi
     ok "\"cancelled\":\"$(jstr "$opid")\"" ;;
 
@@ -569,6 +628,7 @@ case "$verb" in
     for p in "$LOGS"/*.pid; do
       [ -e "$p" ] || continue
       id="$(basename "$p" .pid)"
+      _lp="$(cat "$p" 2>/dev/null)"; case "$_lp" in ''|*[!0-9]*) : ;; *) kill -0 "$_lp" 2>/dev/null || continue ;; esac   # skip ops whose worker died (SIGKILL leaves a stale .pid) so the UI does not reattach to a dead op
       [ "$first" = 1 ] || printf ','; first=0
       printf '{"opid":"%s","progress":%s}' "$(jstr "$id")" "$(cat "$LOGS/progress-$id.json" 2>/dev/null || echo '{}')"
     done

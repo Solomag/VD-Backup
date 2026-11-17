@@ -65,11 +65,12 @@ VDBackup은 앱과 그 데이터를 백업하고 복원하는 root **WebUI 모�
   묶이지 않으므로 백업을 다른 기기에서 복원하거나 PC에서 열 수 있습니다.
 - **대상:** 로컬, SFTP, SCP, SMB, WebDAV, FTP, S3 및 70가지 이상 (`rclone`), 그리고 `rsync`
   와 `restic` 저장소. 작은 옵트인 동반 앱을 통한 Google Drive도 선택적으로 사용 가능.
+- **Telegram:** MTProto를 통해 비공개 Telegram 채널에 무제한 클라우드 저장소로 백업 - 복원과 삭제도 WebUI에서.
 - **무결성:** 모든 아카이브는 매니페스트와 대조하여 검증됩니다. dry-run과 복원 테스트로 아무것도
   건드리지 않고 백업을 확인할 수 있습니다.
 - **선택적 복원 및 일괄 복원:** 백업 항목의 어떤 부분집합이든 복원하거나, 여러 백업을 다중 선택해
   한 번에 모두 복원합니다. 백업을 삭제하고 모든 파괴적 동작의 활동/감사 로그를 보관합니다.
-- **특수 백업:** 메시지(SMS/MMS), 연락처와 통화 기록, Wi-Fi와 Bluetooth. PC에서 열 수 있는
+- **특수 백업:** 메시지(SMS/MMS/RCS), 연락처와 통화 기록, Wi-Fi와 Bluetooth. PC에서 열 수 있는
   선택적 이식형 JSON 내보내기와 함께.
 - **스케줄링 + 자동화:** 단일 앱, 집합, 또는 모든 앱을 대상으로 하는 반복 **백업 또는 복원** 작업과
   keep-N 정리, 옵트인 방식의 설치/업데이트 시 자동 백업 및 제외 앱 목록.
@@ -167,4 +168,4 @@ VD Backup은 독립적인 비공식 프로젝트입니다. Google LLC 또는 다
 
 ## 태그
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

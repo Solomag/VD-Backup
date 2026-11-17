@@ -65,12 +65,13 @@ Neo-Backup وAndroid-DataBackup الموجودة كي تنتقل إليها.
   بعتاد الجهاز، لذا تُستعاد النسخة على جهاز آخر أو تُفتح على حاسوب.
 - **الوجهات:** محلي، SFTP، SCP، SMB، WebDAV، FTP، S3 و70+ غيرها (`rclone`)،
   إضافة إلى مستودعات `rsync` و`restic`. Google Drive اختياري عبر مرافق صغير باختيار صريح.
+- **Telegram:** انسخ احتياطيًا إلى قناة تيليجرام خاصة كتخزين سحابي غير محدود عبر MTProto - الاستعادة والحذف أيضًا من واجهة الويب.
 - **السلامة:** يُتحقق من كل أرشيف مقابل البيان؛ ويتيح لك التشغيل التجريبي واختبار الاستعادة فحص
   نسخة احتياطية دون المساس بأي شيء.
 - **الاستعادة الانتقائية والدُّفعية:** استعادة أي مجموعة فرعية من عناصر النسخة الاحتياطية، أو
   تحديد عدة نسخ احتياطية واستعادتها كلها دفعة واحدة؛ حذف النسخ الاحتياطية والاحتفاظ بسجل
   نشاط/تدقيق لكل إجراء مُتلِف.
-- **النسخ الاحتياطية الخاصة:** الرسائل (SMS/MMS)، جهات الاتصال وسجل المكالمات، Wi-Fi وBluetooth،
+- **النسخ الاحتياطية الخاصة:** الرسائل (SMS/MMS/RCS)، جهات الاتصال وسجل المكالمات، Wi-Fi وBluetooth،
   مع تصدير JSON محمول اختياري يمكنك فتحه على حاسوب.
 - **الجدولة + الأتمتة:** مهام **نسخ احتياطي أو استعادة** متكررة تستهدف تطبيقا واحدا أو
   مجموعة أو كل التطبيقات، مع تقليم keep-N، إضافة إلى نسخ احتياطي تلقائي باختيار صريح عند
@@ -161,4 +162,4 @@ VD Backup مشروع مستقل وغير رسمي. وهو غير مرتبط بش
 
 ## الوسوم
 
-`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `vdbackup`
+`android` `backup` `restore` `app-data` `migration` `neo-backup` `databackup` `kernelsu` `apatch` `magisk` `webui` `root` `tar` `zstd` `restic` `rclone` `age` `encryption` `ssaid` `appops` `on-device` `agpl` `ai-friendly` `telegram` `rcs` `vdbackup`

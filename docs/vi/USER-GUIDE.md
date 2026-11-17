@@ -386,6 +386,7 @@ Việc truyền từ xa được xử lý bởi các công cụ đóng gói sẵ
   Google Drive** và hơn 70 dịch vụ khác.
 - **rsync** và bộ **ssh/scp/sftp**: cho đồng bộ delta và các đích SSH thuần.
 - **restic**: các kho **Snapshot** đã mã hóa, khử trùng lặp (cục bộ hoặc từ xa).
+- **Telegram**: tài khoản Telegram của riêng bạn làm bộ nhớ ngoài không giới hạn. Chọn đích **Telegram**, đăng nhập một lần (điện thoại -> mã -> mật khẩu hai lớp nếu có), và các bản sao lưu được tải lên một kênh riêng tư. **Restore from Telegram** ở tab Backups kéo một bản sao lưu về thiết bị này, nơi nó khôi phục như mọi bản sao lưu cục bộ. Khôi phục trên **cùng thiết bị** là trường hợp đáng tin cậy (phiên vẫn ở thiết bị đó).
 
 **Tạo một remote đám mây (không cần SSH).** Trong tab Destinations, chọn loại đích
 **rclone** và dùng **Add cloud remote**. Bạn có thể kết nối **bất kỳ backend rclone nào**:
