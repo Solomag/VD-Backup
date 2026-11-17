@@ -1,9 +1,9 @@
 {
-  "version": "v1.10",
-  "versionCode": 11000,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.10/VD-Backup-v1.10-universal-lite.zip",
+  "version": "v1.09",
+  "versionCode": 10900,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.09/VD-Backup-v1.09-universal-lite.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "VDBackup v1.10\n\nNew\n- Telegram: send backups to a private Telegram channel as unlimited cloud storage over MTProto - back up, restore and delete from the WebUI.\n- RCS chats (Google Messages): a raw same-device backup plus a readable export that opens on any computer.\n\nInterface\n- The WebUI no longer freezes on a slow or unreachable connection; it stays navigable while icons load.\n- Starting a restore without the data-replacement confirmation now explains what is needed instead of doing nothing.\n\nReliability\n- Operations that cannot finish report the error instead of quietly reporting success.\n- Per-app network-policy restore on custom ROMs now verifies the policy actually applied before reporting success.",
-  "size": 65178630,
-  "sha256": "944a09977a34784209b9e07c7cb435bfc88cfcdc3ac3cab8a403426cf17d9381"
+  "notes": "Reliability: backing up a large app list now finishes reliably. The step that quiesces each app no longer goes through Android's ActivityManager (which past about 120 apps exhausted the transaction limit and stalled the run); it now stops the app's processes directly, so a backup of any number of apps completes. A finished or interrupted backup also reliably releases its wake lock, so repeated backups no longer keep the device awake.",
+  "size": 51159170,
+  "sha256": "eada034610bb88b4ce6a464f3ecd5abe7a91dd698707c842657f49e853e3a840"
 }
