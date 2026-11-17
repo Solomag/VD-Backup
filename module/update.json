@@ -3,7 +3,7 @@
   "versionCode": 11000,
   "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.10/VD-Backup-v1.10-universal-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "",
-  "size": 0,
-  "sha256": ""
+  "notes": "VDBackup v1.10\n\nNew\n- Telegram: send backups to a private Telegram channel as unlimited cloud storage over MTProto - back up, restore and delete from the WebUI.\n- RCS chats (Google Messages): a raw same-device backup plus a readable export that opens on any computer.\n\nInterface\n- The WebUI no longer freezes on a slow or unreachable connection; it stays navigable while icons load.\n- Starting a restore without the data-replacement confirmation now explains what is needed instead of doing nothing.\n\nReliability\n- Operations that cannot finish report the error instead of quietly reporting success.\n- Per-app network-policy restore on custom ROMs now verifies the policy actually applied before reporting success.",
+  "size": 257476393,
+  "sha256": "25c0aee1545261d5a2fc92a03917732f644bbe0d72f0449023bcee5620dd491c"
 }
