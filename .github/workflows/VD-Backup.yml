@@ -285,16 +285,16 @@ jobs:
           gen x86-full         update-x86.json
           gen x86_64-full      update-x86_64.json
 
-      # MMRL feed: mmrl-util (the VD-Modules repo) requires the ONLINE_JSON zip to be under
-      # 50MB, which the ~230MB universal-full is not. Emit a parallel update-mmrl.json pointing
-      # at the universal-LITE zip (~48MB) so the module is distributable via MMRL, while the
-      # in-app update.json stays on the full zip. Same version/notes/changelog as update.json.
-      - name: Fill update-mmrl.json (lite feed for MMRL)
+      # MMRL: the MMRL client caps installs at 50MB, which the universal-lite (~62MB) exceeds, so
+      # it cannot install VDBackup directly. Point update-mmrl.json at the mmrl-stub zip (<50MB):
+      # it installs under the cap and fetches the full module via the signed VDLU feed on first
+      # boot (see stub/README.md), while the in-app update.json stays on the full zip.
+      - name: Fill update-mmrl.json (MMRL stub, under the 50MB client cap)
         env:
           VER: ${{ steps.v.outputs.name }}
         run: |
           set -e
-          zip="VD-Backup-${VER}-universal-lite.zip"
+          zip="VD-Backup-${VER}-mmrl-stub.zip"
           sz=$(stat -c%s "$zip")
           sh=$(sha256sum "$zip" | cut -d' ' -f1)
           url="https://github.com/VD171/VD-Backup/releases/download/${VER}/${zip}"
