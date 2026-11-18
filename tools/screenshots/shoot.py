@@ -195,6 +195,7 @@ MOCK_JS = r"""
         out = { ok: true };
       }
       var s = JSON.stringify(out);
+      if (/journal\.json/.test(String(cmd))) s = "";   // VDLU: empty journal -> no stuck "Updating" banner
       setTimeout(function () {
         try { if (typeof window[cbName] === "function") window[cbName](0, s, ""); } catch (e) {}
       }, 0);
