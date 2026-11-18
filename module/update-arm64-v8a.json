@@ -1,9 +1,9 @@
 {
-  "version": "v1.12",
-  "versionCode": 11200,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.12/VD-Backup-v1.12-arm64-v8a-full.zip",
+  "version": "v1.10",
+  "versionCode": 11000,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.10/VD-Backup-v1.10-arm64-v8a-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "Reliability\n\n- A batch saved to this device now checks there is room for everything before it starts, and stops up front with how much it needs and how much is free, instead of failing partway through a long run. A new switch in Settings turns this off.\n\nFixes\n\n- The free-space safeguards now work on every device. The checks that stop a backup before it fills the disk relied on a size measurement that stock Android quietly ignored, so on many devices they never triggered. They now measure space reliably everywhere. (#5)\n\nNew\n\n- Name and tag your backups: give any backup a custom name and free-form tags like \"v1\" or \"january\", and search them by name, tag or app. The name and tags travel with a backup when you export or import it.",
-  "size": 58744611,
-  "sha256": "f51de19b832bb16a43e7684e2d3101357e9e3258c68fa774f6f98c1e4e042513"
+  "notes": "",
+  "size": 0,
+  "sha256": ""
 }

@@ -273,6 +273,7 @@ audit() { printf '{"ts":"%s","op":"%s","opid":"%s","detail":"%s"}\n' \
 
 # localized notification strings (21 languages); English is the fallback.
 [ -f "$MODDIR/etc/notify.sh" ] && . "$MODDIR/etc/notify.sh"
+[ -f "$MODDIR/etc/curl-ca.sh" ] && . "$MODDIR/etc/curl-ca.sh"
 
 # Android notification from root (no companion). notify <key> <name>; key is one of
 # backup_start|backup_done|restore_start|restore_done. Language from cfg .language.

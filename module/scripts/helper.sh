@@ -105,6 +105,7 @@ esac
 BIN="$MODDIR/bin/$BINABI"
 export PATH="$BIN:$PATH"
 export LD_LIBRARY_PATH="$BIN/lib:${LD_LIBRARY_PATH:-}"
+[ -f "$MODDIR/etc/curl-ca.sh" ] && . "$MODDIR/etc/curl-ca.sh"
 
 # pm/dumpsys are app_process based: run them with a CLEAN env, or the bundled Termux
 # libs on LD_LIBRARY_PATH shadow ART's and binder marshalling fails on some ROMs

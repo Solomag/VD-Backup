@@ -2349,7 +2349,7 @@ function adbFmtSize(b) {
   b = +b || 0; if (!b) return "";
   var u = ["B", "KB", "MB", "GB", "TB"], i = 0;
   while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
-  return (i ? b.toFixed(b < 10 ? 1 : 0) : b) + " " + u[i];
+  return (i ? b.toFixed(1) : b) + u[i];   // 1 decimal (KB+), no space: 324B, 15.6KB, 184.3MB, 1.2GB
 }
 function adbIcon(t) { return t === "dir" ? "📁" : t === "link" ? "🔗" : "📄"; }
 function adbMkNode(e, parent) {
