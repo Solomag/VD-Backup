@@ -6,13 +6,6 @@
 
 All notable changes to VDBackup are documented here. English only.
 
-## v1.12.1
-
-Fixes:
-
-- Checking for and installing updates now works on every device. The bundled downloader could not validate secure (https) connections unless a specific developer app was installed, so the self-update, the Updates panel and the one-tap install from the MMRL app failed on most devices. It now uses the device's own trust store and works everywhere.
-- The size next to each item in the /data/adb file picker now always keeps one decimal (for example 15.6 KB, 184.3 MB), instead of dropping it on larger values.
-
 ## v1.12
 
 Reliability:

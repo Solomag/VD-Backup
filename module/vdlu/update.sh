@@ -54,23 +54,14 @@ init_tools() {
 	CURL=$(command -v curl 2>/dev/null) || CURL=""
 	WGET=$(command -v wget 2>/dev/null) || WGET=""
 	GZIP=$(command -v gzip 2>/dev/null) || GZIP=""
-	# https cert validation uses the Android trust store (--capath). Some static curl builds also bake
-	# in a default CA bundle FILE that is absent on real devices, making curl fail (rc 77) before
-	# --capath is read, so build a bundle from the store and pass --cacert too, which overrides it.
-	# Config `ca_path`/`ca_cert` override. The ed25519 signature stays the integrity root.
+	# The static curl uses mbedTLS with NO built-in CA bundle, so https cert validation needs the
+	# Android trust store (--capath). Config `ca_path` overrides; else auto-detect. The ed25519
+	# signature stays the integrity root - the cert check is defense-in-depth on the transport.
 	CAPATH=$(cfg ca_path "")
 	if [ -z "$CAPATH" ]; then
 		for _p in /system/etc/security/cacerts /apex/com.android.conscrypt/cacerts /etc/security/cacerts; do
 			[ -d "$_p" ] && { CAPATH="$_p"; break; }
 		done
-	fi
-	CACERT=$(cfg ca_cert "")
-	if [ -z "$CACERT" ]; then
-		_cab="$VDLU_DIR/.ca-bundle.pem"
-		for _d in /apex/com.android.conscrypt/cacerts /system/etc/security/cacerts /etc/security/cacerts; do
-			[ -d "$_d" ] && cat "$_d"/* 2>/dev/null
-		done > "$_cab" 2>/dev/null
-		if [ -s "$_cab" ]; then CACERT="$_cab"; else rm -f "$_cab"; fi
 	fi
 }
 
@@ -214,8 +205,8 @@ fetch_url() { # url dest -> sets FETCH_RC (transport exit code) and returns it
 				# 1 byte/s for 60s (mid-stream stall). A slow-but-PROGRESSING blob download is NOT affected (no
 				# --max-time cap). A partial/corrupt download is caught anyway by the blob's sha256.
 				T="--connect-timeout 15 --speed-limit 1 --speed-time 60"
-				_ca=""; [ -n "$CACERT" ] && _ca="--cacert $CACERT"; [ -n "$CAPATH" ] && _ca="$_ca --capath $CAPATH"
-				"$CURL" -fsSL $T $_ca --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+				if [ -n "$CAPATH" ]; then "$CURL" -fsSL $T --capath "$CAPATH" --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"
+				else "$CURL" -fsSL $T --max-filesize "$MAX_FILE_BYTES" -o "$dest" "$url"; fi
 				FETCH_RC=$?
 			elif [ -n "$WGET" ]; then "$WGET" -q --connect-timeout=15 --read-timeout=60 -O "$dest" "$url"; FETCH_RC=$?
 			else echo "VDLU: no curl/wget available" >&2; FETCH_RC=1; return 1; fi ;;
