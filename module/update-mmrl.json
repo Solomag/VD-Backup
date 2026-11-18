@@ -1,9 +1,9 @@
 {
-  "version": "v1.07",
-  "versionCode": 10700,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.07/VD-Backup-v1.07-universal-lite.zip",
+  "version": "v1.13",
+  "versionCode": 11300,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.13/VD-Backup-v1.13-mmrl-stub.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "Reliability: unattended and scheduled backups no longer stop when you leave the app - the backup now runs fully outside the app's process group.\n\nRestore: app permissions restore correctly on custom ROMs - per-UID permission modes and a restored app's network-access policy are reapplied (Android 16 and 17). You can opt in, per app, to also back up its network policy.\n\nSettings: exporting settings, or any encrypted backup, now reports a clear message when encryption cannot run on this device, instead of a generic error.\n\nInterface: dragging the interface-scale slider no longer switches tabs.\n\nLanguages: Ukrainian added - 22 languages.",
-  "size": 49628589,
-  "sha256": "4979f4db88a84e9f7176bfea87a98ad00c94fa1044af120162693f04196f4d34"
+  "notes": "New\n- Default encryption passphrase, set once in Settings with a per-app override, so encrypted backups stop asking every time. (#17)\n- Remote-only backups: a backup to Telegram or an rclone cloud remote uploads and keeps no local copy by default (with a Keep a local copy switch), and you can browse and restore straight from an rclone remote. (#16)\n- A Staging folder setting controls where a remote or external backup is temporarily assembled.\n\nFixes\n- Update checks and installs now work on every device.\n- Turning an installed app into a system app now actually takes effect.\n- Failed or interrupted backups no longer leave partial copies piling up.\n- Importing a Neo-Backup or Android-DataBackup backup now restores each app with the correct security labels, so it no longer crashes.\n- The system-files (/data/adb) backup goes to the destination you choose, with a post-restore reboot hint and scrollable folder names.\n- Notifications name the app, not its package id; smoother app and backup search.\n\nImprovements\n- The last English-only screens are now translated in all 21 languages.",
+  "size": 26623384,
+  "sha256": "416db77e78b3d31dd8d3e98427e647caf7c3becf57953f7adc764065ec750990"
 }
