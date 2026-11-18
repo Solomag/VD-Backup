@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,9 @@ importować istniejące kopie zapasowe Neo-Backup i Android-DataBackup, abyś m�
   destrukcyjnej akcji.
 - **Kopie specjalne:** wiadomości (SMS/MMS/RCS), kontakty i rejestr połączeń, Wi-Fi i Bluetooth,
   z opcjonalnym przenośnym eksportem do JSON, który otworzysz na komputerze.
+- **Pliki systemowe (`/data/adb`):** zrób kopię samego środowiska root - modułów, ich danych i
+  konfiguracji - całości albo poddrzewa, które wybierzesz z drzewa plików, przy czym każdy plik jest
+  przywracany do swojego pierwotnego właściciela i kontekstu SELinux, tak aby root dalej działał. Zaawansowane; tylko to, co wybierzesz.
 - **Harmonogram + automatyzacja:** cykliczne zadania **kopii lub przywracania** wymierzone w jedną
   aplikację, zestaw lub wszystkie aplikacje, z przycinaniem keep-N, a także opcjonalna automatyczna kopia
   przy instalacji/aktualizacji i lista wykluczonych aplikacji.
@@ -132,6 +135,17 @@ administrować **każdym** działaniem modułu bezgłowo przez to samo API, któ
 WebUI, pełną powierzchnię sterowania znajdziesz w **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**,
 a aby współtworzyć, w [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome).
 
+## Aktualizacje przyrostowe (VDLU)
+
+VD Backup zawiera silnik **VDLU** (wbudowany w `vdlu/`): moduł aktualizuje się, pobierając tylko te
+pliki, które się zmieniły (bloby adresowane treścią + podpisany `manifest.json`), zamiast ponownie pobierać
+cały `.zip`. Profil **wzmocniony**: podpis ed25519 jest obowiązkowy, a downgrade'y są blokowane; pełny
+`.zip` pozostaje ważny jako rozwiązanie zapasowe.
+
+- **Tylko LIVE** (bez restartu): aktualizacje są stosowane przy następnym rozruchu przez `service.sh`, w tle, bez efektu, gdy żaden feed nie jest osiągalny.
+- **Stan** w `/data/adb/vdbackup/vdlu/`, poza modułem, aby przetrwał ponowne flashowanie.
+- **WebUI:** panel **Aktualizacje** z toastem postępu i anulowaniem; automatyczna aktualizacja jest opcjonalna (opt-in).
+
 ## Dokumentacja
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/pl-Home)**: dokumentacja do przeglądania online.
@@ -153,6 +167,8 @@ Projekty siostrzane tego samego autora:
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: Twoje usługi Google (RCS, Wallet, atestacje Play Integrity) odczytywane na Twoim urządzeniu bez internetu.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: narzędzie do podszywania się urządzenia, które zamienia świeży fingerprint w spójny, konsekwentny profil.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samodzielny zrootowany demon SSH (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Kontakty
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · Українська · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · Українська · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -76,6 +76,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` резервна копія будь-якого абсолютного шляху як `tar.zst`+`manifest.json` під `.paths/` (відокремлено) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` відновлення резервної копії шляху до її початкового розташування (`confirm` обмежує її; відокремлено) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` один лінивий рівень дерева /data/adb (типово `/data/adb`), для вибору. |
+| `adb-du` | `{path}` | `{ok,size}` рекурсивний розмір у байтах одного піддерева /data/adb, на запит. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` створює резервну копію /data/adb - цілком (пропустіть `paths`) або обрані під-шляхи - з пофайловою точністю SELinux/власника, під `.adb/` (відокремлено) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` відновлює резервну копію /data/adb ПОВЕРХ живого дерева - цілком або обрані під-шляхи - зберігаючи контекст кожного файлу (ніколи суцільний chcon); `confirm` обмежує її (відокремлено) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` резервні копії файлової системи /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` збережений докладний перелік файлів резервної копії, для вибору дерева відновлення. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | монтувати встановлений застосунок як системний (безсистемний підмодуль; наживо через NoMount інакше при наступному завантаженні) |
 | `companion-status` / `companion-install` | `{}` | статус компаньйона Google Drive / встановлення на вимогу |
@@ -103,6 +109,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` перелічує зашифровані файли конфігурації, доступні для імпорту. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` видаляє збережені віддалені паролі та ключ шифрування пристрою; призначення, завдання й резервні копії лишаються. |
 | `log-prune` | `{}` | `{ok}` обрізає журнали давно завершених операцій, обмежує слід аудиту й виселяє застарілі піктограми (це викликає служба завантаження). |
+| `sanitize` | `{}` | `{ok}` знову застосовує видимість (0755) папок резервних копій для кожного користувача Android, щоб файловий менеджер міг відкрити папки, які необроблена копія від root або резервна копія до v1.03.2 залишили доступними лише власнику. |
 
 ### Поля `progress`
 
@@ -210,6 +217,14 @@ Play Store під час встановлення) і `"deep_spoof": true` (пр
 пропускається, поки пристрій критично гарячий. Кожен пропуск за обмеженням записується у слід аудиту як
 `op:"scheduler-gated"` з `reason`, що дорівнює `wifi` / `charging` / `battery` / `days` /
 `thermal`.
+
+### Надійність пакета
+
+Пакет (`backup` з `packages`, `restore` з `refs`) запускає кожен застосунок у власному субшеллі, щоб один застосунок не міг зламати інші:
+
+- **`batch_app_timeout`** (конфіг, секунди, типово `1800`, `0` вимикає): якщо застосунок триває довше, його дерево процесів завершується, він записується як `ERR_TIMEOUT`, і пакет триває далі, щоб один застряглий застосунок ніколи не заморозив увесь прогін.
+- **Частковий результат**: підсумковий запис містить `ok`, `n` з `of`, зведення `fails` `{code:count}` (напр. `{"ERR_NO_SPACE":24}`) і `free` (вільні байти у файловій системі копій). Частковий пакет записується як `ERR_BATCH_PARTIAL`, ніколи не сліпа помилка.
+- **Теплове регулювання** (конфіг `thermal_throttle`, типово увімкнено): між застосунками worker робить паузу для охолодження, коли пристрій гарячий, видаючи фазу поступу `cooling`, щоб довгий прогін не перегрів пристрій.
 
 ### Аргументи `remote-add`
 
@@ -322,6 +337,25 @@ Google Drive має два шляхи: це віддалене `drive` (не п�
   `"confirm": true`, обмеження з важким тертям, як `special-restore`. `ref`, що не є
   дійсною резервною копією шляху, зазнає невдачі з `ERR_BAD_REF`.
 - Обидва працюють **відокремлено**; опитуйте `progress` з поверненим `opid`.
+
+### Резервна копія файлової системи /data/adb
+
+`adb-backup` / `adb-restore` створюють резервну копію й відновлюють root-середовище під /data/adb
+(модулі, їхні дані та конфігурації), кероване лінивим вибором дерева (`adb-list` по одному рівню за
+раз, `adb-du` для розміру теки на запит).
+
+- Цілком або вибірково на обох кінцях: пропустіть `paths` для всього, або передайте обрані під-шляхи
+  (відносно /data/adb); відновлення бере ті самі `paths`.
+- **Пофайлова точність:** архів зберігає контекст SELinux, власника й xattrs кожного файлу, і
+  відновлення на це спирається - воно НІКОЛИ не застосовує суцільний `chcon`, який сплющив би
+  різнорідні контексти /data/adb і зламав root. `adb-restore` розпаковує ПОВЕРХ живого дерева; воно
+  ніколи його не стирає.
+- Самопосилання: власний вивід резервної копії та staging модуля виключаються, тож копія ніколи не
+  містить саму себе.
+- `adb-index` повертає збережений перелік файлів резервної копії, щоб відновлення могло показати її
+  дерево; вибір в UI виражається цілком через `paths` (повністю позначена тека - це один шлях;
+  частково позначена спускається до своїх позначених нащадків, тож список виключень не потрібен).
+- `adb-restore` потребує `"confirm": true` (обмеження з важким тертям); обидва працюють відокремлено, опитуйте `progress`.
 
 ### `update-check`
 

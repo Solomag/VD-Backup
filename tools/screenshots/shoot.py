@@ -55,7 +55,7 @@ from playwright.sync_api import sync_playwright
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
 WEBROOT = os.path.join(ROOT, "module", "webroot")
 OUTDIR = os.path.join(ROOT, "docs", "screenshots")
-LANGS = ["ar", "cs", "de", "en", "es", "fa", "fr", "hi", "in", "it", "ja",
+LANGS = ["ar", "cs", "de", "en", "es", "fa", "fr", "hi", "id", "it", "ja",
          "ko", "nl", "pl", "pt", "ru", "sv", "th", "tr", "uk", "vi", "zh"]
 # (tab to switch to, scroll target, output basename)
 SCREENS = [
@@ -246,7 +246,7 @@ def main(argv):
         try:
             for lang in langs:
                 ctx = browser.new_context(viewport=VIEWPORT, device_scale_factor=SCALE,
-                                          locale=lang if lang != "in" else "id")
+                                          locale=lang)
                 page = ctx.new_page()
                 page.add_init_script(MOCK_JS % (fix_json, lang))
                 page.goto(base, wait_until="networkidle")

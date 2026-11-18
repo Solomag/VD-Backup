@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · 中文
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · 中文
 
 ---
 
@@ -10,32 +10,33 @@ Android-DataBackup，这会让你感到熟悉, 只不过一切都在一个地方
 
 ## 目录
 
-- [1. What VDBackup is](#1-what-vdbackup-is)
-- [2. Requirements](#2-requirements)
-- [3. Install and first run](#3-install-and-first-run)
-- [4. The WebUI tour](#4-the-webui-tour)
-- [5. Making a backup](#5-making-a-backup)
-  - [5.1 Choosing what to back up](#51-choosing-what-to-back-up)
-  - [5.2 Backup modes: Full, Snapshot, Mirror](#52-backup-modes-full-snapshot-mirror)
-  - [5.3 Compression](#53-compression)
-  - [5.4 Encryption](#54-encryption)
-  - [5.5 Verify and dry-run](#55-verify-and-dry-run)
-  - [5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)](#56-special-backups-messages-call-log-wi-fi-bluetooth-calendar-wallpaper-dns-system-settings)
-  - [5.7 Standalone folder and file backups](#57-standalone-folder-and-file-backups)
-- [6. Restoring a backup](#6-restoring-a-backup)
-- [7. Destinations: local and remote](#7-destinations-local-and-remote)
+- [1. VDBackup 是什么](#1-vdbackup-是什么)
+- [2. 系统要求](#2-系统要求)
+- [3. 安装与首次运行](#3-安装与首次运行)
+- [4. WebUI 导览](#4-webui-导览)
+- [5. 创建备份](#5-创建备份)
+  - [5.1 选择要备份的内容](#51-选择要备份的内容)
+  - [5.2 备份模式: Full, Snapshot, Mirror](#52-备份模式-full-snapshot-mirror)
+  - [5.3 压缩](#53-压缩)
+  - [5.4 加密](#54-加密)
+  - [5.5 Verify 与 Dry-run](#55-verify-与-dry-run)
+  - [5.6 特殊备份 (短信, 通话记录, Wi-Fi, 蓝牙, 日历, 壁纸, DNS, 系统设置)](#56-特殊备份-短信-通话记录-wi-fi-蓝牙-日历-壁纸-dns-系统设置)
+  - [5.7 独立的文件夹和文件备份](#57-独立的文件夹和文件备份)
+  - [5.8 系统文件 (/data/adb)](#58-系统文件-dataadb)
+- [6. 恢复备份](#6-恢复备份)
+- [7. 目标: 本地与远端](#7-目标-本地与远端)
   - [7.1 备份你的设置](#71-备份你的设置)
-- [8. Scheduling and retention](#8-scheduling-and-retention)
-- [9. Migrating in: importing Neo-Backup and Android-DataBackup](#9-migrating-in-importing-neo-backup-and-android-databackup)
-- [10. SSAID (device ANDROID_ID)](#10-ssaid-device-android_id)
-- [11. Portability: opening backups on a PC](#11-portability-opening-backups-on-a-pc)
-- [12. Driving VDBackup from an AI assistant](#12-driving-vdbackup-from-an-ai-assistant)
-- [13. Troubleshooting and FAQ](#13-troubleshooting-and-faq)
-- [14. Uninstalling](#14-uninstalling)
+- [8. 计划任务与保留](#8-计划任务与保留)
+- [9. 迁入: 导入 Neo-Backup 和 Android-DataBackup](#9-迁入-导入-neo-backup-和-android-databackup)
+- [10. SSAID (设备 ANDROID_ID)](#10-ssaid-设备-android_id)
+- [11. 可移植性: 在 PC 上打开备份](#11-可移植性-在-pc-上打开备份)
+- [12. 用 AI 助手驱动 VDBackup](#12-用-ai-助手驱动-vdbackup)
+- [13. 故障排除与 FAQ](#13-故障排除与-faq)
+- [14. 卸载](#14-卸载)
 
 ---
 
-## 1. What VDBackup is
+## 1. VDBackup 是什么
 
 VDBackup 是一个带内置 WebUI 的 root 模块，用于备份和恢复你的应用及其数据。它被设计为 Swift
 Backup、Neo-Backup 和 Android-DataBackup 的开放、root 原生的继任者：它力求在一个地方完成这些
@@ -58,7 +59,7 @@ VDBackup 生成的一切都使用**标准格式**（tar、gzip、zstd、age、zi
 | **目标** | **设置** | **活动日志** |
 | ![目标](../screenshots/zh/destinations-dark.png) | ![设置](../screenshots/zh/settings-dark.png) | ![活动日志](../screenshots/zh/activitylog-dark.png) |
 
-## 2. Requirements
+## 2. 系统要求
 
 - **一台已 root 的 Android 设备**，由 **KernelSU**、**APatch** 或 **Magisk** 管理。VDBackup
   作为模块从该管理器安装。
@@ -70,7 +71,7 @@ VDBackup 生成的一切都使用**标准格式**（tar、gzip、zstd、age、zi
 一些细粒度的额外功能（AppOps、SSAID、少量特权系统位）依赖 Android 框架；模块会在内部处理
 它们，并带有纯 shell 回退，当设备上无法使用时会优雅降级。
 
-## 3. Install and first run
+## 3. 安装与首次运行
 
 1. 下载最新的 `VD-Backup-vX.Y.zip` 发行版。
 2. 在你的 KernelSU / APatch / Magisk 管理器中，像刷入任何其他模块一样刷入该模块 zip。
@@ -117,7 +118,7 @@ VDBackup 生成的一切都使用**标准格式**（tar、gzip、zstd、age、zi
 出于两个原因请记住这一点：备份会占用 `/sdcard/VDBackup` 下的空间，而当出现问题时，你要查看的
 地方是 `/data/adb/vdbackup/logs/`。
 
-## 4. The WebUI tour
+## 4. WebUI 导览
 
 WebUI 分为几个标签页：
 
@@ -145,14 +146,14 @@ WebUI 分为几个标签页：
 通知的 ROM 上，任务开始和完成时你还会收到 Android 通知；无论哪种方式，应用内的进度卡片都是
 可靠的指示器。
 
-## 5. Making a backup
+## 5. 创建备份
 
 基本流程：打开 **Apps**，选择一个应用，选定要包含的内容，挑选一种模式，设置压缩和（可选的）
 加密，然后运行。进度会实时显示，完成时会有通知告知你。
 
 在备份对话框中，你还可以为本次备份选择**目标**（本地存储或你添加的任意云端/远程目标），而无需先在设置中更改默认目标。
 
-### 5.1 Choosing what to back up
+### 5.1 选择要备份的内容
 
 对每个应用，你可以包含这些项目的任意组合：
 
@@ -171,7 +172,7 @@ WebUI 分为几个标签页：
 VDBackup 还会保留那些让恢复保持忠实的东西：SELinux 上下文、uid/gid 所有权、文件模式、扩展
 属性（xattr）和 capabilities。
 
-### 5.2 Backup modes: Full, Snapshot, Mirror
+### 5.2 备份模式: Full, Snapshot, Mirror
 
 VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都是正确的选择。
 
@@ -185,7 +186,7 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
   状态保持一致（变化的文件被复制，被删除的文件在目标端被删除）。最适合：一份快速、始终最新的
   副本，例如同步到云端远端。请注意即使在 mirror 中，APK 仍以压缩方式存储，绝不以原始形式存储。
 
-### 5.3 Compression
+### 5.3 压缩
 
 你可以为 Full 备份选择压缩方式：
 
@@ -198,7 +199,7 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
 
 如果你不做选择，VDBackup 会使用其配置的默认值（合理级别的 zstd）。
 
-### 5.4 Encryption
+### 5.4 加密
 
 加密是**可选的**且可移植。VDBackup 使用带口令（scrypt）的 **age** 进行加密，这正是为了
 可移植性而选择的：任何操作系统上的任何标准 `age` 工具，仅凭口令就能解密你的备份。加密**绝不**
@@ -215,7 +216,7 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
 - APK 加密和数据加密是**彼此独立的开关**。开启数据加密**不会**加密 APK。如果你确实也想加密
   APK，请明确地开启 APK 加密开关。
 
-### 5.5 Verify and dry-run
+### 5.5 Verify 与 Dry-run
 
 两个安全选项帮助你在依赖某个备份之前信任它：
 
@@ -226,7 +227,7 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
 
 当备份发往**云端**目标时，VDBackup 会再增加两重保护。它会运行一个最终的 **checksum-verified** 步骤，把上传的副本与远端上的原件重新核对，若不匹配则使任务失败（而不是把一个损坏的副本留在云端）。并且在 Full 上传之前，它会检查远端的**可用空间**，若备份放不下，便以清晰的**“空间不足”**错误提前停止，而不是把远端填满再中途失败。（空间检查针对 Full 上传；Mirror 是增量同步，因此豁免。）
 
-### 5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)
+### 5.6 特殊备份 (短信, 通话记录, Wi-Fi, 蓝牙, 日历, 壁纸, DNS, 系统设置)
 
 在 **Backups** 标签页的应用列表下方，**Special backups**（特殊备份）涵盖不与单个应用绑定的
 系统级数据。挑选类别并备份它们；它们以与应用备份相同的 SELinux/xattr 保留和可选加密进行归档。
@@ -255,7 +256,7 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
 同一 ROM 上是可靠的。恢复是**幂等的**：原始类别（短信、联系人、Wi-Fi、蓝牙、日历）通过**替换**数据
 而非合并来恢复，因此把同一个备份恢复两次绝不会产生重复项，而 DNS 和系统设置只是被重新应用。
 
-### 5.7 Standalone folder and file backups
+### 5.7 独立的文件夹和文件备份
 
 有时你想备份一个并非应用的普通文件夹或文件, 一个相机文件夹、一个文档目录、单个数据库。VDBackup
 可以备份共享存储上或 `/data` 下的**任意绝对路径**，采用与应用备份相同的可移植格式：一个 `tar.zst`
@@ -268,7 +269,21 @@ VDBackup 提供三种模式。WebUI 会预选 **Full**，这对大多数人都�
 - 与应用备份一样，路径备份和恢复以 **detached** 方式运行并带有实时进度，使用你选择的压缩，并且可以
   用口令加密。
 
-## 6. Restoring a backup
+### 5.8 系统文件 (`/data/adb`)
+
+`/data/adb` 是你的 root 管理器存放已安装模块、它们的数据和配置的地方, 也就是 root 环境本身。
+VDBackup 可以备份它, 整体或部分, 这样你就能在一次抹除或一次更换 ROM 后带着你的 root 设置。
+
+- **全部或选择性。** 备份整个 `/data/adb`, 或者打开文件树并精确挑选你想要的文件夹和文件；一个
+  半选中的文件夹只包含你勾选的子项。
+- **一切尽在你手中。** 这棵树是中立的 - 除了 VDBackup 自己的工作文件（否则它就会备份自身）之外,
+  没有任何东西被预先选中或隐藏。压缩和加密与其他任何备份一样, 都是可移植的选项。
+- **恢复让 root 保持工作。** 每个文件都以其原始的所有者、组、模式和 SELinux 上下文被逐个写回,
+  覆盖到实时的树上（绝不是一刀切的抹除）, 因此 `/data/adb` 下不同的上下文得以保留, 你的 root
+  管理器仍能启动。
+- **高级。** 这会直接触及 root 环境。恢复具有破坏性并要求你确认；选择性恢复只写回你所选择的路径。
+
+## 6. 恢复备份
 
 打开 **Backups** 标签页，选择你想要的备份，然后开始恢复。由于恢复是一个破坏性操作，VDBackup
 会先要求你**确认**，并把该操作记录到本地审计日志中。
@@ -302,7 +317,7 @@ APK 暂存到一个 VDBackup 叠加子模块中，让 root 管理器从 `/system
 提供它, 真实的 `/system` 分区永远不会被触碰。在 KernelSU 上启用 **NoMount** 时它会实时生效；
 否则在重启后生效。这绝不依赖于已安装 NoMount。
 
-## 7. Destinations: local and remote
+## 7. 目标: 本地与远端
 
 默认情况下，备份写入模块状态目录下的**本地**存储。你也可以在 **Destinations** 标签页中添加
 远端目标。对于本地目标，**Browse** 会打开一个文件夹选择器，让你在共享存储（`/sdcard`）下选择一个子文件夹，而不必手动输入路径。
@@ -354,7 +369,7 @@ VDBackup 自身的配置，即目标位置、计划、预设和已保存的凭�
 - **导入设置** 会读回这样的文件并合并到本设备，而不会删除已有的任何内容。
 - **清除已保存的凭据** 会一步删除已保存的远程密码和设备加密密钥；你的目标位置、计划和备份保持不变。
 
-## 8. Scheduling and retention
+## 8. 计划任务与保留
 
 VDBackup 可以按计划自动运行备份, 以及恢复。在调度器中，你用以下内容定义一个任务：
 
@@ -388,7 +403,7 @@ VDBackup 可以按计划自动运行备份, 以及恢复。在调度器中，你
 **活动日志。** Schedule 标签页有一个 **View activity log** 按钮，它会（立即）打开一个全屏页面，显示本地审计轨迹, 备份、
 还原、删除、计划运行和自动运行，以及修剪, 最新的在前。**Export logs** 操作会保存一个日志文件（位于备份文件夹下），你可以将其附加到反馈或错误报告中。
 
-## 9. Migrating in: importing Neo-Backup and Android-DataBackup
+## 9. 迁入: 导入 Neo-Backup 和 Android-DataBackup
 
 如果你从 Neo-Backup 或 Android-DataBackup 迁移过来，你不必从头开始。在 **Backups** 标签页中，
 你可以**导入**你现有的备份：
@@ -401,7 +416,7 @@ VDBackup 可以按计划自动运行备份, 以及恢复。在调度器中，你
 **支持密码加密的 Neo-Backup 备份。** Neo-Backup 的 AES-256 加密备份可以被导入, 在需要时会
 **提示你输入密码**，而密码仅用于解密，绝不会存入命令行。
 
-## 10. SSAID (device ANDROID_ID)
+## 10. SSAID (设备 ANDROID_ID)
 
 SSAID 是每个应用的 `ANDROID_ID`, 一个某些应用会读取的设备级标识符。VDBackup 可以备份和恢复
 它，但这是它所触及的最敏感的东西，因此处理时格外谨慎：
@@ -418,7 +433,7 @@ SSAID 是每个应用的 `ANDROID_ID`, 一个某些应用会读取的设备级�
 **建议：** 除非你确切知道自己需要它（例如某个把自身与设备 ID 绑定、而你正在有意迁移的特定
 应用），否则就让 SSAID 保持关闭。对于普通的应用和数据备份，你并不需要它。
 
-## 11. Portability: opening backups on a PC
+## 11. 可移植性: 在 PC 上打开备份
 
 你的备份**不会被锁定在这个模块里**，也**绝不绑定硬件**。一切都使用标准格式，因此你可以在没有
 安装 VDBackup 的 Windows、macOS 或 Linux 上打开备份。
@@ -441,7 +456,7 @@ SSAID 是每个应用的 `ANDROID_ID`, 一个某些应用会读取的设备级�
 请注意 SELinux 上下文、uid/gid 和模式存储在 tar 内部，只有在你于 Android 上恢复时才会被正确
 重新应用, 在 PC 上你仍会得到你的全部文件，只是不会强制 Android 特有的所有权。
 
-## 12. Driving VDBackup from an AI assistant
+## 12. 用 AI 助手驱动 VDBackup
 
 VDBackup 的构建不仅对人友好，也对 AI 助手和智能体友好。WebUI 只是一个小型 JSON API 的其中
 一个客户端；智能体可以通过同一个 API 以无界面的方式管理模块的**每一项**操作（每条命令都返回
@@ -452,7 +467,7 @@ SSAID 保持选用，变更性操作保持需确认且被审计）。
 [`AI-AGENTS.md`](AI-AGENTS.md)，其中记录了完整的控制面：命令约定、每个动词及其参数和返回值，
 以及智能体必须遵守的安全规则。
 
-## 13. Troubleshooting and FAQ
+## 13. 故障排除与 FAQ
 
 **日志在哪里？** 在模块状态目录下，`/data/adb/vdbackup/logs/`。正在运行的操作的实时进度在
 `progress-<opid>.json` 中，而变更性操作（恢复、删除、导入、SSAID 更改）的**审计轨迹**在
@@ -483,7 +498,7 @@ SSAID 保持选用，变更性操作保持需确认且被审计）。
 **我的加密备份打不开, 我丢失了口令。** 按设计没有恢复后门；保护备份的正是口令。请妥善保管
 它。
 
-## 14. Uninstalling
+## 14. 卸载
 
 像卸载其他模块一样，从你的 KernelSU / APatch / Magisk 管理器卸载 VDBackup。卸载会**保留你的设置**，只移除临时状态，因此以后重装会接续你的配置、目标位置和计划。它会保留你的备份于 `/sdcard/VDBackup`（标准格式，无需模块即可在 PC 上打开）、你的配置于 `/data/adb/vdbackup`，以及你已保存的凭据、rclone.conf 和 age 密钥于凭据加密的 `/data/misc_ce/0/vdbackup`（首次解锁前保持锁定）。若也要移除其中任一项，请在卸载后手动删除相应目录。
 

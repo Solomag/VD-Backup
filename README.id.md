@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,9 @@ mengimpor cadangan Neo-Backup dan Android-DataBackup yang sudah ada agar Anda bi
   setiap tindakan destruktif.
 - **Cadangan khusus:** pesan (SMS/MMS/RCS), kontak dan log panggilan, Wi-Fi dan Bluetooth,
   dengan ekspor JSON portabel opsional yang dapat Anda buka di PC.
+- **File sistem (`/data/adb`):** backup lingkungan root itu sendiri - modul, data dan
+  konfigurasinya - semuanya atau subpohon yang Anda pilih dari pohon file, dengan setiap file
+  direstore ke pemilik dan konteks SELinux aslinya agar root tetap bekerja. Lanjutan; hanya yang Anda pilih.
 - **Penjadwalan + otomasi:** tugas **backup atau restore** berulang yang menargetkan satu aplikasi, sekumpulan,
   atau semua aplikasi, dengan pemangkasan keep-N, ditambah pencadangan otomatis opt-in saat pemasangan/pembaruan
   dan daftar aplikasi yang dikecualikan.
@@ -118,6 +121,17 @@ lainnya. Sebuah agen dapat mengelola **setiap** tindakan modul tanpa antarmuka m
 yang digunakan WebUI, lihat **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** untuk permukaan kendali
 lengkap, dan [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) untuk berkontribusi.
 
+## Pembaruan inkremental (VDLU)
+
+VD Backup menyertakan mesin **VDLU** (tertanam di `vdlu/`): modul memperbarui dirinya sendiri dengan hanya
+mengambil berkas yang berubah (blob yang dialamatkan berdasarkan konten + sebuah `manifest.json` bertanda
+tangan), alih-alih mengunduh ulang seluruh `.zip`. Profil **diperkuat**: tanda tangan ed25519 wajib dan
+penurunan versi diblokir; `.zip` lengkap tetap valid sebagai cadangan.
+
+- **Hanya LIVE** (tanpa boot ulang): pembaruan diterapkan pada boot berikutnya melalui `service.sh`, di latar belakang, tanpa efek apa pun ketika tidak ada feed yang dapat dijangkau.
+- **Status** di `/data/adb/vdbackup/vdlu/`, di luar modul, sehingga bertahan dari flash ulang.
+- **WebUI:** panel **Pembaruan** dengan toast progres dan batal; pembaruan otomatis bersifat opt-in.
+
 ## Dokumentasi
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/in-Home)**: dokumentasi, dapat dijelajahi daring.
@@ -139,6 +153,8 @@ Proyek saudara dari penulis yang sama:
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: layanan Google Anda (RCS, Wallet, atestasi Play Integrity), dibaca di perangkat Anda tanpa internet.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: sebuah pemalsu perangkat yang mengubah fingerprint baru menjadi profil yang koheren dan konsisten.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: sebuah daemon SSH mandiri dengan akses root (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Kontak
 

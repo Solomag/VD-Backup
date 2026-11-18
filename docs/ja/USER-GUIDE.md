@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · 日本語 · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -23,6 +23,7 @@ Swift Backup, Neo-Backup, Android-DataBackup を使ったことがあれば、�
   - [5.5 Verify と dry-run](#55-verify-と-dry-run)
   - [5.6 特殊バックアップ (メッセージ, 通話履歴, Wi-Fi, Bluetooth, カレンダー, 壁紙, DNS, システム設定)](#56-特殊バックアップ-メッセージ-通話履歴-wi-fi-bluetooth-カレンダー-壁紙-dns-システム設定)
   - [5.7 スタンドアロンのフォルダとファイルの backup](#57-スタンドアロンのフォルダとファイルの-backup)
+  - [5.8 システムファイル (/data/adb)](#58-システムファイル-dataadb)
 - [6. backup の復元](#6-backup-の復元)
 - [7. 宛先: ローカルとリモート](#7-宛先-ローカルとリモート)
   - [7.1 設定のバックアップ](#71-設定のバックアップ)
@@ -287,6 +288,25 @@ SELinux/xattr の保全と任意の暗号化とともにアーカイブされま
   求めます。
 - アプリの backup と同じく、パスの backup と復元はライブの進捗とともに **detached** で実行され、
   選んだ圧縮を使い、passphrase で暗号化できます。
+
+### 5.8 システムファイル (`/data/adb`)
+
+`/data/adb` は、root マネージャーがインストール済みのモジュール、そのデータや設定を保管する場所、
+root 環境そのものです。VDBackup はこれを全体または一部だけ backup でき、ワイプや ROM の変更を
+またいで root のセットアップを持ち運べます。
+
+- **全体または選択。** `/data/adb` 全体を backup することも、ファイルツリーを開いて必要なフォルダや
+  ファイルだけを正確に選ぶこともできます。半分だけチェックされたフォルダは、チェックした子だけを
+  含みます。
+- **すべてはあなたの手の中に。** ツリーは中立です - 何も事前選択されず、隠されもしません。ただし
+  VDBackup 自身の作業ファイルは例外で、さもないと自分自身を backup してしまうためです。圧縮と
+  暗号化は、他のどの backup とも同じポータブルなオプションです。
+- **復元しても root は動き続けます。** 各ファイルは元の所有者、グループ、モード、SELinux
+  コンテキストとともに、一度に 1 ファイルずつ、生きたツリーの上に書き戻されます (一括のワイプは
+  決してしません)。そのため `/data/adb` 配下の異なるコンテキストが保たれ、root マネージャーは
+  問題なく起動します。
+- **上級者向け。** これは root 環境に直接触れます。復元は破壊的で、確認を求めます。選択的な復元は、
+  選んだパスだけを書き戻します。
 
 ## 6. backup の復元
 

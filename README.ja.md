@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,9 @@ Android-DataBackup のバックアップをインポートして移行するこ�
   行えます。
 - **特殊バックアップ:** メッセージ (SMS/MMS/RCS)、連絡先と通話履歴、Wi-Fi と Bluetooth。PC で開ける
   ポータブルな JSON エクスポートも任意で付けられます。
+- **システムファイル (`/data/adb`):** root 環境そのもの - モジュール、そのデータや設定 - を
+  バックアップします。すべて、またはファイルツリーから選んだサブツリーを対象にでき、各ファイルは
+  元の所有者と SELinux コンテキストで復元されるので root は動き続けます。上級者向け。選んだものだけ。
 - **スケジュール + 自動化:** 単一のアプリ, 集合, またはすべてのアプリを対象とする **バックアップまたは復元**
   の定期ジョブ (keep-N 方式で古い世代を刈り込み) に加え、インストール/更新時のオプトインの自動バックアップと
   除外アプリ一覧。
@@ -120,6 +123,14 @@ VDBackup は、人だけでなく AI アシスタントやエージェントに�
 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** を、貢献については
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) を参照してください。
 
+## 差分アップデート (VDLU)
+
+VD Backup は **VDLU** エンジンを同梱しています (`vdlu/` に同梱)。モジュールは `.zip` 全体を再ダウンロードするのではなく、変更されたファイルだけを取得して自分自身を更新します (コンテンツアドレス指定のブロブ + 署名付きの `manifest.json`)。**堅牢化** プロファイル: ed25519 署名は必須で、ダウングレードはブロックされます。完全な `.zip` はフォールバックとして引き続き有効です。
+
+- **LIVE のみ** (再起動なし): アップデートは `service.sh` 経由で次回起動時にバックグラウンドで適用され、到達可能なフィードがない場合は何もしません。
+- **状態** は `/data/adb/vdbackup/vdlu/` にあり、モジュールの外にあるため再フラッシュしても残ります。
+- **WebUI:** 進捗トーストとキャンセルを備えた **アップデート** パネル。自動更新はオプトインです。
+
 ## ドキュメント
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/ja-Home)**: オンラインで閲覧できるドキュメント。
@@ -141,6 +152,8 @@ VDBackup は、人だけでなく AI アシスタントやエージェントに�
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: あなたの Google サービス (RCS、Wallet、Play Integrity の構成証明) を、インターネットなしでデバイス上で読み取ります。
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: 新しいフィンガープリントを、首尾一貫した整合性のあるプロファイルに変えるデバイススプーファー。
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: 単体で動く root 権限の SSH デーモン (Dropbear)。
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## 連絡先
 

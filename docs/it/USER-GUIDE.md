@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · Italiano · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · Italiano · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -12,28 +12,29 @@ posto, senza nulla da "consentire".
 
 ## Indice
 
-- [1. What VDBackup is](#1-what-vdbackup-is)
-- [2. Requirements](#2-requirements)
-- [3. Install and first run](#3-install-and-first-run)
-- [4. The WebUI tour](#4-the-webui-tour)
-- [5. Making a backup](#5-making-a-backup)
-  - [5.1 Choosing what to back up](#51-choosing-what-to-back-up)
-  - [5.2 Backup modes: Full, Snapshot, Mirror](#52-backup-modes-full-snapshot-mirror)
-  - [5.3 Compression](#53-compression)
-  - [5.4 Encryption](#54-encryption)
-  - [5.5 Verify and dry-run](#55-verify-and-dry-run)
-  - [5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)](#56-special-backups-messages-call-log-wi-fi-bluetooth-calendar-wallpaper-dns-system-settings)
-  - [5.7 Standalone folder and file backups](#57-standalone-folder-and-file-backups)
-- [6. Restoring a backup](#6-restoring-a-backup)
-- [7. Destinations: local and remote](#7-destinations-local-and-remote)
+- [1. Cos'è VDBackup](#1-cosè-vdbackup)
+- [2. Requisiti](#2-requisiti)
+- [3. Installazione e primo avvio](#3-installazione-e-primo-avvio)
+- [4. Visita della WebUI](#4-visita-della-webui)
+- [5. Creare un backup](#5-creare-un-backup)
+  - [5.1 Scegliere cosa salvare](#51-scegliere-cosa-salvare)
+  - [5.2 Modalità di backup : Full, Snapshot, Mirror](#52-modalità-di-backup--full-snapshot-mirror)
+  - [5.3 Compressione](#53-compressione)
+  - [5.4 Cifratura](#54-cifratura)
+  - [5.5 Verify e dry-run](#55-verify-e-dry-run)
+  - [5.6 Backup speciali (messaggi, registro chiamate, Wi-Fi, Bluetooth, calendario, sfondo, DNS, impostazioni di sistema)](#56-backup-speciali-messaggi-registro-chiamate-wi-fi-bluetooth-calendario-sfondo-dns-impostazioni-di-sistema)
+  - [5.7 Backup autonomi di cartelle e file](#57-backup-autonomi-di-cartelle-e-file)
+  - [5.8 File di sistema (/data/adb)](#58-file-di-sistema-dataadb)
+- [6. Ripristinare un backup](#6-ripristinare-un-backup)
+- [7. Destinazioni : locale e remota](#7-destinazioni--locale-e-remota)
   - [7.1 Backup delle tue impostazioni](#71-backup-delle-tue-impostazioni)
-- [8. Scheduling and retention](#8-scheduling-and-retention)
-- [9. Migrating in: importing Neo-Backup and Android-DataBackup](#9-migrating-in-importing-neo-backup-and-android-databackup)
-- [10. SSAID (device ANDROID_ID)](#10-ssaid-device-android_id)
-- [11. Portability: opening backups on a PC](#11-portability-opening-backups-on-a-pc)
-- [12. Driving VDBackup from an AI assistant](#12-driving-vdbackup-from-an-ai-assistant)
-- [13. Troubleshooting and FAQ](#13-troubleshooting-and-faq)
-- [14. Uninstalling](#14-uninstalling)
+- [8. Pianificazione e ritenzione](#8-pianificazione-e-ritenzione)
+- [9. Migrare : importare Neo-Backup e Android-DataBackup](#9-migrare--importare-neo-backup-e-android-databackup)
+- [10. SSAID (ANDROID_ID del dispositivo)](#10-ssaid-android_id-del-dispositivo)
+- [11. Portabilità : aprire i backup su un PC](#11-portabilità--aprire-i-backup-su-un-pc)
+- [12. Pilotare VDBackup da un assistente IA](#12-pilotare-vdbackup-da-un-assistente-ia)
+- [13. Risoluzione dei problemi e FAQ](#13-risoluzione-dei-problemi-e-faq)
+- [14. Disinstallazione](#14-disinstallazione)
 
 ---
 
@@ -308,6 +309,25 @@ cartella `.paths` nella tua directory dei backup.
   chiede di **confermare** prima di sovrascrivere qualcosa.
 - Come i backup di app, i backup e i ripristini di percorso vengono eseguiti **staccati** con avanzamento
   in tempo reale, usano la compressione che scegli, e possono essere cifrati con una passphrase.
+
+### 5.8 File di sistema (`/data/adb`)
+
+`/data/adb` è dove il tuo manager root tiene i moduli installati, i loro dati e la loro
+configurazione - l'ambiente root stesso. VDBackup può eseguirne il backup, in tutto o in parte,
+così da poter portare la tua configurazione root attraverso un wipe o un cambio di ROM.
+
+- **Totale o selettivo.** Esegui il backup di tutto `/data/adb`, oppure apri l'albero dei file e
+  scegli esattamente le cartelle e i file che vuoi; una cartella spuntata a metà include solo i
+  figli che hai selezionato.
+- **Tutto resta nelle tue mani.** L'albero è neutro - niente è preselezionato o nascosto, tranne i
+  file di lavoro di VDBackup stesso, che altrimenti si limiterebbero a fare il backup di sé stesso.
+  La compressione e la cifratura sono le stesse opzioni portabili di qualsiasi altro backup.
+- **Il ripristino mantiene root funzionante.** Ogni file viene riscritto con il suo proprietario,
+  gruppo, modo e contesto SELinux originali, un file alla volta, sopra l'albero vivo (mai una
+  cancellazione totale), così che i contesti differenti sotto `/data/adb` siano preservati e il tuo
+  manager root continui ad avviarsi.
+- **Avanzato.** Questo tocca direttamente l'ambiente root. Il ripristino è distruttivo e ti chiede
+  di confermare; un ripristino selettivo riscrive solo i percorsi che hai scelto.
 
 ## 6. Ripristinare un backup
 

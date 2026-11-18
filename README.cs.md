@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,9 @@ importovat existující zálohy Neo-Backup a Android-DataBackup, abyste mohli p�
   každé destruktivní akce.
 - **Speciální zálohy:** zprávy (SMS/MMS/RCS), kontakty a seznam hovorů, Wi-Fi a Bluetooth,
   s volitelným přenosným exportem do JSON, který otevřete na PC.
+- **Systémové soubory (`/data/adb`):** zazálohujte samotné rootové prostředí - moduly, jejich data a
+  konfigurace - celé, nebo podstrom, který si vyberete ze stromu souborů, přičemž každý soubor se obnoví
+  k původnímu vlastníkovi a kontextu SELinux, takže root dál funguje. Pokročilé; jen to, co zvolíte.
 - **Plánování + automatizace:** opakující se úlohy **zálohy nebo obnovy** cílící na jednu
   aplikaci, sadu nebo všechny aplikace, s prořezáváním keep-N, plus volitelná automatická
   záloha při instalaci/aktualizaci a seznam vyloučených aplikací.
@@ -119,6 +122,17 @@ stejné API, které používá WebUI, úplnou řídicí plochu najdete v
 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** a chcete-li přispět, v
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome).
 
+## Přírůstkové aktualizace (VDLU)
+
+VD Backup obsahuje **VDLU** engine (vestavěný v `vdlu/`): modul se aktualizuje tak, že stahuje jen
+soubory, které se změnily (obsahově adresované bloby + podepsaný `manifest.json`), místo opětovného stažení
+celého `.zip`. **Zpevněný** profil: podpis ed25519 je povinný a downgrady jsou blokovány; úplný `.zip`
+zůstává platný jako záloha.
+
+- **Pouze LIVE** (bez restartu): aktualizace se použijí při příštím startu přes `service.sh`, na pozadí, bez efektu, když není dostupný žádný feed.
+- **Stav** v `/data/adb/vdbackup/vdlu/`, mimo modul, takže přežije přeflashování.
+- **WebUI:** panel **Aktualizace** s toastem průběhu a zrušením; automatická aktualizace je volitelná (opt-in).
+
 ## Dokumentace
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/cs-Home)**: dokumentace k procházení online.
@@ -140,6 +154,8 @@ Sesterské projekty téhož autora:
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: vaše služby Google (RCS, Wallet, atestace Play Integrity) čtené na vašem zařízení bez internetu.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: nástroj pro podvržení zařízení, který promění čerstvý fingerprint v soudržný, konzistentní profil.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: samostatný rootovaný SSH démon (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Kontakty
 

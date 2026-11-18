@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · Čeština · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · Čeština · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` zálohuje libovolnou absolutní cestu jako `tar.zst`+`manifest.json` pod `.paths/` (oddělené) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` obnoví zálohu cesty na její původní umístění (`confirm` to chrání; oddělené) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` jedna líná úroveň stromu /data/adb (výchozí `/data/adb`), pro výběr. |
+| `adb-du` | `{path}` | `{ok,size}` rekurzivní velikost v bajtech jednoho podstromu /data/adb, na vyžádání. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` zálohuje /data/adb - celé (vynechte `paths`) nebo zvolené pod-cesty - s věrností SELinux/vlastníka po souborech, pod `.adb/` (oddělené) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` obnoví zálohu /data/adb PŘES živý strom - celý nebo zvolené pod-cesty - se zachováním kontextu každého souboru (nikdy plošný chcon); `confirm` to chrání (oddělené) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` zálohy souborového systému /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` uložený podrobný výpis souborů zálohy, pro výběr stromu obnovy. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | připojí nainstalovanou aplikaci jako systémovou (bezsystémový podmodul; živě přes NoMount, jinak při příštím bootu) |
 | `companion-status` / `companion-install` | `{}` | stav společníka Google Drive / instalace na vyžádání |
@@ -102,6 +108,7 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` vypíše šifrované konfigurační soubory dostupné k importu. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` odstraní uložená vzdálená hesla a šifrovací klíč zařízení; cíle, úlohy a zálohy zůstávají. |
 | `log-prune` | `{}` | `{ok}` prořeže dávno dokončené protokoly operací, omezí auditní stopu a odstraní zastaralé ikony (volá to spouštěcí služba). |
+| `sanitize` | `{}` | `{ok}` znovu prosadí viditelnost (0755) složek záloh pro každého uživatele Androidu, aby správce souborů mohl otevřít složky, které syrová kopie root nebo záloha před v1.03.2 ponechaly přístupné jen vlastníkovi. |
 
 ### Pole `progress`
 
@@ -208,6 +215,14 @@ Nad rámec toho se vždy uplatní minimální kontrola **tepelné bezpečnosti**
 se přeskočí, dokud je zařízení kriticky horké. Každé přeskočení kvůli bráně se zapíše do
 auditní stopy jako `op:"scheduler-gated"` s `reason` rovným `wifi` / `charging` / `battery` /
 `days` / `thermal`.
+
+### Spolehlivost dávky
+
+Dávka (`backup` s `packages`, `restore` s `refs`) spouští každou aplikaci ve vlastním subshellu, takže jedna aplikace nemůže poškodit ostatní:
+
+- **`batch_app_timeout`** (konfigurace, sekundy, výchozí `1800`, `0` vypíná): pokud aplikace trvá déle, její strom procesů je ukončen, zaznamená se jako `ERR_TIMEOUT` a dávka pokračuje, takže jedna zaseknutá aplikace nikdy nezmrazí celý běh.
+- **Částečný výsledek**: závěrečný zápis obsahuje `ok`, `n` z `of`, přehled `fails` `{code:count}` (např. `{"ERR_NO_SPACE":24}`) a `free` (volné bajty v souborovém systému záloh). Částečná dávka je `ERR_BATCH_PARTIAL`, nikdy slepá chyba.
+- **Tepelné tempo** (konfigurace `thermal_throttle`, ve výchozím stavu zapnuto): mezi aplikacemi se worker pozastaví, aby vychladl, když je zařízení horké, a vydá fázi průběhu `cooling`, takže dlouhý běh zařízení nepřehřeje.
 
 ### Argumenty `remote-add`
 
@@ -319,6 +334,24 @@ sadou při šifrování) pod `.paths/` v adresáři záloh.
   `"confirm": true`, silně frikční zábrana, jako `special-restore`. `ref`, který není platná
   záloha cesty, selže s `ERR_BAD_REF`.
 - Oba běží **oddělené**; dotazujte se na `progress` s vráceným `opid`.
+
+### Záloha souborového systému /data/adb
+
+`adb-backup` / `adb-restore` zálohují a obnovují root prostředí pod /data/adb (moduly,
+jejich data a konfigurace), řízené línym výběrem stromu (`adb-list` po jedné úrovni, `adb-du`
+pro velikost složky na vyžádání).
+
+- Celé nebo výběrové na obou koncích: vynechte `paths` pro vše, nebo předejte zvolené pod-cesty
+  (relativní k /data/adb); obnova bere stejné `paths`.
+- **Věrnost po souborech:** archiv zachovává kontext SELinux, vlastníka a xattrs každého souboru a
+  obnova se na to spoléhá - NIKDY neaplikuje plošný `chcon`, který by zploštil heterogenní
+  kontexty /data/adb a rozbil root. `adb-restore` rozbaluje PŘES živý strom; nikdy jej nemaže.
+- Sebereference: vlastní výstup zálohy a staging modulu jsou vyloučeny, takže záloha nikdy
+  neobsahuje sebe sama.
+- `adb-index` vrací uložený výpis souborů zálohy, aby obnova mohla ukázat svůj strom; výběr v UI
+  je vyjádřen zcela přes `paths` (plně zaškrtnutá složka je jedna cesta; částečně zaškrtnutá
+  sestupuje ke svým zaškrtnutým potomkům, takže seznam vyloučení není potřeba).
+- `adb-restore` vyžaduje `"confirm": true` (silně frikční zábrana); oba běží odděleně, dotazujte se na `progress`.
 
 ### `update-check`
 

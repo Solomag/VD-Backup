@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · Português · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · Português · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ lugar, sem nada para "permitir".
   - [5.5 Verify e dry-run](#55-verify-e-dry-run)
   - [5.6 Backups especiais (mensagens, registro de chamadas, Wi-Fi, Bluetooth, agenda, papel de parede, DNS, configurações do sistema)](#56-backups-especiais-mensagens-registro-de-chamadas-wi-fi-bluetooth-agenda-papel-de-parede-dns-configurações-do-sistema)
   - [5.7 Backups avulsos de pastas e arquivos](#57-backups-avulsos-de-pastas-e-arquivos)
+  - [5.8 Arquivos de sistema (/data/adb)](#58-arquivos-de-sistema-dataadb)
 - [6. Restaurando um backup](#6-restaurando-um-backup)
 - [7. Destinos: local e remoto](#7-destinos-local-e-remoto)
   - [7.1 Backup das suas configurações](#71-backup-das-suas-configurações)
@@ -325,6 +326,25 @@ sob uma pasta `.paths` no seu diretório de backups.
   destrutivo e pede que você **confirme** antes de sobrescrever qualquer coisa.
 - Como os backups de app, os backups e restaurações de caminho rodam **destacados** com progresso
   ao vivo, usam a compressão que você escolheu, e podem ser criptografados com uma passphrase.
+
+### 5.8 Arquivos de sistema (`/data/adb`)
+
+`/data/adb` é onde o seu gerenciador root guarda os módulos instalados, seus dados e sua
+configuração - o próprio ambiente root. O VDBackup pode fazer backup disso, inteiro ou em parte,
+para que você leve a sua configuração root através de um wipe ou uma troca de ROM.
+
+- **Total ou seletivo.** Faça backup de todo o `/data/adb`, ou abra a árvore de arquivos e escolha
+  exatamente as pastas e arquivos que você quer; uma pasta meio-marcada inclui apenas os filhos que
+  você marcou.
+- **Tudo fica nas suas mãos.** A árvore é neutra - nada é pré-selecionado ou ocultado, exceto os
+  próprios arquivos de trabalho do VDBackup, que de outra forma apenas fariam backup de si mesmo. A
+  compressão e a criptografia são as mesmas opções portáteis de qualquer outro backup.
+- **A restauração mantém o root funcionando.** Cada arquivo é escrito de volta com seu dono, grupo,
+  modo e contexto SELinux originais, um arquivo por vez, sobre a árvore viva (nunca um apagamento
+  geral), de modo que os contextos diferentes sob `/data/adb` sejam preservados e o seu gerenciador
+  root ainda inicialize.
+- **Avançado.** Isto toca o ambiente root diretamente. Restaurar é destrutivo e pede que você
+  confirme; uma restauração seletiva escreve de volta apenas os caminhos que você escolheu.
 
 ## 6. Restaurando um backup
 

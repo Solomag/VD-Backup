@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · Deutsch · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · Deutsch · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ Ort geschieht, ohne dass etwas "erlaubt" werden muss.
   - [5.5 Verify und Dry-run](#55-verify-und-dry-run)
   - [5.6 Spezial-Backups (Nachrichten, Anrufliste, WLAN, Bluetooth, Kalender, Hintergrund, DNS, Systemeinstellungen)](#56-spezial-backups-nachrichten-anrufliste-wlan-bluetooth-kalender-hintergrund-dns-systemeinstellungen)
   - [5.7 Eigenständige Backups von Ordnern und Dateien](#57-eigenständige-backups-von-ordnern-und-dateien)
+  - [5.8 Systemdateien (/data/adb)](#58-systemdateien-dataadb)
 - [6. Ein Backup wiederherstellen](#6-ein-backup-wiederherstellen)
 - [7. Ziele: lokal und remote](#7-ziele-lokal-und-remote)
   - [7.1 Ihre Einstellungen sichern](#71-ihre-einstellungen-sichern)
@@ -325,6 +326,24 @@ RECOVERY-Notiz, wenn du es verschlüsselst. Diese Pfad-Backups werden getrennt g
   Wiederherstellung destruktiv und bittet dich zu **bestätigen**, bevor es irgendetwas überschreibt.
 - Wie App-Backups laufen Pfad-Backups und -Wiederherstellungen **abgekoppelt** mit Live-Fortschritt,
   nutzen deine gewählte Komprimierung und können mit einer Passphrase verschlüsselt werden.
+
+### 5.8 Systemdateien (`/data/adb`)
+
+`/data/adb` ist der Ort, an dem dein root-Manager installierte Module, ihre Daten und ihre Konfiguration
+aufbewahrt - die root-Umgebung selbst. VDBackup kann dies sichern, ganz oder teilweise, sodass du deine
+root-Einrichtung über ein Löschen oder einen ROM-Wechsel mitnimmst.
+
+- **Ganz oder selektiv.** Sichere ganz `/data/adb`, oder öffne den Dateibaum und wähle genau die Ordner
+  und Dateien, die du willst; ein halb angekreuzter Ordner umfasst nur die Kinder, die du angehakt hast.
+- **Alles bleibt in deiner Hand.** Der Baum ist neutral - nichts ist vorausgewählt oder versteckt, außer
+  VDBackups eigenen Arbeitsdateien, die sonst nur sich selbst sichern würden. Komprimierung und
+  Verschlüsselung sind dieselben portablen Optionen wie bei jedem anderen Backup.
+- **Die Wiederherstellung hält root funktionsfähig.** Jede Datei wird mit ihrem ursprünglichen Eigentümer,
+  ihrer Gruppe, ihrem Modus und SELinux-Kontext zurückgeschrieben, eine Datei nach der anderen, über den
+  lebenden Baum (nie ein pauschales Löschen), sodass die unterschiedlichen Kontexte unter `/data/adb`
+  erhalten bleiben und dein root-Manager weiterhin bootet.
+- **Fortgeschritten.** Dies berührt die root-Umgebung direkt. Das Wiederherstellen ist destruktiv und
+  bittet dich zu bestätigen; eine selektive Wiederherstellung schreibt nur die von dir gewählten Pfade zurück.
 
 ## 6. Ein Backup wiederherstellen
 

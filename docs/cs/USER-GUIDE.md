@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · Čeština · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · Čeština · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ místě, bez čehokoli, co by bylo potřeba "povolit".
   - [5.5 Verify a dry-run](#55-verify-a-dry-run)
   - [5.6 Speciální zálohy (zprávy, seznam hovorů, Wi-Fi, Bluetooth, kalendář, tapeta, DNS, systémová nastavení)](#56-speciální-zálohy-zprávy-seznam-hovorů-wi-fi-bluetooth-kalendář-tapeta-dns-systémová-nastavení)
   - [5.7 Samostatné zálohy složek a souborů](#57-samostatné-zálohy-složek-a-souborů)
+  - [5.8 Systémové soubory (/data/adb)](#58-systémové-soubory-dataadb)
 - [6. Obnova zálohy](#6-obnova-zálohy)
 - [7. Cíle: lokální a vzdálené](#7-cíle-lokální-a-vzdálené)
   - [7.1 Záloha vašich nastavení](#71-záloha-vašich-nastavení)
@@ -305,6 +306,23 @@ cest jsou udržovány zvlášť, pod složkou `.paths` ve vašem adresáři zál
   přepsáním čehokoli vás požádá o **potvrzení**.
 - Jako zálohy aplikací běží zálohy a obnovy cest **oddělené** s živým průběhem, používají vámi
   zvolenou kompresi a lze je zašifrovat passphrase.
+
+### 5.8 Systémové soubory (`/data/adb`)
+
+`/data/adb` je místo, kde váš root manažer uchovává nainstalované moduly, jejich data a jejich
+konfiguraci - samotné rootové prostředí. VDBackup to umí zazálohovat, celé nebo zčásti, takže si
+svou root sestavu přenesete přes vymazání nebo změnu ROM.
+
+- **Celé, nebo výběrově.** Zazálohujte celé `/data/adb`, nebo otevřete strom souborů a vyberte přesně
+  ty složky a soubory, které chcete; napůl zaškrtnutá složka zahrne jen potomky, které jste zaškrtli.
+- **Vše zůstává ve vašich rukou.** Strom je neutrální - nic není předvybrané ani skryté, kromě vlastních
+  pracovních souborů VDBackupu, které by jinak zálohovaly jen samy sebe. Komprese a šifrování jsou tytéž
+  přenositelné volby jako u kterékoli jiné zálohy.
+- **Obnova udrží root funkční.** Každý soubor se zapisuje zpět s původním vlastníkem, skupinou, režimem
+  a kontextem SELinux, po jednom souboru, přes živý strom (nikdy plošné vymazání), takže odlišné
+  kontexty pod `/data/adb` zůstanou zachovány a váš root manažer stále nabootuje.
+- **Pokročilé.** Toto se dotýká rootového prostředí přímo. Obnova je destruktivní a žádá vás o potvrzení;
+  výběrová obnova zapíše zpět jen cesty, které jste zvolili.
 
 ## 6. Obnova zálohy
 

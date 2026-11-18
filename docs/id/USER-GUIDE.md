@@ -24,6 +24,7 @@ tempat, tanpa ada yang perlu "diizinkan".
   - [5.5 Verify dan dry-run](#55-verify-dan-dry-run)
   - [5.6 Backup khusus (pesan, log panggilan, Wi-Fi, Bluetooth, kalender, wallpaper, DNS, pengaturan sistem)](#56-backup-khusus-pesan-log-panggilan-wi-fi-bluetooth-kalender-wallpaper-dns-pengaturan-sistem)
   - [5.7 Backup folder dan file mandiri](#57-backup-folder-dan-file-mandiri)
+  - [5.8 File sistem (/data/adb)](#58-file-sistem-dataadb)
 - [6. Merestore backup](#6-merestore-backup)
 - [7. Tujuan: lokal dan remote](#7-tujuan-lokal-dan-remote)
   - [7.1 Mencadangkan pengaturan Anda](#71-mencadangkan-pengaturan-anda)
@@ -58,9 +59,9 @@ perangkat spesifik Anda. Lihat [bagian 11](#bagian-11).
 
 | Beranda | Aplikasi | Jadwal |
 |:---:|:---:|:---:|
-| ![Beranda](../screenshots/in/home-dark.png) | ![Aplikasi](../screenshots/in/apps-dark.png) | ![Jadwal](../screenshots/in/schedule-dark.png) |
+| ![Beranda](../screenshots/id/home-dark.png) | ![Aplikasi](../screenshots/id/apps-dark.png) | ![Jadwal](../screenshots/id/schedule-dark.png) |
 | **Tujuan** | **Pengaturan** | **Log aktivitas** |
-| ![Tujuan](../screenshots/in/destinations-dark.png) | ![Pengaturan](../screenshots/in/settings-dark.png) | ![Log aktivitas](../screenshots/in/activitylog-dark.png) |
+| ![Tujuan](../screenshots/id/destinations-dark.png) | ![Pengaturan](../screenshots/id/settings-dark.png) | ![Log aktivitas](../screenshots/id/activitylog-dark.png) |
 
 ## 2. Persyaratan
 
@@ -304,6 +305,25 @@ mengenkripsinya. Backup path ini disimpan terpisah, di bawah folder `.paths` di 
   Anda **mengonfirmasi** sebelum menimpa apa pun.
 - Seperti backup aplikasi, backup dan restore path berjalan **terlepas** dengan kemajuan live, memakai
   kompresi pilihan Anda, dan dapat dienkripsi dengan passphrase.
+
+### 5.8 File sistem (`/data/adb`)
+
+`/data/adb` adalah tempat manajer root Anda menyimpan modul yang terpasang, data dan
+konfigurasinya - lingkungan root itu sendiri. VDBackup dapat membackupnya, seluruhnya atau
+sebagian, sehingga Anda dapat membawa setup root Anda melintasi wipe atau penggantian ROM.
+
+- **Total atau selektif.** Backup seluruh `/data/adb`, atau buka pohon file dan pilih persis
+  folder dan file yang Anda inginkan; folder yang tercentang separuh hanya menyertakan anak yang
+  Anda centang.
+- **Semuanya tetap di tangan Anda.** Pohon ini netral - tidak ada yang dipilih sebelumnya atau
+  disembunyikan, kecuali file kerja milik VDBackup sendiri, yang jika tidak hanya akan membackup
+  dirinya sendiri. Kompresi dan enkripsi adalah opsi portabel yang sama seperti backup lainnya.
+- **Restore menjaga root tetap bekerja.** Setiap file ditulis kembali dengan pemilik, grup, mode,
+  dan konteks SELinux aslinya, satu file pada satu waktu, di atas pohon yang hidup (tidak pernah
+  wipe menyeluruh), sehingga konteks yang berbeda-beda di bawah `/data/adb` dipertahankan dan
+  manajer root Anda tetap boot.
+- **Lanjutan.** Ini menyentuh lingkungan root secara langsung. Merestore bersifat merusak dan
+  meminta Anda mengonfirmasi; restore selektif hanya menulis kembali path yang Anda pilih.
 
 ## 6. Merestore backup
 

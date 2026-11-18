@@ -1,4 +1,4 @@
-> **Languages:** English · [العربية](ar/AI-AGENTS.md) · [Čeština](cs/AI-AGENTS.md) · [Deutsch](de/AI-AGENTS.md) · [Español](es/AI-AGENTS.md) · [فارسی](fa/AI-AGENTS.md) · [Français](fr/AI-AGENTS.md) · [हिन्दी](hi/AI-AGENTS.md) · [Bahasa Indonesia](in/AI-AGENTS.md) · [Italiano](it/AI-AGENTS.md) · [日本語](ja/AI-AGENTS.md) · [한국어](ko/AI-AGENTS.md) · [Nederlands](nl/AI-AGENTS.md) · [Polski](pl/AI-AGENTS.md) · [Português](pt/AI-AGENTS.md) · [Русский](ru/AI-AGENTS.md) · [Svenska](sv/AI-AGENTS.md) · [ไทย](th/AI-AGENTS.md) · [Türkçe](tr/AI-AGENTS.md) · [Українська](uk/AI-AGENTS.md) · [Tiếng Việt](vi/AI-AGENTS.md) · [中文](zh/AI-AGENTS.md)
+> **Languages:** English · [العربية](ar/AI-AGENTS.md) · [Čeština](cs/AI-AGENTS.md) · [Deutsch](de/AI-AGENTS.md) · [Español](es/AI-AGENTS.md) · [فارسی](fa/AI-AGENTS.md) · [Français](fr/AI-AGENTS.md) · [हिन्दी](hi/AI-AGENTS.md) · [Bahasa Indonesia](id/AI-AGENTS.md) · [Italiano](it/AI-AGENTS.md) · [日本語](ja/AI-AGENTS.md) · [한국어](ko/AI-AGENTS.md) · [Nederlands](nl/AI-AGENTS.md) · [Polski](pl/AI-AGENTS.md) · [Português](pt/AI-AGENTS.md) · [Русский](ru/AI-AGENTS.md) · [Svenska](sv/AI-AGENTS.md) · [ไทย](th/AI-AGENTS.md) · [Türkçe](tr/AI-AGENTS.md) · [Українська](uk/AI-AGENTS.md) · [Tiếng Việt](vi/AI-AGENTS.md) · [中文](zh/AI-AGENTS.md)
 
 ---
 
@@ -76,6 +76,12 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` back up any absolute path as `tar.zst`+`manifest.json` under `.paths/` (detached) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` restore a path backup to its original location (`confirm` gates it; detached) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` one lazy level of the /data/adb tree (default `/data/adb`), for the picker. |
+| `adb-du` | `{path}` | `{ok,size}` recursive byte size of one /data/adb subtree, on demand. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` back up /data/adb - total (omit `paths`) or the chosen sub-paths - with per-file SELinux/owner fidelity, under `.adb/` (detached) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` restore a /data/adb backup OVER the live tree - total or chosen sub-paths - keeping each file's context (never a blanket chcon); `confirm` gates it (detached) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` the /data/adb filesystem backups. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` a backup's stored verbose file listing, for the restore tree picker. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | mount an installed app as a system app (systemless sub-module; live via NoMount else next boot) |
 | `companion-status` / `companion-install` | `{}` | Google Drive companion status / on-demand install |
@@ -103,6 +109,7 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` lists the encrypted config files available to import. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` removes stored remote passwords and the device encryption key; destinations, jobs and backups stay. |
 | `log-prune` | `{}` | `{ok}` prunes long-finished op logs, caps the audit trail and evicts stale icons (the boot service calls this). |
+| `sanitize` | `{}` | `{ok}` re-asserts backup-folder visibility (0755) across every Android user, so a file manager can open folders a raw root copy or a pre-v1.03.2 backup left owner-only. |
 
 ### `progress` fields
 
@@ -210,6 +217,21 @@ A minimal **thermal safety** check is always applied on top of these: a schedule
 skipped while the device is critically hot. Every gate skip is written to the audit trail as
 `op:"scheduler-gated"` with a `reason` of `wifi` / `charging` / `battery` / `days` /
 `thermal`.
+
+### Batch reliability
+
+A batch (`backup` with `packages`, `restore` with `refs`) runs each app in its own subshell,
+so one app cannot break the rest:
+
+- **`batch_app_timeout`** (config, seconds, default `1800`, `0` disables): if an app takes
+  longer, its process tree is killed, it is recorded `ERR_TIMEOUT`, and the batch continues,
+  so one stuck app never freezes the whole run.
+- **Partial result**: the finish write carries `ok`, `n` of `of`, a `fails` tally
+  `{code:count}` (e.g. `{"ERR_NO_SPACE":24}`), and `free` (bytes left on the backups
+  filesystem). A partial batch is `ERR_BATCH_PARTIAL`, never a blind error.
+- **Thermal pacing** (config `thermal_throttle`, default on): between apps the worker pauses
+  to cool when the device is hot, emitting a `cooling` progress phase, so a long run cannot
+  overheat the device.
 
 ### `remote-add` args
 
@@ -323,6 +345,24 @@ with a RECOVERY kit when encrypted) under `.paths/` in the backups directory.
   valid path backup fails with `ERR_BAD_REF`.
 - Both run **detached**; poll `progress` with the returned `opid`.
 
+### /data/adb filesystem backup
+
+`adb-backup` / `adb-restore` back up and restore the root environment under /data/adb (modules,
+their data and configs), driven by a lazy tree picker (`adb-list` one level at a time, `adb-du`
+for a folder's size on demand).
+
+- Total or selective at both ends: omit `paths` for everything, or pass the chosen sub-paths
+  (relative to /data/adb); restore takes the same `paths`.
+- **Per-file fidelity:** the archive keeps each file's SELinux context, owner and xattrs, and the
+  restore relies on that - it NEVER applies a blanket `chcon`, which would flatten /data/adb's
+  heterogeneous contexts and break root. `adb-restore` extracts OVER the live tree; it never wipes it.
+- Self-reference: the backup's own output and the module's staging are excluded, so a backup never
+  contains itself.
+- `adb-index` returns a backup's stored file listing so a restore can show its tree; the UI selection
+  is expressed entirely through `paths` (a fully-checked folder is one path; a partly-checked one
+  descends to its checked children, so no exclude list is needed).
+- `adb-restore` requires `"confirm": true` (heavy-friction gate); both run detached, poll `progress`.
+
 ### `update-check`
 
 `update-check` reports whether a newer version of the module has been published, so an agent
@@ -380,7 +420,7 @@ verb.
 - Treat the JSON output as the source of truth; check `ok`/`code`, poll `progress`,
   and surface `ERR_*` codes rather than guessing.
 
-See [ARCHITECTURE.md](../ARCHITECTURE.md) and
+See [ARCHITECTURE.md](ARCHITECTURE.md) and
 [FILE-STRUCTURE.md](FILE-STRUCTURE.md) for the internals.
 
 <!-- doc-footer -->

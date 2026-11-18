@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -73,6 +73,9 @@ Neo-Backup وAndroid-DataBackup الموجودة كي تنتقل إليها.
   نشاط/تدقيق لكل إجراء مُتلِف.
 - **النسخ الاحتياطية الخاصة:** الرسائل (SMS/MMS/RCS)، جهات الاتصال وسجل المكالمات، Wi-Fi وBluetooth،
   مع تصدير JSON محمول اختياري يمكنك فتحه على حاسوب.
+- **ملفات النظام (`/data/adb`):** انسخ بيئة الـ root نفسها - الوحدات وبياناتها وإعداداتها - كلها أو
+  شجرة فرعية تختارها من شجرة ملفات، مع استعادة كل ملف إلى مالكه الأصلي وسياق SELinux الأصلي كي
+  يظل الـ root عاملا. متقدم؛ فقط ما تختاره.
 - **الجدولة + الأتمتة:** مهام **نسخ احتياطي أو استعادة** متكررة تستهدف تطبيقا واحدا أو
   مجموعة أو كل التطبيقات، مع تقليم keep-N، إضافة إلى نسخ احتياطي تلقائي باختيار صريح عند
   التثبيت/التحديث وقائمة تطبيقات مستبعَدة.
@@ -117,6 +120,14 @@ Neo-Backup وAndroid-DataBackup الموجودة كي تنتقل إليها.
 راجع **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** لسطح التحكم الكامل، و
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) للمساهمة.
 
+## التحديثات التزايدية (VDLU)
+
+يأتي VD Backup مزوّدًا بالمحرك **VDLU** (مُضمَّن في `vdlu/`): تُحدِّث الوحدة نفسها بجلب الملفات التي تغيّرت فقط (كتل معنونة بالمحتوى + ملف `manifest.json` موقَّع)، بدلًا من إعادة تنزيل ملف `.zip` بالكامل. ملف التعريف **المُقوَّى**: توقيع ed25519 إلزامي والرجوع إلى إصدار أقدم محظور؛ ويبقى ملف `.zip` الكامل صالحًا كبديل احتياطي.
+
+- **LIVE فقط** (دون إعادة تشغيل): تُطبَّق التحديثات عند الإقلاع التالي عبر `service.sh`، في الخلفية، ولا تفعل شيئًا عندما لا يكون هناك feed يمكن الوصول إليه.
+- **الحالة** في `/data/adb/vdbackup/vdlu/`، خارج الوحدة، لذا تبقى بعد إعادة الفلاش.
+- **WebUI:** لوحة **التحديثات** مع إشعار منبثق للتقدّم وزر إلغاء؛ والتحديث التلقائي اختياري.
+
 ## التوثيق
 
 - **[الويكي](https://github.com/VD171/VD-Backup/wiki/ar-Home)**: التوثيق، قابل للتصفح على الإنترنت.
@@ -138,6 +149,8 @@ Neo-Backup وAndroid-DataBackup الموجودة كي تنتقل إليها.
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: خدمات Google لديك (RCS، Wallet، شهادات Play Integrity)، تُقرأ على جهازك دون إنترنت.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: مُزيِّف جهاز يحوّل بصمة جديدة إلى ملف تعريف متماسك ومتسق.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: خادم SSH مستقل يعمل بصلاحيات الجذر (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## جهات الاتصال
 

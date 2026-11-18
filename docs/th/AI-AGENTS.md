@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · ไทย · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · ไทย · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -74,6 +74,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` สำรองพาธสัมบูรณ์ใด ๆ เป็น `tar.zst`+`manifest.json` ใต้ `.paths/` (detached) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` กู้คืนการสำรองพาธไปยังตำแหน่งเดิมของมัน (`confirm` เป็นตัวกั้น; detached) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` หนึ่งระดับแบบ lazy ของต้นไม้ /data/adb (ค่าเริ่มต้น `/data/adb`) สำหรับตัวเลือก |
+| `adb-du` | `{path}` | `{ok,size}` ขนาดไบต์แบบเวียนเกิดของซับทรี /data/adb หนึ่งอัน ตามคำขอ |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` สำรอง /data/adb - ทั้งหมด (ละ `paths`) หรือซับพาธที่เลือก - ด้วยความเที่ยงตรง SELinux/เจ้าของต่อไฟล์ ใต้ `.adb/` (detached) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` กู้คืนการสำรอง /data/adb ทับต้นไม้ที่ใช้งานอยู่ - ทั้งหมดหรือซับพาธที่เลือก - โดยคงบริบทของแต่ละไฟล์ (ไม่เคยใช้ chcon แบบเหมารวม); `confirm` เป็นตัวกั้น (detached) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` การสำรองระบบไฟล์ /data/adb |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` รายการไฟล์แบบละเอียดที่เก็บไว้ของการสำรอง สำหรับตัวเลือกต้นไม้กู้คืน |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | เมานต์แอปที่ติดตั้งให้เป็นแอประบบ (โมดูลย่อยแบบ systemless; มีผลทันทีผ่าน NoMount มิฉะนั้นเมื่อบูตครั้งถัดไป) |
 | `companion-status` / `companion-install` | `{}` | สถานะ / การติดตั้งตามความต้องการของตัวเสริม Google Drive |
@@ -101,6 +107,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` แสดงรายการไฟล์การตั้งค่าที่เข้ารหัสที่พร้อมนำเข้า |
 | `wipe-credentials` | `{}` | `{ok,wiped}` ลบรหัสผ่านระยะไกลที่บันทึกไว้และคีย์เข้ารหัสของอุปกรณ์ ปลายทาง งาน และข้อมูลสำรองยังคงอยู่ |
 | `log-prune` | `{}` | `{ok}` ตัดบันทึกปฏิบัติการที่เสร็จนานแล้ว จำกัดร่องรอยการตรวจสอบ และลบไอคอนที่ล้าสมัย (บริการบูตเรียกสิ่งนี้) |
+| `sanitize` | `{}` | `{ok}` ยืนยันการมองเห็น (0755) ของโฟลเดอร์สำรองข้อมูลอีกครั้งในทุกผู้ใช้ Android เพื่อให้โปรแกรมจัดการไฟล์สามารถเปิดโฟลเดอร์ที่สำเนา root แบบดิบหรือข้อมูลสำรองก่อน v1.03.2 ปล่อยให้เข้าถึงได้เฉพาะเจ้าของ |
 
 ### ฟิลด์ของ `progress`
 
@@ -207,6 +214,14 @@ Neo backup ที่เข้ารหัสไว้ จะรับ `"password
 `op:"scheduler-gated"` พร้อม `reason` อย่างใดอย่างหนึ่งใน `wifi` / `charging` / `battery` / `days` /
 `thermal`
 
+### ความน่าเชื่อถือของชุดงาน
+
+ชุดงาน (`backup` ที่มี `packages`, `restore` ที่มี `refs`) จะรันแต่ละแอปในซับเชลล์ของตัวเอง เพื่อไม่ให้แอปหนึ่งทำให้แอปอื่นเสียหายได้:
+
+- **`batch_app_timeout`** (การตั้งค่า, วินาที, ค่าเริ่มต้น `1800`, `0` คือปิด): หากแอปใช้เวลานานกว่านี้ ต้นไม้กระบวนการของมันจะถูกยุติ บันทึกเป็น `ERR_TIMEOUT` และชุดงานดำเนินต่อไป เพื่อไม่ให้แอปที่ค้างเพียงแอปเดียวหยุดการทำงานทั้งหมด
+- **ผลลัพธ์บางส่วน**: การเขียนเมื่อเสร็จจะมี `ok`, `n` จาก `of`, สรุป `fails` แบบ `{code:count}` (เช่น `{"ERR_NO_SPACE":24}`) และ `free` (ไบต์ที่เหลือในระบบไฟล์ของข้อมูลสำรอง) ชุดงานบางส่วนคือ `ERR_BATCH_PARTIAL` ไม่ใช่ข้อผิดพลาดแบบไร้ที่มา
+- **การกำหนดจังหวะตามอุณหภูมิ** (การตั้งค่า `thermal_throttle`, เปิดโดยค่าเริ่มต้น): ระหว่างแอป เวิร์กเกอร์จะหยุดชั่วคราวเพื่อลดอุณหภูมิเมื่อเครื่องร้อน โดยส่งเฟสความคืบหน้า `cooling` เพื่อไม่ให้การทำงานนานทำให้เครื่องร้อนเกินไป
+
 ### อาร์กิวเมนต์ของ `remote-add`
 
 ปลายทางคลาวด์คือปลายทาง `type:"rclone"` ที่ระบุชื่อ `rclone` remote จงสร้าง remote นั้นก่อน
@@ -310,6 +325,22 @@ VDBackup เอง (ผนึกด้วย SHA-256 พร้อมชุด RE
   ตัวกั้นที่มีแรงเสียดทานสูง เช่นเดียวกับ `special-restore` `ref` ที่ไม่ใช่การสำรองพาธที่ถูกต้องจะล้มเหลวด้วย
   `ERR_BAD_REF`
 - ทั้งคู่รันแบบ **detached**; poll `progress` ด้วย `opid` ที่คืนมา
+
+### การสำรองระบบไฟล์ /data/adb
+
+`adb-backup` / `adb-restore` สำรองและกู้คืนสภาพแวดล้อม root ใต้ /data/adb (โมดูล ข้อมูลและการตั้งค่าของมัน)
+ขับเคลื่อนด้วยตัวเลือกต้นไม้แบบ lazy (`adb-list` ทีละระดับ, `adb-du` สำหรับขนาดของโฟลเดอร์ตามคำขอ)
+
+- ทั้งหมดหรือเลือกเฉพาะที่ทั้งสองปลาย: ละ `paths` สำหรับทุกอย่าง หรือส่งซับพาธที่เลือก
+  (สัมพัทธ์กับ /data/adb); การกู้คืนรับ `paths` เดียวกัน
+- **ความเที่ยงตรงต่อไฟล์:** archive เก็บบริบท SELinux เจ้าของ และ xattrs ของแต่ละไฟล์ และการกู้คืน
+  พึ่งพาสิ่งนั้น - มันไม่เคยใช้ `chcon` แบบเหมารวม ซึ่งจะทำให้บริบทที่หลากหลายของ /data/adb แบนราบ
+  และทำให้ root พัง `adb-restore` แตกไฟล์ทับต้นไม้ที่ใช้งานอยู่ ไม่เคยล้างมันทิ้ง
+- การอ้างอิงตัวเอง: เอาต์พุตของการสำรองเองและ staging ของโมดูลถูกยกเว้น ดังนั้นการสำรองจึงไม่เคยบรรจุตัวมันเอง
+- `adb-index` คืนรายการไฟล์ที่เก็บไว้ของการสำรองเพื่อให้การกู้คืนแสดงต้นไม้ของมันได้; การเลือกใน UI
+  ถูกแสดงออกทั้งหมดผ่าน `paths` (โฟลเดอร์ที่ติ๊กเต็มคือหนึ่งพาธ; ที่ติ๊กบางส่วนจะลงไปยังลูกที่ติ๊กไว้
+  จึงไม่ต้องใช้รายการ exclude)
+- `adb-restore` ต้องการ `"confirm": true` (ตัวกั้นที่มีแรงเสียดทานสูง); ทั้งคู่รันแบบ detached, poll `progress`
 
 ### `update-check`
 

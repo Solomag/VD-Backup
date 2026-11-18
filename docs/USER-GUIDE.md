@@ -1,4 +1,4 @@
-> **Languages:** English · [العربية](ar/USER-GUIDE.md) · [Čeština](cs/USER-GUIDE.md) · [Deutsch](de/USER-GUIDE.md) · [Español](es/USER-GUIDE.md) · [فارسی](fa/USER-GUIDE.md) · [Français](fr/USER-GUIDE.md) · [हिन्दी](hi/USER-GUIDE.md) · [Bahasa Indonesia](in/USER-GUIDE.md) · [Italiano](it/USER-GUIDE.md) · [日本語](ja/USER-GUIDE.md) · [한국어](ko/USER-GUIDE.md) · [Nederlands](nl/USER-GUIDE.md) · [Polski](pl/USER-GUIDE.md) · [Português](pt/USER-GUIDE.md) · [Русский](ru/USER-GUIDE.md) · [Svenska](sv/USER-GUIDE.md) · [ไทย](th/USER-GUIDE.md) · [Türkçe](tr/USER-GUIDE.md) · [Українська](uk/USER-GUIDE.md) · [Tiếng Việt](vi/USER-GUIDE.md) · [中文](zh/USER-GUIDE.md)
+> **Languages:** English · [العربية](ar/USER-GUIDE.md) · [Čeština](cs/USER-GUIDE.md) · [Deutsch](de/USER-GUIDE.md) · [Español](es/USER-GUIDE.md) · [فارسی](fa/USER-GUIDE.md) · [Français](fr/USER-GUIDE.md) · [हिन्दी](hi/USER-GUIDE.md) · [Bahasa Indonesia](id/USER-GUIDE.md) · [Italiano](it/USER-GUIDE.md) · [日本語](ja/USER-GUIDE.md) · [한국어](ko/USER-GUIDE.md) · [Nederlands](nl/USER-GUIDE.md) · [Polski](pl/USER-GUIDE.md) · [Português](pt/USER-GUIDE.md) · [Русский](ru/USER-GUIDE.md) · [Svenska](sv/USER-GUIDE.md) · [ไทย](th/USER-GUIDE.md) · [Türkçe](tr/USER-GUIDE.md) · [Українська](uk/USER-GUIDE.md) · [Tiếng Việt](vi/USER-GUIDE.md) · [中文](zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ place, with nothing to "allow".
   - [5.5 Verify and dry-run](#55-verify-and-dry-run)
   - [5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)](#56-special-backups-messages-call-log-wi-fi-bluetooth-calendar-wallpaper-dns-system-settings)
   - [5.7 Standalone folder and file backups](#57-standalone-folder-and-file-backups)
+  - [5.8 System files (/data/adb)](#58-system-files-dataadb)
 - [6. Restoring a backup](#6-restoring-a-backup)
 - [7. Destinations: local and remote](#7-destinations-local-and-remote)
   - [7.1 Backing up your settings](#71-backing-up-your-settings)
@@ -330,6 +331,23 @@ your backups directory.
   destructive and asks you to **confirm** before it overwrites anything.
 - Like app backups, path backups and restores run **detached** with live progress, use
   your chosen compression, and can be encrypted with a passphrase.
+
+### 5.8 System files (`/data/adb`)
+
+`/data/adb` is where your root manager keeps installed modules, their data and their
+configuration - the root environment itself. VDBackup can back this up, whole or in part,
+so you can carry your root setup across a wipe or a ROM change.
+
+- **Total or selective.** Back up all of `/data/adb`, or open the file tree and pick exactly
+  the folders and files you want; a half-checked folder includes only the children you ticked.
+- **Everything stays in your hands.** The tree is neutral - nothing is pre-selected or hidden,
+  except VDBackup's own working files, which would otherwise just back up itself. Compression
+  and encryption are the same portable options as any other backup.
+- **Restore keeps root working.** Each file is written back with its original owner, group,
+  mode and SELinux context, one file at a time, over the live tree (never a blanket wipe), so
+  the differing contexts under `/data/adb` are preserved and your root manager still boots.
+- **Advanced.** This touches the root environment directly. Restoring is destructive and asks
+  you to confirm; a selective restore writes back only the paths you chose.
 
 ## 6. Restoring a backup
 

@@ -75,6 +75,12 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` membackup sembarang path absolut sebagai `tar.zst`+`manifest.json` di bawah `.paths/` (terlepas) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` merestore sebuah backup path ke lokasi aslinya (`confirm` membatasinya; terlepas) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` satu level lazy dari pohon /data/adb (default `/data/adb`), untuk pemilih. |
+| `adb-du` | `{path}` | `{ok,size}` ukuran byte rekursif satu subpohon /data/adb, sesuai permintaan. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` membackup /data/adb - total (hilangkan `paths`) atau sub-path yang dipilih - dengan fidelitas SELinux/pemilik per-file, di bawah `.adb/` (terlepas) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` merestore sebuah backup /data/adb DI ATAS pohon hidup - total atau sub-path yang dipilih - mempertahankan konteks tiap file (tidak pernah chcon menyeluruh); `confirm` membatasinya (terlepas) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` backup sistem file /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` daftar file verbose tersimpan sebuah backup, untuk pemilih pohon restore. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | pasang aplikasi terpasang sebagai aplikasi sistem (sub-modul systemless; live via NoMount jika tidak maka boot berikutnya) |
 | `companion-status` / `companion-install` | `{}` | status pendamping Google Drive / pemasangan sesuai permintaan |
@@ -102,6 +108,7 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` mencantumkan berkas konfig terenkripsi yang tersedia untuk diimpor. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` menghapus kata sandi jarak jauh tersimpan dan kunci enkripsi perangkat; tujuan, tugas, dan cadangan tetap ada. |
 | `log-prune` | `{}` | `{ok}` memangkas log op yang sudah lama selesai, membatasi jejak audit, dan membuang ikon usang (layanan boot memanggilnya). |
+| `sanitize` | `{}` | `{ok}` menegaskan kembali visibilitas (0755) folder backup di setiap pengguna Android, sehingga pengelola berkas dapat membuka folder yang ditinggalkan hanya-pemilik oleh salinan root mentah atau backup sebelum v1.03.2. |
 
 ### Field `progress`
 
@@ -210,6 +217,14 @@ Di atas semua itu, sebuah pemeriksaan **keamanan termal** minimal selalu diterap
 terjadwal dilewati selama perangkat panas secara kritis. Setiap pelewatan gerbang ditulis ke audit
 trail sebagai `op:"scheduler-gated"` dengan `reason` berupa `wifi` / `charging` / `battery` / `days`
 / `thermal`.
+
+### Keandalan batch
+
+Sebuah batch (`backup` dengan `packages`, `restore` dengan `refs`) menjalankan setiap aplikasi di subshell-nya sendiri, sehingga satu aplikasi tidak dapat merusak yang lain:
+
+- **`batch_app_timeout`** (konfigurasi, detik, bawaan `1800`, `0` menonaktifkan): jika sebuah aplikasi memakan waktu lebih lama, pohon prosesnya dihentikan, dicatat sebagai `ERR_TIMEOUT`, dan batch berlanjut, sehingga satu aplikasi yang macet tidak pernah membekukan seluruh proses.
+- **Hasil sebagian**: penulisan akhir membawa `ok`, `n` dari `of`, hitungan `fails` `{code:count}` (mis. `{"ERR_NO_SPACE":24}`), dan `free` (byte tersisa di sistem berkas cadangan). Batch sebagian adalah `ERR_BATCH_PARTIAL`, tidak pernah kesalahan buta.
+- **Pengaturan laju termal** (konfigurasi `thermal_throttle`, bawaan aktif): di antara aplikasi, worker berhenti sejenak untuk mendingin saat perangkat panas, memancarkan fase kemajuan `cooling`, sehingga proses yang panjang tidak membuat perangkat terlalu panas.
 
 ### Args `remote-add`
 
@@ -322,6 +337,25 @@ dengan kit RECOVERY saat terenkripsi) di bawah `.paths/` di direktori backups.
   `"confirm": true`, sebuah gate berfriksi tinggi, seperti `special-restore`. Sebuah `ref` yang
   bukan backup path yang valid gagal dengan `ERR_BAD_REF`.
 - Keduanya berjalan **terlepas**; poll `progress` dengan `opid` yang dikembalikan.
+
+### Backup sistem file /data/adb
+
+`adb-backup` / `adb-restore` membackup dan merestore lingkungan root di bawah /data/adb (modul,
+data dan konfigurasinya), digerakkan oleh pemilih pohon lazy (`adb-list` satu level per kali,
+`adb-du` untuk ukuran sebuah folder sesuai permintaan).
+
+- Total atau selektif di kedua ujung: hilangkan `paths` untuk semuanya, atau berikan sub-path yang
+  dipilih (relatif terhadap /data/adb); restore mengambil `paths` yang sama.
+- **Fidelitas per-file:** arsip menyimpan konteks SELinux, pemilik dan xattrs tiap file, dan restore
+  bergantung pada itu - ia TIDAK PERNAH menerapkan `chcon` menyeluruh, yang akan meratakan konteks
+  heterogen /data/adb dan merusak root. `adb-restore` mengekstrak DI ATAS pohon hidup; ia tidak pernah
+  menghapusnya.
+- Referensi-diri: keluaran backup itu sendiri dan staging modul dikecualikan, sehingga sebuah backup
+  tidak pernah memuat dirinya sendiri.
+- `adb-index` mengembalikan daftar file tersimpan sebuah backup agar restore dapat menampilkan pohonnya;
+  pilihan UI diekspresikan sepenuhnya melalui `paths` (folder yang tercentang penuh adalah satu path;
+  yang tercentang sebagian turun ke anak-anaknya yang tercentang, jadi tidak perlu daftar exclude).
+- `adb-restore` membutuhkan `"confirm": true` (gate berfriksi tinggi); keduanya berjalan terlepas, poll `progress`.
 
 ### `update-check`
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · Polski · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · Polski · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ chmurowe (`rclone`/`restic`/ssh) komunikują się z siecią.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` tworzy kopię dowolnej ścieżki bezwzględnej jako `tar.zst`+`manifest.json` pod `.paths/` (odłączone) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` przywraca kopię ścieżki do jej oryginalnej lokalizacji (`confirm` to zabezpiecza; odłączone) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` jeden leniwy poziom drzewa /data/adb (domyślnie `/data/adb`), dla selektora. |
+| `adb-du` | `{path}` | `{ok,size}` rekurencyjny rozmiar w bajtach jednego poddrzewa /data/adb, na żądanie. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` tworzy kopię /data/adb - całość (pomiń `paths`) lub wybrane pod-ścieżki - z wiernością SELinux/właściciela per-plik, pod `.adb/` (odłączone) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` przywraca kopię /data/adb NA żywe drzewo - całość lub wybrane pod-ścieżki - zachowując kontekst każdego pliku (nigdy zbiorczy chcon); `confirm` to zabezpiecza (odłączone) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` kopie systemu plików /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` zapisany szczegółowy wykaz plików kopii, dla selektora drzewa przywracania. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | montuje zainstalowaną aplikację jako systemową (bezsystemowy podmoduł; na żywo przez NoMount, inaczej przy następnym rozruchu) |
 | `companion-status` / `companion-install` | `{}` | status komponentu Dysku Google / instalacja na żądanie |
@@ -102,6 +108,7 @@ chmurowe (`rclone`/`restic`/ssh) komunikują się z siecią.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` wypisuje zaszyfrowane pliki konfiguracji dostępne do importu. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` usuwa zapisane hasła zdalne i klucz szyfrowania urządzenia; miejsca docelowe, zadania i kopie pozostają. |
 | `log-prune` | `{}` | `{ok}` przycina dawno zakończone logi operacji, ogranicza dziennik audytu i usuwa nieaktualne ikony (wywołuje to usługa rozruchu). |
+| `sanitize` | `{}` | `{ok}` ponownie wymusza widoczność (0755) folderów kopii zapasowych dla każdego użytkownika Androida, aby menedżer plików mógł otworzyć foldery, które surowa kopia root lub kopia zapasowa sprzed v1.03.2 pozostawiły dostępne tylko dla właściciela. |
 
 ### Pola `progress`
 
@@ -209,6 +216,14 @@ Oprócz tego zawsze stosowane jest minimalne **zabezpieczenie termiczne**: zapla
 pomijana, gdy urządzenie jest krytycznie gorące. Każde pominięcie bramkowe jest zapisywane w śladzie
 audytu jako `op:"scheduler-gated"` z `reason` o wartości `wifi` / `charging` / `battery` / `days` /
 `thermal`.
+
+### Niezawodność partii
+
+Partia (`backup` z `packages`, `restore` z `refs`) uruchamia każdą aplikację we własnej podpowłoce, aby jedna aplikacja nie mogła zepsuć pozostałych:
+
+- **`batch_app_timeout`** (konfiguracja, sekundy, domyślnie `1800`, `0` wyłącza): jeśli aplikacja trwa dłużej, jej drzewo procesów zostaje zakończone, jest zapisywana jako `ERR_TIMEOUT`, a partia jest kontynuowana, aby jedna zawieszona aplikacja nigdy nie zamroziła całego przebiegu.
+- **Wynik częściowy**: zapis końcowy zawiera `ok`, `n` z `of`, zestawienie `fails` `{code:count}` (np. `{"ERR_NO_SPACE":24}`) oraz `free` (wolne bajty w systemie plików kopii). Częściowa partia to `ERR_BATCH_PARTIAL`, nigdy ślepy błąd.
+- **Regulacja termiczna** (konfiguracja `thermal_throttle`, domyślnie włączona): między aplikacjami worker wstrzymuje się, aby ostygnąć, gdy urządzenie jest gorące, emitując fazę postępu `cooling`, aby długi przebieg nie przegrzał urządzenia.
 
 ### Argumenty `remote-add`
 
@@ -322,6 +337,24 @@ Archiwum jest zapisywane jako `tar.zst` plus `manifest.json` we własnym formaci
   wymaga `"confirm": true`, bramki o dużym tarciu, jak `special-restore`. `ref`, który nie jest
   prawidłową kopią ścieżki, kończy się błędem `ERR_BAD_REF`.
 - Oba działają **odłączone**; odpytuj `progress` zwróconym `opid`.
+
+### Kopia systemu plików /data/adb
+
+`adb-backup` / `adb-restore` tworzą kopię i przywracają środowisko root pod /data/adb (moduły,
+ich dane i konfiguracje), sterowane leniwym selektorem drzewa (`adb-list` po jednym poziomie, `adb-du`
+dla rozmiaru folderu na żądanie).
+
+- Całość lub wybiórczo na obu końcach: pomiń `paths` dla wszystkiego, albo przekaż wybrane pod-ścieżki
+  (względne do /data/adb); przywracanie bierze te same `paths`.
+- **Wierność per-plik:** archiwum zachowuje kontekst SELinux, właściciela i xattrs każdego pliku, a
+  przywracanie na tym polega - NIGDY nie stosuje zbiorczego `chcon`, który spłaszczyłby heterogeniczne
+  konteksty /data/adb i zepsuł root. `adb-restore` wypakowuje NA żywe drzewo; nigdy go nie kasuje.
+- Samoodniesienie: własne wyjście kopii i staging modułu są wykluczone, więc kopia nigdy nie zawiera
+  samej siebie.
+- `adb-index` zwraca zapisany wykaz plików kopii, aby przywracanie mogło pokazać jej drzewo; wybór w UI
+  jest wyrażony w całości przez `paths` (w pełni zaznaczony folder to jedna ścieżka; częściowo
+  zaznaczony schodzi do swoich zaznaczonych dzieci, więc lista wykluczeń nie jest potrzebna).
+- `adb-restore` wymaga `"confirm": true` (bramka o dużym tarciu); oba działają odłączone, odpytuj `progress`.
 
 ### `update-check`
 

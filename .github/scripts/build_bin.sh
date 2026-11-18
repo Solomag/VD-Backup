@@ -171,17 +171,30 @@ fetch_abx() {
   fi
 }
 
+# mtproto-store: static Go binary (Telegram as a backup destination via MTProto), fetched from its GitHub
+# release. Tracks the LATEST release automatically, the same model as the Termux bins: build_bin resolves the
+# newest tag, the provenance records package/version so the lock catches a change, and bin-refresh does a
+# .patch bump on its own. No manual pin bump when mtproto-store ships a new version. MTPROTO_FALLBACK is the
+# floor used only when the GitHub API is unreachable at build time.
+MTPROTO_FALLBACK="v1.1.1"
+mtproto_latest() {
+  local url="https://api.github.com/repos/VictorGabriel7Dev/mtproto-store/releases/latest"
+  if [ -n "${GITHUB_TOKEN:-}" ]; then
+    curl -fsSL -H "Authorization: Bearer $GITHUB_TOKEN" "$url" 2>/dev/null
+  else
+    curl -fsSL "$url" 2>/dev/null
+  fi | sed -n 's/.*"tag_name"[: ]*"\([^"]*\)".*/\1/p' | head -1
+}
+MTPROTO_RELEASE="$(mtproto_latest)"; [ -n "$MTPROTO_RELEASE" ] || MTPROTO_RELEASE="$MTPROTO_FALLBACK"
 mtproto_asset() { case "$1" in arm64-v8a) echo linux-arm64 ;; armeabi-v7a) echo linux-armv7 ;; x86) echo linux-386 ;; x86_64) echo linux-amd64 ;; esac; }
-MTPROTO_RELEASE="v1.1.0"   # mtproto-store: Telegram-destination binary; bump with the module when it updates (v1.1.0: delete verb + rename-robust init-storage + --channel-id)
-# mtproto-store: static Go binary (Telegram as a backup destination via MTProto); fetched from its GitHub release
 fetch_mtproto() {
   local abi="$1" asset out bin url
   asset="$(mtproto_asset "$abi")"; [ -n "$asset" ] || return 0
   out="$OUT_BASE/$abi"; bin="$WORK/$abi/mtproto-store"
   url="https://github.com/VictorGabriel7Dev/mtproto-store/releases/download/$MTPROTO_RELEASE/mtproto-store-$asset"
   if curl -fsSL "$url" -o "$bin" 2>/dev/null; then
-    printf '{"type": "mtproto-store", "project": "VictorGabriel7Dev/mtproto-store", "release": "%s", "url": "%s", "archive_sha256": "%s"}\n' \
-      "$MTPROTO_RELEASE" "$url" "$(sha "$bin")" >> "$WORK/$abi/src.jsonl"
+    printf '{"type": "mtproto-store", "package": "mtproto-store", "version": "%s", "project": "VictorGabriel7Dev/mtproto-store", "release": "%s", "url": "%s", "archive_sha256": "%s"}\n' \
+      "$MTPROTO_RELEASE" "$MTPROTO_RELEASE" "$url" "$(sha "$bin")" >> "$WORK/$abi/src.jsonl"
     cp "$bin" "$out/mtproto-store"; chmod 0755 "$out/mtproto-store"
     echo "  mtproto-store: fetched ($asset)"
   else

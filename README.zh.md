@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -68,6 +68,7 @@ VDBackup 是一个 root **WebUI 模块**，用于备份和还原你的应用及�
 - **完整性:** 每个归档都会对照清单进行校验；试运行和还原测试让你无需改动任何东西即可检查备份。
 - **选择性与批量还原:** 还原备份项目的任意子集，或多选多个备份并一次性全部还原；删除备份，并为每一次破坏性操作保留活动/审计日志。
 - **特殊备份:** 短信 (SMS/MMS/RCS)、联系人和通话记录、Wi-Fi 和蓝牙，还可选地导出一份可在 PC 上打开的可移植 JSON。
+- **系统文件 (`/data/adb`):** 备份 root 环境本身 - 模块、它们的数据和配置 - 全部，或你从文件树中挑选的一个子树，每个文件都以其原始所有者和 SELinux 上下文还原，让 root 继续工作。高级；仅限你所选择的内容。
 - **调度 + 自动化:** 针对单个应用、一组应用或所有应用的周期性**备份或恢复**任务，以 keep-N 修剪，外加选择加入的安装/更新时自动备份和一份排除应用列表。
 - **安装来源:** 还原的应用默认把 Play Store 报告为其安装来源 (可切换)；一个高级的选择加入项还会伪造发起方软件包和来源。
 - **系统应用挂载:** 无需触碰真实的 `/system` 分区即可把已安装的应用挂载为系统应用 (无系统修改的叠加子模块，支持 NoMount)。
@@ -104,6 +105,14 @@ VDBackup 的构建目标是不仅欢迎人，也欢迎 AI 助手和代理。引�
 控制面请见 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**，参与贡献请见
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome)。
 
+## 增量更新 (VDLU)
+
+VD Backup 附带 **VDLU** 引擎 (内置于 `vdlu/`)：模块只获取已更改的文件 (内容寻址的 blob + 一个带签名的 `manifest.json`) 来自我更新，而不是重新下载整个 `.zip`。**加固**配置：ed25519 签名是强制的，降级被阻止；完整的 `.zip` 仍作为回退保持有效。
+
+- **仅 LIVE** (无需重启)：更新会在下次启动时通过 `service.sh` 在后台应用，当没有可达的 feed 时则为空操作。
+- **状态**位于 `/data/adb/vdbackup/vdlu/`，在模块之外，因此重新刷入后仍然保留。
+- **WebUI:** 一个带有进度 toast 和取消的 **更新** 面板；自动更新为可选 (opt-in)。
+
 ## 文档
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/zh-Home)**: 可在线浏览的文档。
@@ -125,6 +134,8 @@ VDBackup 的构建目标是不仅欢迎人，也欢迎 AI 助手和代理。引�
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: 在你的设备上无需联网即可读取你的 Google 服务 (RCS、Wallet、Play Integrity 证明)。
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: 一个设备伪装器，把全新的指纹变成连贯一致的配置。
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: 一个独立的 root SSH 守护进程 (Dropbear)。
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Contacts
 

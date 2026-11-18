@@ -173,6 +173,11 @@ jobs:
         run: |
           set -e
           VCODE="$(sed -n 's/^versionCode=//p' module/module.prop)"
+          # Per-variant updateJson (issue #15): each built zip's module.prop points to its OWN
+          # update manifest, so the root manager keeps the installed variant on update instead of
+          # always pulling universal-full. One sed per staged dir, like the per-variant pruning.
+          RAW="https://raw.githubusercontent.com/VD171/VD-Backup/main/module"
+          set_updatejson() { sed -i "s#^updateJson=.*#updateJson=${RAW}/$2#" "$1/module.prop"; }
           # Seed each variant with a KEYLESS vdlu/baseline.json: the content-addressed manifest of
           # exactly what THAT zip ships, so a fresh install is "born current" and its first VDLU
           # self-update is a proper incremental diff, not a from:0 full re-fetch. vdlu-pack only
@@ -200,6 +205,7 @@ jobs:
           # 2. universal-lite: all ABIs, without the two largest binaries (rclone, restic)
           cp -a module _m_unilite
           rm -f _m_unilite/bin/*/rclone _m_unilite/bin/*/restic
+          set_updatejson _m_unilite update-universal-lite.json
           seed_baseline _m_unilite
           ( cd _m_unilite && zip -r9 "../VD-Backup-${VER}-universal-lite.zip" . -x 'bin/*/.gitkeep' )
           # 3-6. per-ABI full: one ABI dir only, every binary for that architecture
@@ -208,6 +214,7 @@ jobs:
             for d in "_m_$abi"/bin/*/; do
               [ "$(basename "$d")" = "$abi" ] || rm -rf "$d"
             done
+            set_updatejson "_m_$abi" "update-$abi.json"
             seed_baseline "_m_$abi"
             ( cd "_m_$abi" && zip -r9 "../VD-Backup-${VER}-$abi-full.zip" . -x 'bin/*/.gitkeep' )
           done
@@ -228,6 +235,29 @@ jobs:
              '.size=$size | .sha256=$sha | .notes=$notes' module/update.json > "$tmp"
           mv "$tmp" module/update.json
           cat module/update.json
+
+      # Per-variant update manifests (issue #15): clone the just-filled update.json into one
+      # manifest per non-full variant, each carrying that zip's real url/size/sha256 (version,
+      # versionCode, changelog and notes are inherited). Each variant zip's module.prop already
+      # points here (set in Assemble), so the root manager keeps the installed variant on update.
+      - name: Generate per-variant update manifests
+        env:
+          VER: ${{ steps.v.outputs.name }}
+        run: |
+          set -e
+          base="https://github.com/VD171/VD-Backup/releases/download/${VER}"
+          gen() {  # <zip-suffix> <manifest>
+            zip="VD-Backup-${VER}-$1.zip"
+            sz=$(stat -c%s "$zip"); sh=$(sha256sum "$zip" | cut -d' ' -f1)
+            jq --arg url "${base}/${zip}" --argjson size "$sz" --arg sha "$sh" \
+               '.zipUrl=$url | .size=$size | .sha256=$sha' module/update.json > "module/$2"
+            cat "module/$2"
+          }
+          gen universal-lite   update-universal-lite.json
+          gen arm64-v8a-full   update-arm64-v8a.json
+          gen armeabi-v7a-full update-armeabi-v7a.json
+          gen x86-full         update-x86.json
+          gen x86_64-full      update-x86_64.json
 
       # MMRL feed: mmrl-util (the VD-Modules repo) requires the ONLINE_JSON zip to be under
       # 50MB, which the ~230MB universal-full is not. Emit a parallel update-mmrl.json pointing
@@ -259,7 +289,9 @@ jobs:
           git checkout -- companion/app/src/main/res/values/oauth.xml 2>/dev/null || true
           # Stage NEW screenshot dirs too (git commit -am only catches tracked files): a newly
           # added language, e.g. uk, has an untracked docs/screenshots/<lang>/ that -am would miss.
-          git add docs/screenshots module/update-mmrl.json 2>/dev/null || true
+          git add docs/screenshots module/update-mmrl.json \
+                  module/update-universal-lite.json module/update-arm64-v8a.json \
+                  module/update-armeabi-v7a.json module/update-x86.json module/update-x86_64.json 2>/dev/null || true
           git commit -am "Release ${{ steps.v.outputs.name }} (assets, screenshots, update.json)" || true
           git push || true
 

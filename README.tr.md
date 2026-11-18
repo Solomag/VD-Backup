@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,10 @@ Neo-Backup ve Android-DataBackup yedeklerini içe aktarabilir.
   her yıkıcı eylemin bir etkinlik/denetim günlüğünü tutun.
 - **Özel yedekler:** mesajlar (SMS/MMS/RCS), kişiler ve arama günlüğü, Wi-Fi ve Bluetooth;
   bir PC'de açabileceğiniz isteğe bağlı taşınabilir bir JSON dışa aktarımıyla.
+- **Sistem dosyaları (`/data/adb`):** root ortamının kendisini yedekleyin - modülleri, verilerini
+  ve yapılandırmalarını - hepsini veya bir dosya ağacından seçtiğiniz bir alt ağacı, her dosya
+  kendi özgün sahibi ve SELinux bağlamıyla geri yüklenerek, böylece root çalışmaya devam eder.
+  Gelişmiş; yalnızca seçtikleriniz.
 - **Zamanlama + otomasyon:** tek bir uygulamayı, bir kümeyi veya tüm uygulamaları hedefleyen
   **yedekleme veya geri yükleme** için yinelenen işler, keep-N budamayla, ayrıca
   kurulum/güncellemede katılımlı otomatik yedekleme ve bir hariç tutulan uygulamalar listesi.
@@ -120,6 +124,17 @@ diğerleri gibi incelenip kabul edilir. Bir aracı, WebUI'nin kullandığı ayn�
 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**'ye, katkıda bulunmak için ise
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome)'ye bakın.
 
+## Artımlı güncellemeler (VDLU)
+
+VD Backup, **VDLU** motorunu içerir (`vdlu/` içine gömülü): modül, tüm `.zip` dosyasını yeniden indirmek
+yerine yalnızca değişen dosyaları (içerik adresli bloblar + imzalı bir `manifest.json`) alarak kendini
+günceller. **Sağlamlaştırılmış** profil: ed25519 imzası zorunludur ve sürüm düşürmeleri engellenir; tam
+`.zip` bir yedek olarak geçerli kalır.
+
+- **Yalnızca LIVE** (yeniden başlatma yok): güncellemeler bir sonraki açılışta `service.sh` ile arka planda uygulanır, erişilebilir bir feed yoksa hiçbir şey yapılmaz.
+- **Durum** `/data/adb/vdbackup/vdlu/` içinde, modülün dışında, böylece yeniden flashlamayı atlatır.
+- **WebUI:** ilerleme bildirimi (toast) ve iptal içeren bir **Güncellemeler** paneli; otomatik güncelleme isteğe bağlıdır.
+
 ## Belgeler
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/tr-Home)**: belgeler, çevrimiçi göz atılabilir.
@@ -141,6 +156,8 @@ Aynı yazarın kardeş projeleri:
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: Google hizmetleriniz (RCS, Wallet, Play Integrity doğrulamaları), internet olmadan cihazınızda okunur.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: taze bir parmak izini tutarlı, uyumlu bir profile dönüştüren bir cihaz sahteleyici.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: bağımsız, root yetkili bir SSH artalan süreci (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## İletişim
 

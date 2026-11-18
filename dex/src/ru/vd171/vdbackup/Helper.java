@@ -176,6 +176,25 @@ public final class Helper {
         return -1;
     }
 
+    // Read a UID's live network policy via getUidPolicy. This is the authoritative source at
+    // backup time: the running NPMS keeps the policy in memory and can lag netpolicy.xml, so a
+    // UID with an active REJECT_ALL may have no <uid-policy> entry on disk yet (issue #9) - the
+    // file capture then records nothing and the restore has nothing to apply. -1 = unreadable.
+    private static int netpolicyGet(int uid) throws Exception {
+        Class<?> sm = Class.forName("android.os.ServiceManager");
+        IBinder binder = (IBinder) sm.getMethod("getService", String.class).invoke(null, "netpolicy");
+        if (binder == null) throw new IllegalStateException("netpolicy service unavailable");
+        Class<?> stub = Class.forName("android.net.INetworkPolicyManager$Stub");
+        Object inpm = stub.getMethod("asInterface", IBinder.class).invoke(null, binder);
+        for (Method m : inpm.getClass().getMethods()) {
+            if ("getUidPolicy".equals(m.getName()) && m.getParameterTypes().length == 1) {
+                Object v = m.invoke(inpm, uid);
+                if (v instanceof Integer) return (Integer) v;
+            }
+        }
+        return -1;
+    }
+
     // APK resources through a bare AssetManager (no Context, so systemMain() never runs).
     private static Resources apkResources(ApplicationInfo ai) throws Exception {
         String apk = (ai.sourceDir != null) ? ai.sourceDir : ai.publicSourceDir;
@@ -323,6 +342,19 @@ public final class Helper {
                 boolean ok = (readback == policy);
                 System.out.println("{\"ok\":" + ok + ",\"verb\":\"netpolicy-set\",\"uid\":" + uid
                     + ",\"policy\":" + policy + ",\"readback\":" + readback + "}");
+                System.out.flush();
+                System.exit(0);
+                return;
+            }
+
+            if ("netpolicy-get".equals(verb)) {
+                // netpolicy-get <uid>: read a UID's live network policy via getUidPolicy. The
+                // authoritative source at backup time - netpolicy.xml on disk can lag the running
+                // NPMS, so a UID with an active policy may have no file entry yet (issue #9).
+                int uid = Integer.parseInt(args[1]);
+                int policy = netpolicyGet(uid);
+                System.out.println("{\"ok\":" + (policy >= 0) + ",\"verb\":\"netpolicy-get\",\"uid\":" + uid
+                    + ",\"policy\":" + policy + "}");
                 System.out.flush();
                 System.exit(0);
                 return;

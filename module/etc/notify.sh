@@ -24,13 +24,13 @@
 #  Localized notification strings for worker.sh notify().
 #  vdb_notify_msg <lang> <key> <name> echoes "<localized prefix><name>".
 #  key: backup_start | backup_done | restore_start | restore_done.
-#  Covers the 21 WebUI languages; unknown/auto falls back to English.
+#  Covers the 22 WebUI languages; unknown/auto falls back to English.
 #  Text kept in sync with webroot/lang/<code>.json notif_* keys.
 
 vdb_notify_msg() {
   _l="$1"; _k="$2"; _n="$3"; _p=""
   case "$_l" in
-    ar|cs|de|en|es|fa|fr|hi|in|it|ja|ko|nl|pl|pt|ru|sv|th|tr|vi|zh) ;;
+    ar|cs|de|en|es|fa|fr|hi|id|it|ja|ko|nl|pl|pt|ru|sv|th|tr|uk|vi|zh) ;;
     *) _l=en ;;
   esac
   case "$_l" in
@@ -76,7 +76,7 @@ vdb_notify_msg() {
           restore_start) _p="पुनर्स्थापना शुरू: " ;;
           restore_done)  _p="पुनर्स्थापना पूर्ण: " ;;
         esac ;;
-    in) case "$_k" in
+    id) case "$_k" in
           backup_start)  _p="Pencadangan dimulai: " ;;
           backup_done)   _p="Pencadangan selesai: " ;;
           restore_start) _p="Pemulihan dimulai: " ;;
@@ -141,6 +141,12 @@ vdb_notify_msg() {
           backup_done)   _p="Yedekleme tamamlandı: " ;;
           restore_start) _p="Geri yükleme başladı: " ;;
           restore_done)  _p="Geri yükleme tamamlandı: " ;;
+        esac ;;
+    uk) case "$_k" in
+          backup_start)  _p="Резервне копіювання розпочато: " ;;
+          backup_done)   _p="Резервне копіювання завершено: " ;;
+          restore_start) _p="Відновлення розпочато: " ;;
+          restore_done)  _p="Відновлення завершено: " ;;
         esac ;;
     vi) case "$_k" in
           backup_start)  _p="Đã bắt đầu sao lưu: " ;;

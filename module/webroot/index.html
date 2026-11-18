@@ -115,18 +115,21 @@
       <ul id="backuplist" class="list"></ul>
       <p id="backups-empty" class="muted" data-i18n="backups_empty">No backups yet.</p>
       <button id="tg-backups-open" class="btn small" type="button" data-i18n="ui_tg_backups_btn">Restore from Telegram</button>
-      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span><span class="sh-t" data-i18n="ui_import_title">Import from another app</span></h2>
-      <div class="field">
-        <select id="import-from">
-          <option value="neo">Neo Backup</option>
-          <option value="databackup">DataBackup</option>
-        </select>
-        <button id="import-scan" class="btn" data-i18n="ui_import_scan">Scan</button>
-      </div>
-      <ul id="importlist" class="list"></ul>
-      <p id="import-empty" class="muted" data-i18n="msg_import_empty" hidden>No importable backups found.</p>
+      <details class="grp">
+        <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span><span class="sh-t" data-i18n="ui_import_title">Import from another app</span></summary>
+        <div class="field">
+          <select id="import-from">
+            <option value="neo">Neo Backup</option>
+            <option value="databackup">DataBackup</option>
+          </select>
+          <button id="import-scan" class="btn" data-i18n="ui_import_scan">Scan</button>
+        </div>
+        <ul id="importlist" class="list"></ul>
+        <p id="import-empty" class="muted" data-i18n="msg_import_empty" hidden>No importable backups found.</p>
+      </details>
 
-      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.9z"/></svg></span><span class="sh-t" data-i18n="special_title">Special backups</span></h2>
+      <details class="grp">
+        <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.2 1 5.9-5.2-2.8-5.2 2.8 1-5.9L3.5 9.7l5.9-.9z"/></svg></span><span class="sh-t" data-i18n="special_title">Special backups</span></summary>
       <div class="muted" data-i18n="special_hint">Back up system-wide data: messages, contacts and call log, Wi-Fi and Bluetooth. Restore is same-device and needs a reboot.</div>
       <div class="card">
         <div class="checks" id="special-cats"></div>
@@ -145,8 +148,10 @@
       </div>
       <ul id="special-list" class="list"></ul>
       <p id="special-empty" class="muted" data-i18n="special_empty" hidden>No special backups yet.</p>
+      </details>
 
-      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="sh-t" data-i18n="ui_pathbk_title">Folder / file backup</span></h2>
+      <details class="grp">
+        <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span><span class="sh-t" data-i18n="ui_pathbk_title">Folder / file backup</span></summary>
       <div class="muted" data-i18n="ui_pathbk_hint">Back up any folder or file by its absolute path, with the same compression and encryption as an app backup. Restore writes it back to the same path.</div>
       <div class="card">
         <div class="field">
@@ -157,11 +162,21 @@
       </div>
       <ul id="pathbk-list" class="list"></ul>
       <p id="pathbk-empty" class="muted" data-i18n="ui_pathbk_empty" hidden>No folder backups yet.</p>
+      </details>
+
+      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v6c0 1.7 3.6 3 8 3s8-1.3 8-3V5"/><path d="M4 11v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg></span><span class="sh-t" data-i18n="ui_adb_title">System files (/data/adb)</span></h2>
+      <div class="muted" data-i18n="ui_adb_hint">Back up the root environment under /data/adb - modules, their data and configs - all of it or a chosen subtree you pick from the file tree. Restore writes the selected files back with their original SELinux context, so root keeps working. Advanced; nothing is kept here but what you choose.</div>
+      <div class="card">
+        <button id="adb-backup-open" class="btn go block" data-i18n="ui_adb_do">Back up /data/adb</button>
+      </div>
+      <ul id="adbbk-list" class="list"></ul>
+      <p id="adbbk-empty" class="muted" data-i18n="ui_adb_empty" hidden>No /data/adb backups yet.</p>
     </section>
 
     <section id="dests" class="panel">
       <ul id="destlist" class="list"></ul>
-      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01"/><path d="M8 16.5h.01"/></svg></span><span class="sh-t" data-i18n="dest_add">Add destination</span></h2>
+      <details class="grp">
+        <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/><path d="M8 7.5h.01"/><path d="M8 16.5h.01"/></svg></span><span class="sh-t" data-i18n="dest_add">Add destination</span></summary>
       <div class="field">
         <input id="d-id" type="text" data-i18n-ph="ph_dest_id" placeholder="id (e.g. mynas)">
         <select id="d-type">
@@ -235,6 +250,7 @@
         <p id="r-drive-hint" class="muted" data-i18n="remote_drive_hint">No Google Cloud account needed. On any computer run: rclone authorize "drive", then paste the token it prints here.</p>
         <button id="r-save" class="btn go block" data-i18n="remote_create">Create remote</button>
       </div>
+      </details>
       <div id="companion-hma" class="notice" hidden>
         <div class="notice-toggle">
           <span data-i18n="companion_hma_title">Hide the companion app</span>
@@ -332,32 +348,44 @@
       </div>
 
       <div class="card">
-        <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></span><span class="sh-t" data-i18n="settings_blocklist">Excluded apps</span></h2>
-        <div class="muted" data-i18n="settings_blocklist_hint">Apps on this list are skipped by automatic and scheduled backups.</div>
-        <input id="block-app-search" type="search" class="picker-search" data-i18n-ph="ui_job_search" placeholder="Search apps by name or package" autocomplete="off">
-        <div id="block-app-count" class="muted picker-count"></div>
-        <ul id="block-applist" class="list picker-list"></ul>
-        <p id="block-app-nomatch" class="muted" data-i18n="ui_job_no_match" hidden>No apps match your search</p>
-      </div>
-
-      <div class="card">
-        <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg></span><span class="sh-t" data-i18n="settings_app_items">Per-app items and tags</span></h2>
-        <div class="muted" data-i18n="settings_app_items_hint">Choose exactly which items each app backs up in bulk, automatic and scheduled backups, for example APK only, or APK + OBB. A single manual backup still lets you pick at the time. Apps you do not set here back up everything. Tap an app to also give it tags: free labels to group apps, filter the list, and back up a whole group at once.</div>
-        <input id="ai-app-search" type="search" class="picker-search" data-i18n-ph="ui_job_search" placeholder="Search apps by name or package" autocomplete="off">
-        <div id="ai-app-count" class="muted picker-count"></div>
-        <ul id="ai-applist" class="list picker-list"></ul>
-        <p id="ai-app-nomatch" class="muted" data-i18n="ui_job_no_match" hidden>No apps match your search</p>
-      </div>
-
-      <div class="card">
-        <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span class="sh-t" data-i18n="settings_presets">Backup presets</span></h2>
-        <div class="muted" data-i18n="settings_presets_hint">Named sets of items to include. Pick a preset in the backup dialog to fill the item choices at once.</div>
-        <ul id="presets-list" class="list"></ul>
-        <p id="presets-empty" class="muted" data-i18n="presets_empty">No presets yet.</p>
-        <div class="field">
-          <input id="preset-name" type="text" autocomplete="off" data-i18n-ph="ui_preset_name" placeholder="Preset name">
+        <div class="field check">
+          <input type="checkbox" class="switch" id="set-thermal"><span data-i18n="settings_thermal">Pause to cool down when the device gets hot</span>
         </div>
-        <div class="checks">
+        <div class="muted" data-i18n="settings_thermal_hint">During a long backup, VDBackup waits a moment between apps if the device is running hot, so a big batch cannot overheat it. On by default.</div>
+      </div>
+
+      <div class="card">
+        <details class="grp">
+          <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></span><span class="sh-t" data-i18n="settings_blocklist">Excluded apps</span></summary>
+          <div class="muted" data-i18n="settings_blocklist_hint">Apps on this list are skipped by automatic and scheduled backups.</div>
+          <input id="block-app-search" type="search" class="picker-search" data-i18n-ph="ui_job_search" placeholder="Search apps by name or package" autocomplete="off">
+          <div id="block-app-count" class="muted picker-count"></div>
+          <ul id="block-applist" class="list picker-list"></ul>
+          <p id="block-app-nomatch" class="muted" data-i18n="ui_job_no_match" hidden>No apps match your search</p>
+        </details>
+      </div>
+
+      <div class="card">
+        <details class="grp">
+          <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M21 8v8a2 2 0 0 1-1 1.73l-7 4a2 2 0 0 1-2 0l-7-4A2 2 0 0 1 3 16V8a2 2 0 0 1 1-1.73l7-4a2 2 0 0 1 2 0l7 4A2 2 0 0 1 21 8z"/><path d="M3.3 7L12 12l8.7-5"/><path d="M12 22V12"/></svg></span><span class="sh-t" data-i18n="settings_app_items">Per-app items and tags</span></summary>
+          <div class="muted" data-i18n="settings_app_items_hint">Choose exactly which items each app backs up in bulk, automatic and scheduled backups, for example APK only, or APK + OBB. A single manual backup still lets you pick at the time. Apps you do not set here back up everything. Tap an app to also give it tags: free labels to group apps, filter the list, and back up a whole group at once.</div>
+          <input id="ai-app-search" type="search" class="picker-search" data-i18n-ph="ui_job_search" placeholder="Search apps by name or package" autocomplete="off">
+          <div id="ai-app-count" class="muted picker-count"></div>
+          <ul id="ai-applist" class="list picker-list"></ul>
+          <p id="ai-app-nomatch" class="muted" data-i18n="ui_job_no_match" hidden>No apps match your search</p>
+        </details>
+      </div>
+
+      <div class="card">
+        <details class="grp">
+          <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h10"/></svg></span><span class="sh-t" data-i18n="settings_presets">Backup presets</span></summary>
+          <div class="muted" data-i18n="settings_presets_hint">Named sets of items to include. Pick a preset in the backup dialog to fill the item choices at once.</div>
+          <ul id="presets-list" class="list"></ul>
+          <p id="presets-empty" class="muted" data-i18n="presets_empty">No presets yet.</p>
+          <div class="field">
+            <input id="preset-name" type="text" autocomplete="off" data-i18n-ph="ui_preset_name" placeholder="Preset name">
+          </div>
+          <div class="checks">
           <label><input type="checkbox" id="pi-apk" checked><span data-i18n="item_apk">APK (app)</span></label>
           <label><input type="checkbox" id="pi-data" checked><span data-i18n="item_data">App data</span></label>
           <label><input type="checkbox" id="pi-data_de" checked><span data-i18n="item_data_de">Protected data</span></label>
@@ -365,7 +393,8 @@
           <label><input type="checkbox" id="pi-external" checked><span data-i18n="item_external">External data</span></label>
           <label><input type="checkbox" id="pi-media" checked><span data-i18n="item_media">Media</span></label>
         </div>
-        <button id="preset-add" class="btn go block" data-i18n="ui_preset_add">Add preset</button>
+          <button id="preset-add" class="btn go block" data-i18n="ui_preset_add">Add preset</button>
+        </details>
       </div>
 
       <div class="card">
@@ -397,21 +426,26 @@
       <div id="set-status" class="muted"></div>
 
       <div class="card">
-        <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 20h16"/></svg></span><span class="sh-t" data-i18n="settings_config_backup">Settings backup</span></h2>
-        <div class="muted" data-i18n="settings_config_backup_hint">Save your destinations, schedules, presets and stored credentials to a single encrypted file you can import onto another device or after a clean install. The file holds remote passwords, so it is always protected with a passphrase.</div>
-        <button id="cfg-export" class="btn go block" data-i18n="settings_config_export">Export settings</button>
-        <button id="cfg-import" class="btn block" data-i18n="settings_config_import">Import settings</button>
-        <div id="cfg-config-status" class="muted"></div>
-        <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg></span><span class="sh-t" data-i18n="settings_wipe_credentials">Wipe stored credentials</span></h2>
-        <div class="muted" data-i18n="settings_wipe_credentials_hint">Remove saved remote passwords and the device encryption key. Your destinations, schedules and backups stay, but you will need to re-enter passwords next time.</div>
-        <button id="cfg-wipe" class="btn danger block" data-i18n="settings_wipe_credentials">Wipe stored credentials</button>
+        <details class="grp">
+          <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 10l4 4 4-4"/><path d="M4 20h16"/></svg></span><span class="sh-t" data-i18n="settings_config_backup">Settings backup</span></summary>
+          <div class="muted" data-i18n="settings_config_backup_hint">Save your destinations, schedules, presets and stored credentials to a single encrypted file you can import onto another device or after a clean install. The file holds remote passwords, so it is always protected with a passphrase.</div>
+          <button id="cfg-export" class="btn go block" data-i18n="settings_config_export">Export settings</button>
+          <button id="cfg-import" class="btn block" data-i18n="settings_config_import">Import settings</button>
+          <div id="cfg-config-status" class="muted"></div>
+        </details>
+        <details class="grp">
+          <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg></span><span class="sh-t" data-i18n="settings_wipe_credentials">Wipe stored credentials</span></summary>
+          <div class="muted" data-i18n="settings_wipe_credentials_hint">Remove saved remote passwords and the device encryption key. Your destinations, schedules and backups stay, but you will need to re-enter passwords next time.</div>
+          <button id="cfg-wipe" class="btn danger block" data-i18n="settings_wipe_credentials">Wipe stored credentials</button>
+        </details>
       </div>
     </section>
 
     <section id="schedule" class="panel">
       <ul id="joblist" class="list"></ul>
       <p id="jobs-empty" class="muted" data-i18n="jobs_empty" hidden>No scheduled jobs yet.</p>
-      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><span class="sh-t" data-i18n="job_add">Add a scheduled job</span></h2>
+      <details class="grp">
+        <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span><span class="sh-t" data-i18n="job_add">Add a scheduled job</span></summary>
       <div class="card">
         <div class="field">
           <label for="job-action" data-i18n="job_action">Action</label>
@@ -481,12 +515,22 @@
         <button id="job-save" class="btn go block" data-i18n="save">Save</button>
         <div id="job-status" class="muted"></div>
       </div>
+      </details>
       <button id="log-open" class="btn block" data-i18n="ui_log_open">View activity log</button>
     </section>
 
     <section id="updates" class="panel">
       <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14-5l-2 2"/><path d="M4 13a8 8 0 0 0 14 5l2-2"/><path d="M4 4v4h4"/><path d="M20 20v-4h-4"/></svg></span><span class="sh-t" data-i18n="tab_updates">Updates</span></h2>
+      <div id="update-banner" class="banner" role="status">
+        <span class="banner-ic"><svg viewBox="0 0 24 24"><path d="M12 16V6"/><path d="M8 10l4-4 4 4"/><path d="M5 19h14"/></svg></span>
+        <div class="banner-main">
+          <div class="banner-title" id="update-banner-title"></div>
+          <div class="banner-msg" id="update-banner-msg"></div>
+        </div>
+        <button class="banner-x" id="update-banner-x" aria-label="Dismiss">&times;</button>
+      </div>
       <div id="vdlu-updates"></div>
+      <button id="update-check" class="btn block" data-i18n="ui_check_updates">Check for updates</button>
     </section>
 
     <section id="about" class="panel about">
@@ -497,15 +541,6 @@
           <div class="v" id="about-ver"></div>
         </div>
       </div>
-      <div id="update-banner" class="banner" role="status">
-        <span class="banner-ic"><svg viewBox="0 0 24 24"><path d="M12 16V6"/><path d="M8 10l4-4 4 4"/><path d="M5 19h14"/></svg></span>
-        <div class="banner-main">
-          <div class="banner-title" id="update-banner-title"></div>
-          <div class="banner-msg" id="update-banner-msg"></div>
-        </div>
-        <button class="banner-x" id="update-banner-x" aria-label="Dismiss">&times;</button>
-      </div>
-      <button id="update-check" class="btn block" data-i18n="ui_check_updates">Check for updates</button>
       <p data-i18n="about_what">Full app and data backup and restore as root, driven entirely from a WebUI. The open, root-native successor to Swift Backup, Neo-Backup and Android-DataBackup.</p>
       <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M10 13a4 4 0 0 0 5.66 0l2.5-2.5a4 4 0 0 0-5.66-5.66l-1.2 1.2"/><path d="M14 11a4 4 0 0 0-5.66 0l-2.5 2.5a4 4 0 0 0 5.66 5.66l1.2-1.2"/></svg></span><span class="sh-t" data-i18n="about_links">Project</span></h2>
       <div class="links">
@@ -524,6 +559,10 @@
         <a href="https://github.com/VD171/VD-Google"><span class="k">VDGoogle</span><span class="val" data-i18n="about_sib_vdgoogle">your Google services (RCS, Wallet, Play Integrity attestations), read on your device with no internet.</span></a>
         <a href="https://github.com/VD171/COPG-VD"><span class="k">COPG-VD</span><span class="val" data-i18n="about_sib_copg">a device spoofer that turns a fresh fingerprint into a coherent, consistent profile.</span></a>
         <a href="https://github.com/VD171/VD-dropbear"><span class="k">VD-dropbear</span><span class="val" data-i18n="about_sib_vddropbear">a standalone rooted SSH daemon (Dropbear).</span></a>
+      </div>
+      <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></span><span class="sh-t" data-i18n="about_credits">Credits</span></h2>
+      <div class="links stack">
+        <a href="https://github.com/VictorGabriel7Dev/mtproto-store"><span class="k">mtproto-store</span><span class="val" data-i18n="about_credit_mtproto">the Telegram backup backend, by VictorGabriel7Dev (from work by Ash). AGPL-3.0.</span></a>
       </div>
       <button id="prov-open" class="btn block" data-i18n="about_prov_btn">View bundled-binary manifest</button>
       <h2 class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><span class="sh-t" data-i18n="about_disclaimer">Disclaimer</span></h2>
@@ -846,6 +885,41 @@
       <div class="modal-actions">
         <button class="btn" id="pb-cancel" data-i18n="ui_import_cancel">Cancel</button>
         <button class="btn go" id="pb-ok" data-i18n="ui_pathbk_do">Back up</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="adb-modal" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-card adb-modal-card">
+      <div class="modal-title" id="adb-title" data-i18n="ui_adb_opts_title">Back up /data/adb</div>
+      <div class="modal-msg muted" id="adb-sub" data-i18n="ui_adb_pick">Check a folder to include all of it, or open it to choose inside. Only what you check is included.</div>
+      <div class="adb-toolbar">
+        <input id="adb-filter" type="search" class="picker-search" data-i18n-ph="ui_adb_filter_ph" placeholder="Filter visible names" autocomplete="off">
+        <label class="adb-total-lab"><input type="checkbox" id="adb-total"><span data-i18n="ui_adb_everything">Everything</span></label>
+      </div>
+      <div class="adb-tree modal-scroll" id="adb-tree"></div>
+      <div class="adb-selinfo muted" id="adb-selinfo"></div>
+      <div id="adb-bkopts">
+        <div class="field">
+          <label data-i18n="settings_compression">Compression</label>
+          <select id="adb-comp">
+            <option value="none" data-i18n="opt_comp_none">none</option>
+            <option value="lz4" data-i18n="opt_comp_lz4">lz4</option>
+            <option value="zstd:3" data-i18n="opt_comp_zstd_fast">zstd (fast)</option>
+            <option value="zstd:10" data-i18n="opt_comp_zstd_default">zstd (default)</option>
+            <option value="zstd:19" data-i18n="opt_comp_zstd_max">zstd (max)</option>
+            <option value="gzip" data-i18n="opt_comp_gzip">gzip (compatible)</option>
+          </select>
+        </div>
+        <div class="checks">
+          <label><input type="checkbox" class="switch" id="adb-enc"><span data-i18n="settings_encrypt_data">Encrypt data</span></label>
+        </div>
+      </div>
+      <div id="adb-restwarn" class="notice warn" hidden><div class="notice-msg" data-i18n="ui_adb_restore_warn">This writes the checked files back under /data/adb, over whatever is there now, and can affect running root modules. Only what you check is written; everything else is left alone.</div></div>
+      <input id="adb-pass" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" hidden data-i18n-ph="backup_passphrase" placeholder="Encryption passphrase">
+      <div class="modal-actions">
+        <button class="btn" id="adb-cancel" data-i18n="ui_import_cancel">Cancel</button>
+        <button class="btn go" id="adb-ok" data-i18n="ui_adb_do">Back up</button>
       </div>
     </div>
   </div>

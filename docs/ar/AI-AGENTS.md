@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · العربية · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · العربية · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` نسخ احتياطي لأي مسار مطلق بصيغة `tar.zst`+`manifest.json` تحت `.paths/` (منفصل) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` استعادة نسخة مسار إلى موقعها الأصلي (`confirm` يفعّلها؛ منفصل) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` مستوى كسول واحد من شجرة /data/adb (الافتراضي `/data/adb`)، للمنتقي. |
+| `adb-du` | `{path}` | `{ok,size}` حجم بالبايت تعاوديا لشجرة فرعية واحدة من /data/adb، عند الطلب. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` نسخ احتياطي لـ /data/adb - كليا (احذف `paths`) أو المسارات الفرعية المختارة - بأمانة SELinux/المالك لكل ملف، تحت `.adb/` (منفصل) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` استعادة نسخة /data/adb فوق الشجرة الحية - كليا أو المسارات الفرعية المختارة - مع الحفاظ على سياق كل ملف (ليس chcon شاملا أبدا)؛ `confirm` يفعّلها (منفصل) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` نسخ نظام ملفات /data/adb الاحتياطية. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` قائمة ملفات مخزنة مسهبة لنسخة، لمنتقي شجرة الاستعادة. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | تركيب تطبيق مثبّت كتطبيق نظام (وحدة فرعية بلا نظام؛ حي عبر NoMount وإلا في الإقلاع التالي) |
 | `companion-status` / `companion-install` | `{}` | حالة مرافق Google Drive / التثبيت عند الطلب |
@@ -102,6 +108,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` يسرد ملفات الإعدادات المشفَّرة المتاحة للاستيراد. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` يزيل كلمات المرور البعيدة المحفوظة ومفتاح تشفير الجهاز؛ تبقى الوجهات والمهام والنسخ. |
 | `log-prune` | `{}` | `{ok}` يقلّم سجلات العمليات المنتهية منذ زمن، ويحدّ من سجل التدقيق، ويزيل الأيقونات القديمة (تستدعيه خدمة الإقلاع). |
+| `sanitize` | `{}` | `{ok}` يعيد تأكيد ظهور مجلدات النسخ الاحتياطي (0755) عبر كل مستخدم أندرويد، حتى يتمكن مدير الملفات من فتح مجلدات تركتها نسخة جذر خام أو نسخة احتياطية سابقة لـ v1.03.2 متاحة للمالك فقط. |
 
 ### حقول `progress`
 
@@ -206,6 +213,14 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 يُطبَّق فوق ذلك فحص **سلامة حرارية** أدنى دائما: تُتخطّى العملية المجدولة بينما يكون الجهاز
 ساخنا بشكل حرج. ويُكتَب كل تخطٍّ للبوابة في سجل التدقيق بوصفه `op:"scheduler-gated"` مع
 `reason` من `wifi` / `charging` / `battery` / `days` / `thermal`.
+
+### موثوقية الدُفعة
+
+تُشغّل الدُفعة (`backup` مع `packages`، و`restore` مع `refs`) كل تطبيق في الصدفة الفرعية الخاصة به، بحيث لا يستطيع تطبيق واحد إفساد البقية:
+
+- **`batch_app_timeout`** (إعداد، ثوانٍ، الافتراضي `1800`، و`0` يعطّله): إذا استغرق تطبيق وقتًا أطول، تُنهى شجرة عملياته، ويُسجَّل بوصفه `ERR_TIMEOUT`، وتستمر الدُفعة، بحيث لا يُجمّد تطبيق عالق قطّ التشغيل بأكمله.
+- **نتيجة جزئية**: تحمل الكتابة النهائية `ok`، و`n` من `of`، وإحصاء `fails` بصيغة `{code:count}` (مثل `{"ERR_NO_SPACE":24}`)، و`free` (البايتات المتبقية في نظام ملفات النسخ الاحتياطية). الدُفعة الجزئية هي `ERR_BATCH_PARTIAL`، وليست خطأً أعمى أبدًا.
+- **التنظيم الحراري** (إعداد `thermal_throttle`، مُفعّل افتراضيًا): بين التطبيقات يتوقف العامل مؤقتًا للتبريد عندما يكون الجهاز ساخنًا، باعثًا مرحلة تقدّم `cooling`، بحيث لا يُفرِط تشغيل طويل في تسخين الجهاز.
 
 ### وسائط `remote-add`
 
@@ -312,6 +327,23 @@ Mirror، نسخ/استعادة لقطة `restic` البعيدة، استعادة
 - يكتب `path-restore` عائدا إلى الموقع الأصلي، فهو مدمّر ويتطلب `"confirm": true`, حاجز احتكاك
   عالٍ، مثل `special-restore`. و`ref` الذي ليس نسخة مسار صالحة يفشل بـ `ERR_BAD_REF`.
 - كلاهما يعمل **منفصلا**؛ استطلع `progress` بـ `opid` المُرجَع.
+
+### نسخ نظام ملفات /data/adb الاحتياطي
+
+ينسخ `adb-backup` / `adb-restore` احتياطيا ويستعيد بيئة الروت تحت /data/adb (الوحدات
+وبياناتها وإعداداتها)، مدفوعا بمنتقي شجرة كسول (`adb-list` مستوى واحدا في كل مرة، و`adb-du`
+لحجم مجلد عند الطلب).
+
+- كلي أو انتقائي في الطرفين: احذف `paths` لكل شيء، أو مرر المسارات الفرعية المختارة
+  (نسبة إلى /data/adb)؛ الاستعادة تأخذ نفس `paths`.
+- **أمانة لكل ملف:** يحفظ الأرشيف سياق SELinux والمالك وxattrs لكل ملف، وتعتمد الاستعادة
+  على ذلك - فهي لا تطبق أبدا `chcon` شاملا، الذي سيفلطح سياقات /data/adb غير المتجانسة
+  ويكسر الروت. يستخرج `adb-restore` فوق الشجرة الحية؛ ولا يمحوها أبدا.
+- المرجع الذاتي: يُستثنى خرج النسخة نفسه وساحة تجهيز الوحدة، فلا تحتوي نسخة على نفسها أبدا.
+- يعيد `adb-index` قائمة ملفات مخزنة لنسخة كي تستطيع الاستعادة عرض شجرتها؛ يُعبَّر عن اختيار
+  الواجهة بالكامل عبر `paths` (المجلد المحدد بالكامل مسار واحد؛ والمحدد جزئيا ينزل إلى أبنائه
+  المحددين، فلا حاجة لقائمة استثناء).
+- يتطلب `adb-restore` القيمة `"confirm": true` (حاجز احتكاك عالٍ)؛ كلاهما يعمل منفصلا، استطلع `progress`.
 
 ### `update-check`
 

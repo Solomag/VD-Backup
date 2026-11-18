@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · Türkçe · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · Türkçe · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` herhangi bir mutlak yolu `tar.zst`+`manifest.json` olarak `.paths/` altında yedekler (ayrık) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` bir yol yedeğini orijinal konumuna geri yükler (`confirm` buna kapı tutar; ayrık) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` /data/adb ağacının bir tembel seviyesi (varsayılan `/data/adb`), seçici için. |
+| `adb-du` | `{path}` | `{ok,size}` bir /data/adb alt ağacının özyinelemeli bayt boyutu, istek üzerine. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` /data/adb'yi yedekler - tamamını (`paths`'i atla) veya seçilen alt yolları - dosya başına SELinux/sahip sadakatiyle, `.adb/` altında (ayrık) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` bir /data/adb yedeğini canlı ağacın ÜZERİNE geri yükler - tamamı veya seçilen alt yollar - her dosyanın bağlamını koruyarak (asla toptan chcon); `confirm` buna kapı tutar (ayrık) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` /data/adb dosya sistemi yedekleri. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` bir yedeğin depolanmış ayrıntılı dosya listesi, geri yükleme ağacı seçicisi için. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | kurulu bir uygulamayı sistem uygulaması olarak bağlar (sistemsiz alt-modül; NoMount ile canlı, yoksa sonraki açılışta) |
 | `companion-status` / `companion-install` | `{}` | Google Drive eşlikçi durumu / istek üzerine kurulum |
@@ -102,6 +108,7 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` içe aktarmak için mevcut şifreli yapılandırma dosyalarını listeler. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` kayıtlı uzak parolaları ve cihaz şifreleme anahtarını kaldırır; hedefler, işler ve yedekler kalır. |
 | `log-prune` | `{}` | `{ok}` çoktan bitmiş işlem günlüklerini budar, denetim izini sınırlar ve eski simgeleri temizler (önyükleme hizmeti bunu çağırır). |
+| `sanitize` | `{}` | `{ok}` yedek klasörlerinin görünürlüğünü (0755) her Android kullanıcısında yeniden uygular, böylece bir dosya yöneticisi, ham bir root kopyasının veya v1.03.2 öncesi bir yedeğin yalnızca sahibine erişilebilir bıraktığı klasörleri açabilir. |
 
 ### `progress` alanları
 
@@ -210,6 +217,14 @@ Bunların üzerine her zaman minimal bir **termal güvenlik** kontrolü uygulan�
 derecede sıcakken zamanlanmış bir işlem atlanır. Her kapı atlaması denetim izine
 `op:"scheduler-gated"` olarak, `reason` değeri `wifi` / `charging` / `battery` / `days` /
 `thermal` ile yazılır.
+
+### Toplu işlem güvenilirliği
+
+Bir toplu işlem (`packages` ile `backup`, `refs` ile `restore`) her uygulamayı kendi alt kabuğunda çalıştırır, böylece bir uygulama diğerlerini bozamaz:
+
+- **`batch_app_timeout`** (yapılandırma, saniye, varsayılan `1800`, `0` devre dışı bırakır): bir uygulama daha uzun sürerse işlem ağacı sonlandırılır, `ERR_TIMEOUT` olarak kaydedilir ve toplu işlem devam eder, böylece takılan bir uygulama tüm çalışmayı asla dondurmaz.
+- **Kısmi sonuç**: bitiş yazması `ok`, `of` içinden `n`, bir `fails` dökümü `{code:count}` (örn. `{"ERR_NO_SPACE":24}`) ve `free` (yedeklerin dosya sistemindeki boş bayt) içerir. Kısmi bir toplu işlem `ERR_BATCH_PARTIAL` değeridir, asla kör bir hata değil.
+- **Termal hız ayarı** (yapılandırma `thermal_throttle`, varsayılan açık): uygulamalar arasında cihaz sıcakken worker soğumak için duraklar ve bir `cooling` ilerleme aşaması yayar, böylece uzun bir çalışma cihazı aşırı ısıtmaz.
 
 ### `remote-add` argümanları
 
@@ -323,6 +338,24 @@ Arşiv, backups dizini altındaki `.paths/` içinde VDBackup'ın kendi formatın
   `special-restore` gibi yüksek sürtünmeli bir kapı. Geçerli bir yol yedeği olmayan bir `ref`,
   `ERR_BAD_REF` ile başarısız olur.
 - İkisi de **ayrık** çalışır; döndürülen `opid` ile `progress`'i yoklayın.
+
+### /data/adb dosya sistemi yedeği
+
+`adb-backup` / `adb-restore`, /data/adb altındaki root ortamını (modüller, verileri ve yapılandırmaları)
+yedekler ve geri yükler; tembel bir ağaç seçicisiyle sürülür (`adb-list` bir seferde bir seviye, `adb-du`
+istek üzerine bir klasörün boyutu için).
+
+- Her iki uçta da tam veya seçmeli: her şey için `paths`'i atla, ya da seçilen alt yolları geç
+  (/data/adb'ye göreli); geri yükleme aynı `paths`'i alır.
+- **Dosya başına sadakat:** arşiv her dosyanın SELinux bağlamını, sahibini ve xattrs'ını saklar ve geri
+  yükleme buna dayanır - ASLA toptan bir `chcon` uygulamaz; bu, /data/adb'nin heterojen bağlamlarını
+  düzleştirip root'u bozardı. `adb-restore` canlı ağacın ÜZERİNE çıkarır; onu asla silmez.
+- Öz-referans: yedeğin kendi çıktısı ve modülün staging'i dışlanır, böylece bir yedek asla kendini
+  içermez.
+- `adb-index` bir yedeğin depolanmış dosya listesini döndürür, böylece bir geri yükleme kendi ağacını
+  gösterebilir; UI seçimi tamamen `paths` ile ifade edilir (tamamen işaretli bir klasör tek bir yoldur;
+  kısmen işaretli olan, işaretli çocuklarına iner, bu yüzden bir exclude listesine gerek yoktur).
+- `adb-restore`, `"confirm": true` gerektirir (yüksek sürtünmeli kapı); ikisi de ayrık çalışır, `progress`'i yoklayın.
 
 ### `update-check`
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · Español · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · Español · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ Android-DataBackup, esto te resultará familiar, solo que todo ocurre en un
   - [5.5 Verify y dry-run](#55-verify-y-dry-run)
   - [5.6 Copias especiales (mensajes, registro de llamadas, Wi-Fi, Bluetooth, calendario, fondo de pantalla, DNS, ajustes del sistema)](#56-copias-especiales-mensajes-registro-de-llamadas-wi-fi-bluetooth-calendario-fondo-de-pantalla-dns-ajustes-del-sistema)
   - [5.7 Copias independientes de carpetas y archivos](#57-copias-independientes-de-carpetas-y-archivos)
+  - [5.8 Archivos de sistema (/data/adb)](#58-archivos-de-sistema-dataadb)
 - [6. Restaurar un backup](#6-restaurar-un-backup)
 - [7. Destinos: local y remoto](#7-destinos-local-y-remoto)
   - [7.1 Copia de tu configuración](#71-copia-de-tu-configuración)
@@ -307,6 +308,23 @@ de backups.
   destructiva y te pide **confirmar** antes de sobrescribir nada.
 - Como las copias de app, las copias y restauraciones de ruta corren **desacopladas** con progreso en
   vivo, usan la compresión que elijas, y pueden cifrarse con una passphrase.
+
+### 5.8 Archivos de sistema (`/data/adb`)
+
+`/data/adb` es donde tu gestor root guarda los módulos instalados, sus datos y su configuración - el
+propio entorno root. VDBackup puede respaldarlo, entero o en parte, para que lleves tu configuración
+root a través de un borrado o un cambio de ROM.
+
+- **Total o selectivo.** Respalda todo `/data/adb`, o abre el árbol de archivos y elige exactamente las
+  carpetas y archivos que quieras; una carpeta a medio marcar incluye solo los hijos que marcaste.
+- **Todo queda en tus manos.** El árbol es neutral - nada está preseleccionado ni oculto, salvo los
+  propios archivos de trabajo de VDBackup, que de otro modo se respaldarían a sí mismos. La compresión y
+  el cifrado son las mismas opciones portables que en cualquier otra copia.
+- **Restaurar mantiene root funcionando.** Cada archivo se escribe de vuelta con su propietario, grupo,
+  modo y contexto SELinux originales, un archivo a la vez, sobre el árbol vivo (nunca un borrado general),
+  así que los distintos contextos bajo `/data/adb` se preservan y tu gestor root sigue arrancando.
+- **Avanzado.** Esto toca el entorno root directamente. Restaurar es destructivo y te pide confirmar; una
+  restauración selectiva escribe de vuelta solo las rutas que elegiste.
 
 ## 6. Restaurar un backup
 

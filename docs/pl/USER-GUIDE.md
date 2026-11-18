@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · Polski · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · Polski · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ miejscu, bez niczego do "zezwolenia".
   - [5.5 Verify i dry-run](#55-verify-i-dry-run)
   - [5.6 Kopie specjalne (wiadomości, rejestr połączeń, Wi-Fi, Bluetooth, kalendarz, tapeta, DNS, ustawienia systemowe)](#56-kopie-specjalne-wiadomości-rejestr-połączeń-wi-fi-bluetooth-kalendarz-tapeta-dns-ustawienia-systemowe)
   - [5.7 Samodzielne kopie folderów i plików](#57-samodzielne-kopie-folderów-i-plików)
+  - [5.8 Pliki systemowe (/data/adb)](#58-pliki-systemowe-dataadb)
 - [6. Przywracanie kopii](#6-przywracanie-kopii)
 - [7. Cele: lokalne i zdalne](#7-cele-lokalne-i-zdalne)
   - [7.1 Kopia twoich ustawień](#71-kopia-twoich-ustawień)
@@ -327,6 +328,25 @@ katalogu kopii.
   jest destrukcyjne i prosi cię o **potwierdzenie**, zanim cokolwiek nadpisze.
 - Jak kopie aplikacji, kopie i przywracania ścieżek działają **odłączone** z żywym postępem,
   używają wybranej przez ciebie kompresji i mogą być zaszyfrowane za pomocą passphrase.
+
+### 5.8 Pliki systemowe (`/data/adb`)
+
+`/data/adb` to miejsce, w którym twój menedżer root przechowuje zainstalowane moduły, ich dane i
+konfigurację - samo środowisko root. VDBackup potrafi zrobić jego kopię, w całości lub w części,
+abyś mógł przenieść swoją konfigurację root przez wyczyszczenie lub zmianę ROM-u.
+
+- **Całość lub wybiórczo.** Zrób kopię całego `/data/adb` albo otwórz drzewo plików i wybierz
+  dokładnie te foldery i pliki, które chcesz; folder zaznaczony w połowie obejmuje tylko zaznaczone
+  dzieci.
+- **Wszystko pozostaje w twoich rękach.** Drzewo jest neutralne - nic nie jest wstępnie wybrane ani
+  ukryte, poza własnymi plikami roboczymi VDBackup, które w przeciwnym razie po prostu zrobiłyby
+  kopię samego siebie. Kompresja i szyfrowanie to te same przenośne opcje co w każdej innej kopii.
+- **Przywracanie utrzymuje root w działaniu.** Każdy plik jest zapisywany z powrotem ze swoim
+  pierwotnym właścicielem, grupą, trybem i kontekstem SELinux, jeden plik na raz, na żywym drzewie
+  (nigdy nie ma zbiorczego czyszczenia), dzięki czemu różniące się konteksty pod `/data/adb` są
+  zachowane, a twój menedżer root nadal się uruchamia.
+- **Zaawansowane.** To dotyka środowiska root bezpośrednio. Przywracanie jest destrukcyjne i prosi
+  o potwierdzenie; wybiórcze przywracanie zapisuje z powrotem tylko wybrane przez ciebie ścieżki.
 
 ## 6. Przywracanie kopii
 

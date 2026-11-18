@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · 中文
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · 中文
 
 ---
 
@@ -73,6 +73,12 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` 将任意绝对路径备份为 `tar.zst`+`manifest.json`，存于 `.paths/` 下（detached） |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` 将路径备份恢复到其原始位置（`confirm` 把关；detached） |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` /data/adb 树的一个惰性层级（默认 `/data/adb`），供选择器使用。 |
+| `adb-du` | `{path}` | `{ok,size}` 一个 /data/adb 子树的递归字节大小，按需。 |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` 备份 /data/adb - 全部（省略 `paths`）或所选子路径 - 以每文件的 SELinux/属主保真度，存于 `.adb/` 下（detached） |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` 将 /data/adb 备份恢复到实时树之上 - 全部或所选子路径 - 保留每个文件的上下文（绝不做一刀切的 chcon）；`confirm` 把关（detached） |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` /data/adb 文件系统备份。 |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` 某个备份存储的详尽文件清单，供恢复树选择器使用。 |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | 把已安装的应用挂载为系统应用（无系统修改的子模块；通过 NoMount 实时生效，否则下次开机生效） |
 | `companion-status` / `companion-install` | `{}` | Google Drive 配套应用状态 / 按需安装 |
@@ -100,6 +106,7 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` 列出可供导入的加密配置文件。 |
 | `wipe-credentials` | `{}` | `{ok,wiped}` 删除已保存的远程密码和设备加密密钥；目标位置、任务和备份保留。 |
 | `log-prune` | `{}` | `{ok}` 修剪早已完成的操作日志，限制审计记录，并清除过时图标（由启动服务调用）。 |
+| `sanitize` | `{}` | `{ok}` 在每个 Android 用户下重新确立备份文件夹的可见性 (0755)，使文件管理器能够打开那些被原始 root 副本或 v1.03.2 之前的备份遗留为仅所有者可访问的文件夹。 |
 
 ### `progress` 字段
 
@@ -192,6 +199,14 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 
 在这些之上，还会始终应用一项最小的**热安全（thermal safety）**检查：当设备温度危险过高时，计划的操作会被跳过。每一次门控跳过都会以 `wifi` / `charging` / `battery` / `days` / `thermal` 之一的 `reason`，作为 `op:"scheduler-gated"` 写入 audit trail。
 
+### 批处理可靠性
+
+批处理（带 `packages` 的 `backup`、带 `refs` 的 `restore`）在各自的子 shell 中运行每个应用，因此一个应用无法破坏其余应用：
+
+- **`batch_app_timeout`**（配置，秒，默认 `1800`，`0` 表示禁用）：如果某个应用耗时超过此值，其进程树会被终止，记录为 `ERR_TIMEOUT`，然后批处理继续，这样一个卡住的应用永远不会冻结整个运行。
+- **部分结果**：结束写入包含 `ok`、`of` 中的 `n`、说明失败原因的 `fails` 统计 `{code:count}`（例如 `{"ERR_NO_SPACE":24}`），以及 `free`（备份文件系统的剩余字节）。部分批处理为 `ERR_BATCH_PARTIAL`，绝不是无缘由的错误。
+- **热调度**（配置 `thermal_throttle`，默认开启）：在应用之间，当设备发热时 worker 会暂停以降温，并发出 `cooling` 进度阶段，这样长时间运行不会使设备过热。
+
 ### `remote-add` 参数
 
 云端目标是一个指定某个 `rclone` 远端的 `type:"rclone"` 目标；请先用 `remote-add` 创建该远端。
@@ -283,6 +298,20 @@ config 字段 `network_policy` 控制云端传输可使用哪种连接：`any`�
 - `path-restore` 写回原始位置，因此具有破坏性并要求 `"confirm": true`, 一道高摩擦的关卡，就像
   `special-restore`。不是有效路径备份的 `ref` 会以 `ERR_BAD_REF` 失败。
 - 两者都以 **detached** 方式运行；用返回的 `opid` 轮询 `progress`。
+
+### /data/adb 文件系统备份
+
+`adb-backup` / `adb-restore` 备份并恢复 /data/adb 下的 root 环境（模块及其数据和配置），由惰性树
+选择器驱动（`adb-list` 一次一层，`adb-du` 按需给出某个文件夹的大小）。
+
+- 两端均可全部或选择性：省略 `paths` 表示全部，或传入所选子路径（相对于 /data/adb）；恢复取相同的
+  `paths`。
+- **每文件保真：** 归档保留每个文件的 SELinux 上下文、属主和 xattrs，恢复依赖于此 - 它绝不施加一刀切
+  的 `chcon`，那会抹平 /data/adb 异构的上下文并破坏 root。`adb-restore` 在实时树之上解压；它绝不清空它。
+- 自引用：备份自身的输出和模块的 staging 被排除，因此备份绝不包含自身。
+- `adb-index` 返回某个备份存储的文件清单，以便恢复能展示其树；UI 选择完全通过 `paths` 表达（完全勾选
+  的文件夹是一个路径；部分勾选的则下降到其已勾选的子项，因此无需 exclude 列表）。
+- `adb-restore` 需要 `"confirm": true`（高摩擦关卡）；两者均以 detached 方式运行，轮询 `progress`。
 
 ### `update-check`
 

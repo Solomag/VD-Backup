@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · فارسی · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · فارسی · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -80,6 +80,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` پشتیبان‌گیری از هر مسیر مطلق به‌صورت `tar.zst`+`manifest.json` زیر `.paths/` (جدا) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` بازگرداندن یک پشتیبان مسیر به مکان اصلی‌اش (`confirm` آن را مهار می‌کند؛ جدا) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` یک سطح تنبل از درخت /data/adb (پیش‌فرض `/data/adb`)، برای انتخابگر. |
+| `adb-du` | `{path}` | `{ok,size}` اندازه بازگشتی بر حسب بایت یک زیردرخت /data/adb، به‌هنگام درخواست. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` پشتیبان‌گیری از /data/adb - کامل (`paths` را حذف کنید) یا زیرمسیرهای انتخاب‌شده - با وفاداری SELinux/مالک برای هر فایل، زیر `.adb/` (جدا) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` بازگرداندن یک پشتیبان /data/adb روی درخت زنده - کامل یا زیرمسیرهای انتخاب‌شده - با حفظ زمینه هر فایل (هرگز یک chcon فراگیر)؛ `confirm` آن را مهار می‌کند (جدا) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` پشتیبان‌های سیستم‌فایل /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` فهرست فایل‌های مفصل ذخیره‌شده یک پشتیبان، برای انتخابگر درخت بازگردانی. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | سوار کردن یک برنامه نصب‌شده به‌عنوان برنامه سیستمی (زیرماژول بدون‌سیستم؛ زنده از طریق NoMount وگرنه در راه‌اندازی بعدی) |
 | `companion-status` / `companion-install` | `{}` | وضعیت همراه Google Drive / نصب درخواستی |
@@ -107,6 +113,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` فایل‌های تنظیمات رمزگذاری‌شده موجود برای درون‌ریزی را فهرست می‌کند. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` گذرواژه‌های راه دور ذخیره‌شده و کلید رمزگذاری دستگاه را حذف می‌کند؛ مقصدها، کارها و پشتیبان‌ها می‌مانند. |
 | `log-prune` | `{}` | `{ok}` گزارش‌های عملیات مدت‌ها پیش پایان‌یافته را هرس می‌کند، دنباله ممیزی را محدود می‌کند و آیکون‌های کهنه را حذف می‌کند (سرویس بوت آن را فرا می‌خواند). |
+| `sanitize` | `{}` | `{ok}` نمایانی پوشه‌های پشتیبان (0755) را برای هر کاربر اندروید دوباره اعمال می‌کند، تا یک مدیر فایل بتواند پوشه‌هایی را باز کند که یک کپی خام root یا یک پشتیبان پیش از v1.03.2 تنها برای مالک قابل دسترسی گذاشته است. |
 
 ### میدان‌های `progress`
 
@@ -215,6 +222,14 @@ Neo رمزگذاری‌شده، مقدار `"password"` را می‌گیرد.
 تا وقتی دستگاه به‌طور بحرانی داغ است رد می‌شود. هر رد دروازه در رد پای حسابرسی به‌صورت
 `op:"scheduler-gated"` با `reason` ای از `wifi` / `charging` / `battery` / `days` /
 `thermal` نوشته می‌شود.
+
+### قابلیت اطمینان دسته
+
+یک دسته (`backup` با `packages`، `restore` با `refs`) هر برنامه را در زیرپوستهٔ خودش اجرا می‌کند، تا یک برنامه نتواند بقیه را خراب کند:
+
+- **`batch_app_timeout`** (پیکربندی، ثانیه، پیش‌فرض `1800`، `0` غیرفعال می‌کند): اگر برنامه‌ای بیشتر طول بکشد، درخت فرایندهایش پایان می‌یابد، به‌عنوان `ERR_TIMEOUT` ثبت می‌شود و دسته ادامه می‌یابد، تا یک برنامهٔ گیرکرده هرگز کل اجرا را متوقف نکند.
+- **نتیجهٔ جزئی**: نوشتهٔ پایانی شامل `ok`، `n` از `of`، شمارش `fails` به‌صورت `{code:count}` (مثلاً `{"ERR_NO_SPACE":24}`) و `free` (بایت‌های باقی‌مانده در سیستم‌فایل پشتیبان‌ها) است. دستهٔ جزئی `ERR_BATCH_PARTIAL` است، نه یک خطای کور.
+- **تنظیم حرارتی** (پیکربندی `thermal_throttle`، پیش‌فرض روشن): میان برنامه‌ها وقتی دستگاه داغ است، کارگر برای خنک‌شدن مکث می‌کند و یک مرحلهٔ پیشرفت `cooling` منتشر می‌کند، تا اجرای طولانی دستگاه را بیش از حد گرم نکند.
 
 ### آرگومان‌های `remote-add`
 
@@ -326,6 +341,23 @@ Full با `rclone`/Drive، همگام‌سازی Mirror، پشتیبان/باز�
   پراصطکاک، مانند `special-restore`. یک `ref` که پشتیبان مسیر معتبری نیست با `ERR_BAD_REF` شکست
   می‌خورد.
 - هر دو **جدا** اجرا می‌شوند؛ `progress` را با `opid` بازگشتی پرس‌وجو کنید.
+
+### پشتیبان سیستم‌فایل /data/adb
+
+‫`adb-backup` / `adb-restore` محیط روت زیر /data/adb (ماژول‌ها، داده‌ها و پیکربندی‌هایشان) را
+پشتیبان می‌گیرند و بازمی‌گردانند، با یک انتخابگر درخت تنبل (`adb-list` هر بار یک سطح، و `adb-du`
+برای اندازه یک پوشه به‌هنگام درخواست).
+
+- کامل یا گزینشی در هر دو سو: برای همه‌چیز `paths` را حذف کنید، یا زیرمسیرهای انتخاب‌شده را بدهید
+  (نسبت به /data/adb)؛ بازگردانی همان `paths` را می‌گیرد.
+- **وفاداری برای هر فایل:** بایگانی زمینه SELinux، مالک و xattrs هر فایل را نگه می‌دارد و بازگردانی
+  به آن تکیه می‌کند - هرگز یک `chcon` فراگیر اعمال نمی‌کند، که زمینه‌های ناهمگون /data/adb را تخت
+  می‌کند و روت را می‌شکند. ‫`adb-restore` روی درخت زنده استخراج می‌کند؛ و هرگز آن را پاک نمی‌کند.
+- خوداشاره: خروجی خودِ پشتیبان و محل تجهیز ماژول کنار گذاشته می‌شوند، پس یک پشتیبان هرگز خودش را در بر ندارد.
+- ‫`adb-index` فهرست فایل‌های ذخیره‌شده یک پشتیبان را بازمی‌گرداند تا بازگردانی بتواند درختش را نشان
+  دهد؛ انتخاب رابط کاربری کاملا از طریق `paths` بیان می‌شود (پوشه کاملا تیک‌خورده یک مسیر است؛ پوشه
+  نیمه‌تیک‌خورده به فرزندان تیک‌خورده‌اش فرو می‌رود، پس فهرست استثنا لازم نیست).
+- ‫`adb-restore` به `"confirm": true` نیاز دارد (مهار پراصطکاک)؛ هر دو جدا اجرا می‌شوند، `progress` را پرس‌وجو کنید.
 
 ### `update-check`
 

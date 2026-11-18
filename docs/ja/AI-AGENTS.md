@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · 日本語 · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · 日本語 · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -77,6 +77,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` 任意の絶対パスを `tar.zst`+`manifest.json` として `.paths/` 配下に backup する (detached) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` パス backup を元の場所に復元する (`confirm` がゲートする; detached) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` /data/adb ツリーの 1 つの遅延レベル (デフォルト `/data/adb`)、picker 用。 |
+| `adb-du` | `{path}` | `{ok,size}` /data/adb の 1 つのサブツリーの再帰的なバイトサイズ、オンデマンド。 |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` /data/adb を backup する - 全体 (`paths` を省略) または選択したサブパス - ファイルごとの SELinux/所有者の忠実性を保ち、`.adb/` 配下に (detached) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` /data/adb backup を稼働中のツリーの上に復元する - 全体または選択したサブパス - 各ファイルのコンテキストを保ちつつ (一括 chcon は決してしない); `confirm` がゲートする (detached) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` /data/adb ファイルシステムの backup 群。 |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` backup の保存された詳細なファイル一覧、復元ツリーの picker 用。 |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | インストール済みアプリをシステムアプリとしてマウント (systemless サブモジュール; NoMount でライブ、なければ次回ブート) |
 | `companion-status` / `companion-install` | `{}` | Google Drive コンパニオンの状態 / オンデマンドのインストール |
@@ -104,6 +110,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` インポート可能な暗号化設定ファイルを一覧します。 |
 | `wipe-credentials` | `{}` | `{ok,wiped}` 保存済みのリモートパスワードと端末の暗号化キーを削除します。保存先・ジョブ・バックアップは残ります。 |
 | `log-prune` | `{}` | `{ok}` 完了して久しいオペレーションログを整理し、監査証跡を上限で切り、古いアイコンを削除します（起動サービスが呼び出します）。 |
+| `sanitize` | `{}` | `{ok}` すべての Android ユーザーでバックアップフォルダーの可視性 (0755) を再設定し、生の root コピーや v1.03.2 より前のバックアップが所有者のみに制限したフォルダーをファイルマネージャーで開けるようにします。 |
 
 ### `progress` のフィールド
 
@@ -210,6 +217,14 @@ backup (または明示的な `ref`) を復元し、**実行ごとにアプリ�
 危険なほど高温のあいだ、スケジュールされた操作はスキップされます。すべてのゲートによるスキップは、
 `wifi` / `charging` / `battery` / `days` / `thermal` のいずれかの `reason` を付けて
 `op:"scheduler-gated"` として audit trail に書き込まれます。
+
+### バッチの信頼性
+
+バッチ（`packages` を指定した `backup`、`refs` を指定した `restore`）は各アプリを独自のサブシェルで実行するため、1つのアプリが他を壊すことはありません。
+
+- **`batch_app_timeout`**（設定、秒、既定 `1800`、`0` で無効）: アプリがこれより長くかかると、そのプロセスツリーが終了され、`ERR_TIMEOUT` として記録され、バッチは続行されます。これにより、1つの動かなくなったアプリが実行全体を止めることは決してありません。
+- **部分的な結果**: 終了時の書き込みには `ok`、`of` 中の `n`、失敗理由を示す `fails` 集計 `{code:count}`（例: `{"ERR_NO_SPACE":24}`）、`free`（バックアップ用ファイルシステムの残りバイト数）が含まれます。部分的なバッチは `ERR_BATCH_PARTIAL` であり、原因不明のエラーではありません。
+- **サーマルペーシング**（設定 `thermal_throttle`、既定オン）: アプリの合間に、端末が熱いとワーカーは冷却のため一時停止し、`cooling` の進捗フェーズを出力します。これにより、長い実行で端末が過熱しません。
 
 ### `remote-add` の引数
 
@@ -321,6 +336,24 @@ kit 付きで)、backups ディレクトリ内の `.paths/` 配下に書き込�
   `special-restore` と同じく、高い摩擦のゲートです。有効なパス backup でない `ref` は `ERR_BAD_REF`
   で失敗します。
 - どちらも **detached** で実行されます。返された `opid` で `progress` をポーリングしてください。
+
+### /data/adb ファイルシステム backup
+
+`adb-backup` / `adb-restore` は、/data/adb 配下の root 環境 (モジュール、そのデータと設定) を
+backup / 復元します。遅延ツリー picker で操作します (`adb-list` は一度に 1 レベル、`adb-du` は
+フォルダのサイズをオンデマンドで)。
+
+- 両端で全体または選択的: すべてには `paths` を省略し、または選択したサブパスを渡します
+  (/data/adb からの相対)。復元は同じ `paths` を取ります。
+- **ファイルごとの忠実性:** アーカイブは各ファイルの SELinux コンテキスト、所有者、xattrs を保持し、
+  復元はそれに依存します - 一括 `chcon` は決して適用しません。それは /data/adb の不均一なコンテキストを
+  平坦化し、root を壊してしまいます。`adb-restore` は稼働中のツリーの上に展開します。決して消去しません。
+- 自己参照: backup 自身の出力とモジュールの staging は除外されるため、backup が自分自身を含むことは
+  決してありません。
+- `adb-index` は backup の保存されたファイル一覧を返し、復元がそのツリーを表示できるようにします。UI の
+  選択は完全に `paths` で表現されます (完全にチェックされたフォルダは 1 つのパス、部分的にチェックされた
+  ものはチェックされた子へ降りるため、exclude リストは不要です)。
+- `adb-restore` は `"confirm": true` を必要とします (高い摩擦のゲート)。どちらも detached で実行され、`progress` をポーリングします。
 
 ### `update-check`
 

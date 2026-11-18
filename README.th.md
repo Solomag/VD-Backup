@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -73,6 +73,9 @@ Android-DataBackup**: การรวมสิ่งที่ทั้งสา�
   ที่ทำลายข้อมูล.
 - **การสำรองข้อมูลพิเศษ:** ข้อความ (SMS/MMS/RCS), รายชื่อติดต่อและบันทึกการโทร, Wi-Fi และ Bluetooth
   พร้อมการส่งออก JSON แบบพกพาที่เป็นตัวเลือกซึ่งคุณเปิดบน PC ได้.
+- **ไฟล์ระบบ (`/data/adb`):** สำรองตัวสภาพแวดล้อม root เอง - โมดูล, ข้อมูลและการตั้งค่าของมัน -
+  ทั้งหมดหรือเฉพาะบางส่วนที่คุณเลือกจากแผนผังไฟล์ โดยแต่ละไฟล์ถูกกู้คืนด้วยเจ้าของเดิมและ SELinux
+  context เดิม เพื่อให้ root ยังทำงานต่อได้ ขั้นสูง; เฉพาะสิ่งที่คุณเลือกเท่านั้น
 - **การตั้งเวลา + การทำงานอัตโนมัติ:** งานที่ทำซ้ำสำหรับ **การสำรองข้อมูลหรือการกู้คืน** โดยกำหนดเป้าหมาย
   เป็นแอปเดียว ชุดของแอป หรือแอปทั้งหมด พร้อมการตัดแต่งแบบ keep-N บวกกับการสำรองข้อมูลอัตโนมัติแบบเลือก
   เปิดใช้เมื่อติดตั้ง/อัปเดต และรายการแอปที่ยกเว้น.
@@ -126,6 +129,14 @@ VDBackup สร้างขึ้นให้ต้อนรับผู้ช�
 ทั้งหมดได้ที่ **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** และดูการมีส่วนร่วมได้ที่
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome).
 
+## การอัปเดตแบบเพิ่มทีละส่วน (VDLU)
+
+VD Backup มาพร้อมเอนจิน **VDLU** (ฝังอยู่ใน `vdlu/`): โมดูลอัปเดตตัวเองโดยดึงเฉพาะไฟล์ที่เปลี่ยนแปลง (บล็อบแบบระบุที่อยู่ด้วยเนื้อหา + `manifest.json` ที่ลงนามแล้ว) แทนที่จะดาวน์โหลด `.zip` ทั้งก้อนใหม่. โปรไฟล์ **เสริมความแข็งแกร่ง**: ลายเซ็น ed25519 เป็นสิ่งบังคับและการดาวน์เกรดถูกบล็อก; `.zip` แบบเต็มยังคงใช้ได้ในฐานะทางเลือกสำรอง.
+
+- **LIVE เท่านั้น** (ไม่ต้องรีบูต): การอัปเดตจะถูกนำไปใช้ในการบูตครั้งถัดไปผ่าน `service.sh` แบบเบื้องหลัง, ไม่ทำอะไรเลยเมื่อไม่มี feed ที่เข้าถึงได้.
+- **สถานะ** อยู่ใน `/data/adb/vdbackup/vdlu/`, ภายนอกโมดูล จึงอยู่รอดหลังการแฟลชใหม่.
+- **WebUI:** แผง **อัปเดต** พร้อม toast แสดงความคืบหน้าและปุ่มยกเลิก; การอัปเดตอัตโนมัติเป็นแบบเลือกเปิดใช้ (opt-in).
+
 ## เอกสาร
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/th-Home)**: เอกสาร เรียกดูออนไลน์ได้.
@@ -147,6 +158,8 @@ VDBackup สร้างขึ้นให้ต้อนรับผู้ช�
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: บริการ Google ของคุณ (RCS, Wallet, การรับรอง Play Integrity) อ่านได้บนอุปกรณ์ของคุณโดยไม่ต้องใช้อินเทอร์เน็ต.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: ตัวปลอมแปลงอุปกรณ์ที่เปลี่ยนฟิงเกอร์พรินต์ใหม่ให้กลายเป็นโปรไฟล์ที่สอดคล้องและกลมกลืน.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: ตัว SSH daemon แบบสแตนด์อโลนที่ทำงานด้วยสิทธิ์รูท (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## ช่องทางติดต่อ
 

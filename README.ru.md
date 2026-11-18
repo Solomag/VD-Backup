@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -75,6 +75,10 @@ Android-DataBackup**: объединение того, что они делаю�
   и ведите журнал активности/аудита каждого разрушающего действия.
 - **Особые резервные копии:** сообщения (SMS/MMS/RCS), контакты и журнал вызовов, Wi-Fi и Bluetooth,
   с необязательным переносимым экспортом в JSON, который можно открыть на ПК.
+- **Системные файлы (`/data/adb`):** резервное копирование самого окружения root - модулей, их
+  данных и конфигураций - всего целиком или поддерева, которое вы выбираете в дереве файлов, при
+  этом каждый файл восстанавливается с исходным владельцем и контекстом SELinux, чтобы root
+  продолжал работать. Для продвинутых; только то, что вы выберете.
 - **Расписание + автоматизация:** повторяющиеся задания **резервного копирования или восстановления**
   с целью на одно приложение, набор или все приложения, с очисткой по правилу keep-N, плюс
   опциональное авторезервирование при установке/обновлении и список исключённых приложений.
@@ -132,6 +136,17 @@ VDBackup создан, чтобы быть дружелюбным к ИИ-асс
 поверхность управления см. в **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**, а чтобы внести
 вклад, в [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome).
 
+## Инкрементальные обновления (VDLU)
+
+VD Backup поставляется с движком **VDLU** (встроен в `vdlu/`): модуль обновляет себя, скачивая только те
+файлы, которые изменились (адресуемые по содержимому блобы + подписанный `manifest.json`), вместо повторной
+загрузки всего `.zip`. **Усиленный** профиль: подпись ed25519 обязательна, а понижения версии блокируются;
+полный `.zip` остаётся действительным как запасной вариант.
+
+- **Только LIVE** (без перезагрузки): обновления применяются при следующей загрузке через `service.sh`, в фоне, и ничего не делают, когда ни один feed недоступен.
+- **Состояние** в `/data/adb/vdbackup/vdlu/`, вне модуля, поэтому оно переживает перепрошивку.
+- **WebUI:** панель **Обновления** с всплывающим уведомлением о ходе выполнения и отменой; автоматическое обновление включается по желанию.
+
 ## Документация
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/ru-Home)**: документация для просмотра онлайн.
@@ -153,6 +168,8 @@ VDBackup создан, чтобы быть дружелюбным к ИИ-асс
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: ваши сервисы Google (RCS, Wallet, аттестации Play Integrity), читаемые на вашем устройстве без интернета.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: спуфер устройства, который превращает свежий fingerprint в связный, согласованный профиль.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: автономный SSH-демон с root-правами (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Контакты
 

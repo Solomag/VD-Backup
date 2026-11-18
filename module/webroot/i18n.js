@@ -22,7 +22,7 @@
  * ======================================================================
  */
 window.I18N = (function () {
-  var AVAILABLE = ["en","ar","cs","de","es","fa","fr","hi","in","it","ja",
+  var AVAILABLE = ["en","ar","cs","de","es","fa","fr","hi","id","it","ja",
                    "ko","nl","pl","pt","ru","sv","th","tr","uk","vi","zh"];
   var EN = window.__I18N_EN || {};
   var strings = Object.assign({}, EN);
@@ -60,7 +60,7 @@ window.I18N = (function () {
   }
   function detect() {
     var l = (navigator.language || "en").toLowerCase().slice(0, 2);
-    if (l === "id") l = "in";           // Android uses "in" for Indonesian
+    if (l === "in") l = "id";           // Android reports legacy "in"; normalize to ISO "id"
     return AVAILABLE.indexOf(l) >= 0 ? l : "en";
   }
   function init(code) { return set(code && code !== "auto" ? code : detect()); }

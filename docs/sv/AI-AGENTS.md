@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · Svenska · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · Svenska · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` säkerhetskopiera valfri absolut sökväg som `tar.zst`+`manifest.json` under `.paths/` (frikopplat) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` återställ en sökvägs-säkerhetskopia till dess ursprungliga plats (`confirm` skyddar den; frikopplat) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` en lat nivå av /data/adb-trädet (standard `/data/adb`), för väljaren. |
+| `adb-du` | `{path}` | `{ok,size}` rekursiv byte-storlek för ett /data/adb-delträd, vid behov. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` säkerhetskopierar /data/adb - helt (utelämna `paths`) eller de valda delsökvägarna - med per-fil SELinux-/ägar-trohet, under `.adb/` (frikopplat) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` återställer en /data/adb-säkerhetskopia ÖVER det levande trädet - helt eller valda delsökvägar - med varje fils kontext bevarad (aldrig ett svepande chcon); `confirm` skyddar den (frikopplat) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` säkerhetskopiorna av /data/adb-filsystemet. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` en säkerhetskopias lagrade utförliga fillista, för återställningsträdets väljare. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | montera en installerad app som en systemapp (systemlös undermodul; live via NoMount annars nästa uppstart) |
 | `companion-status` / `companion-install` | `{}` | status för Google Drive-companion / installation på begäran |
@@ -102,6 +108,7 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` listar de krypterade konfigfiler som är tillgängliga att importera. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` tar bort sparade fjärrlösenord och enhetens krypteringsnyckel; destinationer, jobb och säkerhetskopior blir kvar. |
 | `log-prune` | `{}` | `{ok}` beskär sedan länge avslutade op-loggar, begränsar granskningsspåret och rensar inaktuella ikoner (startservicen anropar detta). |
+| `sanitize` | `{}` | `{ok}` återställer synligheten (0755) för backup-mappar för varje Android-användare, så att en filhanterare kan öppna mappar som en rå root-kopia eller en backup före v1.03.2 lämnade åtkomliga endast för ägaren. |
 
 ### `progress`-fält
 
@@ -208,6 +215,14 @@ Utöver detta tillämpas alltid en minimal **termisk säkerhetskontroll**: en sc
 hoppas över medan enheten är kritiskt varm. Varje grindöverhoppning skrivs till granskningsspåret
 som `op:"scheduler-gated"` med ett `reason` av `wifi` / `charging` / `battery` / `days` /
 `thermal`.
+
+### Batchens tillförlitlighet
+
+En batch (`backup` med `packages`, `restore` med `refs`) kör varje app i sitt eget subshell, så att en app inte kan förstöra de andra:
+
+- **`batch_app_timeout`** (konfig, sekunder, standard `1800`, `0` inaktiverar): om en app tar längre tid avslutas dess processträd, den registreras som `ERR_TIMEOUT` och batchen fortsätter, så att en fastnad app aldrig fryser hela körningen.
+- **Delresultat**: den avslutande skrivningen innehåller `ok`, `n` av `of`, en `fails`-räkning `{code:count}` (t.ex. `{"ERR_NO_SPACE":24}`) och `free` (lediga byte i säkerhetskopiornas filsystem). En delvis batch är `ERR_BATCH_PARTIAL`, aldrig ett blint fel.
+- **Termisk takt** (konfig `thermal_throttle`, på som standard): mellan appar pausar worker för att svalna när enheten är varm och sänder en `cooling`-förloppsfas, så att en lång körning inte överhettar enheten.
 
 ### `remote-add`-args
 
@@ -319,6 +334,25 @@ RECOVERY-kit när det är krypterat) under `.paths/` i backup-katalogen.
   `"confirm": true`, en spärr med hög friktion, likt `special-restore`. En `ref` som inte är en
   giltig sökvägs-säkerhetskopia misslyckas med `ERR_BAD_REF`.
 - Båda körs **frikopplat**; polla `progress` med det returnerade `opid`.
+
+### Säkerhetskopia av /data/adb-filsystemet
+
+`adb-backup` / `adb-restore` säkerhetskopierar och återställer root-miljön under /data/adb (moduler,
+deras data och konfigurationer), styrda av en lat trädväljare (`adb-list` en nivå i taget, `adb-du`
+för storleken på en mapp vid behov).
+
+- Helt eller selektivt i båda ändar: utelämna `paths` för allt, eller skicka de valda delsökvägarna
+  (relativa till /data/adb); återställningen tar samma `paths`.
+- **Per-fil-trohet:** arkivet behåller varje fils SELinux-kontext, ägare och xattrs, och återställningen
+  förlitar sig på det - den tillämpar ALDRIG ett svepande `chcon`, vilket skulle platta till /data/adb:s
+  heterogena kontexter och bryta root. `adb-restore` extraherar ÖVER det levande trädet; den raderar det
+  aldrig.
+- Självreferens: säkerhetskopians egen utdata och modulens staging exkluderas, så en säkerhetskopia
+  innehåller aldrig sig själv.
+- `adb-index` returnerar en säkerhetskopias lagrade fillista så att en återställning kan visa sitt träd;
+  UI-valet uttrycks helt genom `paths` (en helt ikryssad mapp är en sökväg; en delvis ikryssad stiger
+  ner till sina ikryssade barn, så ingen exkluderingslista behövs).
+- `adb-restore` kräver `"confirm": true` (spärr med hög friktion); båda körs frikopplat, polla `progress`.
 
 ### `update-check`
 

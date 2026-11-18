@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · Svenska · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ ställe, med inget att "tillåta".
   - [5.5 Verifiera och dry-run](#55-verifiera-och-dry-run)
   - [5.6 Särskilda säkerhetskopior (meddelanden, samtalslogg, Wi-Fi, Bluetooth, kalender, bakgrundsbild, DNS, systeminställningar)](#56-särskilda-säkerhetskopior-meddelanden-samtalslogg-wi-fi-bluetooth-kalender-bakgrundsbild-dns-systeminställningar)
   - [5.7 Fristående säkerhetskopior av mappar och filer](#57-fristående-säkerhetskopior-av-mappar-och-filer)
+  - [5.8 Systemfiler (/data/adb)](#58-systemfiler-dataadb)
 - [6. Återställa en säkerhetskopia](#6-återställa-en-säkerhetskopia)
 - [7. Destinationer: lokal och fjärr](#7-destinationer-lokal-och-fjärr)
   - [7.1 Säkerhetskopiera dina inställningar](#71-säkerhetskopiera-dina-inställningar)
@@ -326,6 +327,24 @@ den. Dessa sökvägs-säkerhetskopior hålls separat, under en `.paths`-mapp i d
   helst, är den destruktiv och ber dig **bekräfta** innan den skriver över något.
 - Liksom app-säkerhetskopior körs sökvägs-säkerhetskopior och -återställningar **frikopplat** med
   live-förlopp, använder din valda komprimering, och kan krypteras med en lösenfras.
+
+### 5.8 Systemfiler (`/data/adb`)
+
+`/data/adb` är där din root-hanterare förvarar installerade moduler, deras data och deras
+konfiguration, själva root-miljön. VDBackup kan säkerhetskopiera detta, helt eller delvis, så att
+du kan ta med din root-uppsättning genom en rensning eller ett ROM-byte.
+
+- **Helt eller selektivt.** Säkerhetskopiera hela `/data/adb`, eller öppna filträdet och välj
+  exakt de mappar och filer du vill ha; en halvmarkerad mapp inkluderar bara de barn du bockade i.
+- **Allt stannar i dina händer.** Trädet är neutralt - inget är förvalt eller dolt, förutom
+  VDBackups egna arbetsfiler, som annars bara skulle säkerhetskopiera sig själv. Komprimering och
+  kryptering är samma portabla alternativ som för vilken annan säkerhetskopia som helst.
+- **Återställning håller root fungerande.** Varje fil skrivs tillbaka med sin ursprungliga ägare,
+  grupp, läge och SELinux-kontext, en fil i taget, över det levande trädet (aldrig en svepande
+  rensning), så att de skilda kontexterna under `/data/adb` bevaras och din root-hanterare
+  fortfarande startar.
+- **Avancerat.** Detta berör root-miljön direkt. Återställning är destruktiv och ber dig bekräfta;
+  en selektiv återställning skriver bara tillbaka de sökvägar du valde.
 
 ## 6. Återställa en säkerhetskopia
 

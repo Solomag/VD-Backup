@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · ไทย · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · ไทย · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -23,6 +23,7 @@ Swift Backup, Neo-Backup หรือ Android-DataBackup มาก่อน ส�
   - [5.5 Verify และ dry-run](#55-verify-และ-dry-run)
   - [5.6 การสำรองพิเศษ (ข้อความ, บันทึกการโทร, Wi-Fi, Bluetooth, ปฏิทิน, วอลเปเปอร์, DNS, การตั้งค่าระบบ)](#56-การสำรองพเศษ-ขอความ-บนทกการโทร-wi-fi-bluetooth-ปฏทน-วอลเปเปอร-dns-การตงคาระบบ)
   - [5.7 การสำรองโฟลเดอร์และไฟล์แบบ standalone](#57-การสำรองโฟลเดอรและไฟลแบบ-standalone)
+  - [5.8 ไฟล์ระบบ (/data/adb)](#58-ไฟลระบบ-dataadb)
 - [6. การกู้คืน backup](#6-การกคน-backup)
 - [7. ปลายทาง: ในเครื่องและระยะไกล](#7-ปลายทาง-ในเครองและระยะไกล)
   - [7.1 สำรองการตั้งค่าของคุณ](#71-สำรองการตงคาของคณ)
@@ -291,6 +292,23 @@ Wi-Fi, Bluetooth, ปฏิทิน) ถูกกู้คืนโดยกา
   **ยืนยัน** ก่อนที่จะเขียนทับอะไร
 - เช่นเดียวกับการสำรองแอป การสำรองและการกู้คืนพาธรันแบบ **detached** พร้อมความคืบหน้าสด ๆ ใช้การ
   บีบอัดที่คุณเลือก และเข้ารหัสด้วย passphrase ได้
+
+### 5.8 ไฟล์ระบบ (`/data/adb`)
+
+`/data/adb` คือที่ที่ตัวจัดการ root ของคุณเก็บโมดูลที่ติดตั้งไว้, ข้อมูลและการตั้งค่าของมัน นั่นคือตัว
+สภาพแวดล้อม root เอง VDBackup สามารถสำรองมันได้ ทั้งหมดหรือบางส่วน เพื่อให้คุณพาการตั้งค่า root
+ของคุณข้ามการล้างเครื่องหรือการเปลี่ยน ROM ได้
+
+- **ทั้งหมดหรือเลือกบางส่วน** สำรอง `/data/adb` ทั้งหมด หรือเปิดแผนผังไฟล์แล้วเลือกเฉพาะโฟลเดอร์และ
+  ไฟล์ที่คุณต้องการ; โฟลเดอร์ที่ติ๊กไว้ครึ่งเดียวจะรวมเฉพาะรายการลูกที่คุณติ๊กไว้เท่านั้น
+- **ทุกอย่างอยู่ในมือคุณ** แผนผังนี้เป็นกลาง - ไม่มีอะไรถูกเลือกไว้ล่วงหน้าหรือถูกซ่อน ยกเว้นไฟล์ทำงาน
+  ของ VDBackup เอง ซึ่งมิฉะนั้นมันก็จะสำรองตัวมันเอง การบีบอัดและการเข้ารหัสเป็นตัวเลือกแบบพกพา
+  เดียวกันกับการสำรองอื่น ๆ
+- **การกู้คืนทำให้ root ยังทำงานได้** แต่ละไฟล์ถูกเขียนกลับด้วยเจ้าของเดิม, กลุ่ม, โหมด และ SELinux
+  context เดิม ทีละไฟล์ ทับลงบนไฟล์ที่มีอยู่จริง (ไม่ใช่การล้างแบบเหมารวม) ดังนั้นบริบทที่แตกต่างกัน
+  ใต้ `/data/adb` จึงถูกรักษาไว้ และตัวจัดการ root ของคุณยังบูตได้
+- **ขั้นสูง** สิ่งนี้แตะต้องสภาพแวดล้อม root โดยตรง การกู้คืนเป็นการทำลายข้อมูลและขอให้คุณยืนยัน; การกู้คืน
+  แบบเลือกจะเขียนกลับเฉพาะพาธที่คุณเลือกเท่านั้น
 
 ## 6. การกู้คืน backup
 

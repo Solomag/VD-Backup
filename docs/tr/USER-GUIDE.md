@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · Türkçe · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · Türkçe · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ gereken hiçbir şey yoktur.
   - [5.5 Doğrulama ve kuru çalıştırma](#55-doğrulama-ve-kuru-çalıştırma)
   - [5.6 Özel yedekler (mesajlar, arama günlüğü, Wi-Fi, Bluetooth, takvim, duvar kağıdı, DNS, sistem ayarları)](#56-özel-yedekler-mesajlar-arama-günlüğü-wi-fi-bluetooth-takvim-duvar-kağıdı-dns-sistem-ayarları)
   - [5.7 Bağımsız klasör ve dosya yedekleri](#57-bağımsız-klasör-ve-dosya-yedekleri)
+  - [5.8 Sistem dosyaları (/data/adb)](#58-sistem-dosyaları-dataadb)
 - [6. Bir yedeği geri yükleme](#6-bir-yedeği-geri-yükleme)
 - [7. Hedefler: yerel ve uzak](#7-hedefler-yerel-ve-uzak)
   - [7.1 Ayarlarınızı yedekleme](#71-ayarlarınızı-yedekleme)
@@ -332,6 +333,24 @@ notuyla. Bu yol yedekleri ayrı tutulur, yedekler dizininizdeki bir `.paths` kla
   ve bir şeyin üzerine yazmadan önce **onaylamanızı** ister.
 - Uygulama yedekleri gibi, yol yedekleri ve geri yüklemeleri de canlı ilerlemeyle **ayrık** çalışır,
   seçtiğiniz sıkıştırmayı kullanır ve bir parolayla şifrelenebilir.
+
+### 5.8 Sistem dosyaları (`/data/adb`)
+
+`/data/adb`, root yöneticinizin kurulu modülleri, verilerini ve yapılandırmalarını, yani root
+ortamının kendisini sakladığı yerdir. VDBackup bunu tamamen veya kısmen yedekleyebilir, böylece
+root kurulumunuzu bir silme işlemi veya bir ROM değişikliği boyunca taşıyabilirsiniz.
+
+- **Tümü veya seçmeli.** `/data/adb`'nin tamamını yedekleyin ya da dosya ağacını açıp tam olarak
+  istediğiniz klasörleri ve dosyaları seçin; yarısı işaretli bir klasör yalnızca işaretlediğiniz
+  alt öğeleri içerir.
+- **Her şey sizin elinizde kalır.** Ağaç tarafsızdır - VDBackup'ın kendi çalışma dosyaları dışında
+  hiçbir şey önceden seçili veya gizli değildir; o dosyalar aksi halde yalnızca kendisini
+  yedeklerdi. Sıkıştırma ve şifreleme, diğer herhangi bir yedekle aynı taşınabilir seçeneklerdir.
+- **Geri yükleme root'u çalışır tutar.** Her dosya kendi özgün sahibi, grubu, modu ve SELinux
+  bağlamıyla, teker teker, canlı ağacın üzerine geri yazılır (asla toptan bir silme değil), böylece
+  `/data/adb` altındaki farklı bağlamlar korunur ve root yöneticiniz hâlâ önyükleme yapar.
+- **Gelişmiş.** Bu, doğrudan root ortamına dokunur. Geri yükleme yıkıcıdır ve onaylamanızı ister;
+  seçmeli bir geri yükleme yalnızca seçtiğiniz yolları geri yazar.
 
 ## 6. Bir yedeği geri yükleme
 

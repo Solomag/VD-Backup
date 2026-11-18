@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · Tiếng Việt · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · Tiếng Việt · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` sao lưu bất kỳ đường dẫn tuyệt đối nào thành `tar.zst`+`manifest.json` dưới `.paths/` (tách rời) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` khôi phục một bản sao lưu đường dẫn về vị trí gốc của nó (`confirm` canh gác nó; tách rời) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` một cấp lười của cây /data/adb (mặc định `/data/adb`), cho bộ chọn. |
+| `adb-du` | `{path}` | `{ok,size}` kích thước byte đệ quy của một cây con /data/adb, theo yêu cầu. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` sao lưu /data/adb - toàn bộ (bỏ `paths`) hoặc các sub-path đã chọn - với độ trung thực SELinux/chủ sở hữu theo từng tệp, dưới `.adb/` (tách rời) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` khôi phục một bản sao lưu /data/adb ĐÈ LÊN cây đang hoạt động - toàn bộ hoặc các sub-path đã chọn - giữ nguyên ngữ cảnh của từng tệp (không bao giờ dùng chcon toàn cục); `confirm` canh gác nó (tách rời) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` các bản sao lưu hệ thống tệp /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` danh sách tệp chi tiết đã lưu của một bản sao lưu, cho bộ chọn cây khôi phục. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | gắn một ứng dụng đã cài làm ứng dụng hệ thống (mô-đun con không-hệ-thống; trực tiếp qua NoMount, nếu không thì ở lần khởi động kế tiếp) |
 | `companion-status` / `companion-install` | `{}` | trạng thái / cài đặt theo yêu cầu của ứng dụng đồng hành Google Drive |
@@ -102,6 +108,7 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` liệt kê các tệp cấu hình mã hóa có sẵn để nhập. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` xóa mật khẩu từ xa đã lưu và khóa mã hóa thiết bị; đích đến, công việc và bản sao lưu vẫn còn. |
 | `log-prune` | `{}` | `{ok}` cắt tỉa nhật ký thao tác đã hoàn tất từ lâu, giới hạn dấu vết kiểm toán và loại bỏ biểu tượng cũ (dịch vụ khởi động gọi cái này). |
+| `sanitize` | `{}` | `{ok}` tái khẳng định khả năng hiển thị (0755) của các thư mục sao lưu trên mọi người dùng Android, để trình quản lý tệp có thể mở các thư mục mà một bản sao root thô hoặc một bản sao lưu trước v1.03.2 đã để ở chế độ chỉ chủ sở hữu truy cập được. |
 
 ### Các trường của `progress`
 
@@ -209,6 +216,14 @@ Trên tất cả các cổng này, một kiểm tra **an toàn nhiệt** tối t
 tác theo lịch bị bỏ qua khi thiết bị nóng tới mức nguy hiểm. Mỗi lần bỏ qua do cổng được ghi vào
 nhật ký kiểm toán dưới dạng `op:"scheduler-gated"` với `reason` là `wifi` / `charging` /
 `battery` / `days` / `thermal`.
+
+### Độ tin cậy của lô
+
+Một lô (`backup` với `packages`, `restore` với `refs`) chạy mỗi ứng dụng trong subshell riêng của nó, để một ứng dụng không thể làm hỏng các ứng dụng còn lại:
+
+- **`batch_app_timeout`** (cấu hình, giây, mặc định `1800`, `0` tắt): nếu một ứng dụng mất nhiều thời gian hơn, cây tiến trình của nó bị kết thúc, nó được ghi là `ERR_TIMEOUT`, và lô tiếp tục, để một ứng dụng bị kẹt không bao giờ làm đóng băng toàn bộ lần chạy.
+- **Kết quả một phần**: lần ghi kết thúc mang theo `ok`, `n` trên `of`, một bảng `fails` `{code:count}` (ví dụ `{"ERR_NO_SPACE":24}`), và `free` (số byte còn lại trên hệ thống tập tin sao lưu). Một lô một phần là `ERR_BATCH_PARTIAL`, không bao giờ là lỗi mù mờ.
+- **Điều tiết nhiệt** (cấu hình `thermal_throttle`, mặc định bật): giữa các ứng dụng, worker tạm dừng để hạ nhiệt khi thiết bị nóng, phát ra một pha tiến trình `cooling`, để một lần chạy dài không làm thiết bị quá nóng.
 
 ### Đối số của `remote-add`
 
@@ -320,6 +335,25 @@ backups.
   cổng ma sát cao, giống `special-restore`. Một `ref` không phải là một bản sao lưu đường dẫn hợp lệ
   sẽ thất bại với `ERR_BAD_REF`.
 - Cả hai đều chạy **tách rời**; thăm dò `progress` bằng `opid` được trả về.
+
+### Sao lưu hệ thống tệp /data/adb
+
+`adb-backup` / `adb-restore` sao lưu và khôi phục môi trường root dưới /data/adb (các module,
+dữ liệu và cấu hình của chúng), được điều khiển bởi một bộ chọn cây lười (`adb-list` mỗi lần một
+cấp, `adb-du` cho kích thước của một thư mục theo yêu cầu).
+
+- Toàn bộ hoặc chọn lọc ở cả hai đầu: bỏ `paths` để lấy mọi thứ, hoặc truyền các sub-path đã chọn
+  (tương đối so với /data/adb); việc khôi phục lấy cùng `paths`.
+- **Độ trung thực theo từng tệp:** kho lưu trữ giữ ngữ cảnh SELinux, chủ sở hữu và xattrs của từng tệp,
+  và việc khôi phục dựa vào đó - nó KHÔNG BAO GIỜ áp dụng một `chcon` toàn cục, điều sẽ làm phẳng các
+  ngữ cảnh không đồng nhất của /data/adb và làm hỏng root. `adb-restore` giải nén ĐÈ LÊN cây đang hoạt
+  động; nó không bao giờ xóa cây.
+- Tự tham chiếu: đầu ra của chính bản sao lưu và staging của module bị loại trừ, nên một bản sao lưu
+  không bao giờ chứa chính nó.
+- `adb-index` trả về danh sách tệp đã lưu của một bản sao lưu để việc khôi phục có thể hiển thị cây của
+  nó; lựa chọn UI được biểu đạt hoàn toàn qua `paths` (một thư mục được chọn đầy đủ là một path; một
+  thư mục được chọn một phần sẽ đi xuống các con được chọn của nó, nên không cần danh sách exclude).
+- `adb-restore` yêu cầu `"confirm": true` (cổng ma sát cao); cả hai đều chạy tách rời, thăm dò `progress`.
 
 ### `update-check`
 

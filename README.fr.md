@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,10 @@ importer les sauvegardes existantes de Neo-Backup et d'Android-DataBackup pour q
   conservez un journal d'activité/d'audit de chaque action destructrice.
 - **Sauvegardes spéciales :** messages (SMS/MMS/RCS), contacts et journal d'appels, Wi-Fi et Bluetooth,
   avec une exportation JSON portable optionnelle que vous pouvez ouvrir sur un PC.
+- **Fichiers système (`/data/adb`) :** sauvegardez l'environnement root lui-même - les modules, leurs
+  données et configs - tout ou un sous-arbre que vous choisissez dans une arborescence de fichiers, chaque
+  fichier étant restauré avec son propriétaire et son contexte SELinux d'origine pour que root continue de
+  fonctionner. Avancé ; seulement ce que vous choisissez.
 - **Planification + automatisation :** tâches récurrentes de **sauvegarde ou de restauration** ciblant une
   seule appli, un ensemble, ou toutes les applis, avec élagage keep-N, plus une sauvegarde automatique opt-in à
   l'installation/mise à jour et une liste d'applis exclues.
@@ -119,6 +123,17 @@ les contributions assistées par IA sont examinées et acceptées comme toute au
 voir **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** pour la surface de contrôle complète, et
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) pour contribuer.
 
+## Mises à jour incrémentielles (VDLU)
+
+VD Backup embarque l'engine **VDLU** (intégré dans `vdlu/`): le module se met à jour en ne récupérant que les
+fichiers qui ont changé (blobs adressés par contenu + un `manifest.json` signé), au lieu de retélécharger tout
+le `.zip`. Profil **durci**: la signature ed25519 est obligatoire et les rétrogradations sont bloquées; le
+`.zip` complet reste valide comme solution de repli.
+
+- **LIVE uniquement** (sans redémarrage): les mises à jour s'appliquent au prochain démarrage via `service.sh`, en arrière-plan, sans effet quand aucun feed n'est accessible.
+- **État** dans `/data/adb/vdbackup/vdlu/`, hors du module, pour survivre à un reflash.
+- **WebUI:** un panneau **Mises à jour** avec un toast de progression et une annulation; la mise à jour automatique est en option.
+
 ## Documentation
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/fr-Home)**: la documentation, consultable en ligne.
@@ -140,6 +155,8 @@ Projets frères du même auteur :
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: vos services Google (RCS, Wallet, attestations Play Integrity), lus sur votre appareil sans internet.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: un spoofer d'appareil qui transforme une empreinte neuve en un profil cohérent et consistant.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: un démon SSH autonome en root (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Contacts
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · हिन्दी · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -18,12 +18,13 @@ Android-DataBackup का उपयोग किया है, तो यह प
 - [4. WebUI की सैर](#4-webui-क-सर)
 - [5. एक backup बनाना](#5-एक-backup-बनन)
   - [5.1 क्या backup करना है चुनना](#51-कय-backup-करन-ह-चनन)
-  - [5.2 Backup modes: Full, Snapshot, Mirror](#52-backup-modes-full-snapshot-mirror)
+  - [5.2 बैकअप modes: Full, Snapshot, Mirror](#52-बकअप-modes-full-snapshot-mirror)
   - [5.3 संपीड़न](#53-सपडन)
   - [5.4 एन्क्रिप्शन](#54-एनकरपशन)
   - [5.5 Verify और dry-run](#55-verify-और-dry-run)
   - [5.6 विशेष बैकअप (संदेश, कॉल लॉग, Wi-Fi, Bluetooth, कैलेंडर, वॉलपेपर, DNS, सिस्टम सेटिंग्स)](#56-वशष-बकअप-सदश-कल-लग-wi-fi-bluetooth-कलडर-वलपपर-dns-ससटम-सटगस)
   - [5.7 स्वतंत्र फ़ोल्डर और फ़ाइल बैकअप](#57-सवततर-फलडर-और-फइल-बकअप)
+  - [5.8 सिस्टम फ़ाइलें (/data/adb)](#58-ससटम-फइल-dataadb)
 - [6. एक backup को restore करना](#6-एक-backup-क-restore-करन)
 - [7. गंतव्य: स्थानीय और remote](#7-गतवय-सथनय-और-remote)
   - [7.1 अपनी सेटिंग्स का बैकअप](#71-अपन-सटगस-क-बकअप)
@@ -182,7 +183,7 @@ ROMs पर जो shell सूचनाएँ सामने लाते ह�
 VDBackup उन चीज़ों को भी संरक्षित करता है जो एक restore को विश्वासयोग्य बनाती हैं: SELinux संदर्भ,
 uid/gid स्वामित्व, फ़ाइल modes, विस्तारित विशेषताएँ (xattr) और क्षमताएँ।
 
-### 5.2 Backup modes: Full, Snapshot, Mirror
+### 5.2 बैकअप modes: Full, Snapshot, Mirror
 
 VDBackup तीन modes प्रदान करता है। WebUI पहले से **Full** चुनता है, जो अधिकांश लोगों के लिए
 सही विकल्प है।
@@ -300,6 +301,23 @@ Full अपलोड के लिए है; Mirror एक delta sync है �
   अधिलेखित करने से पहले आपसे **पुष्टि** माँगता है।
 - ऐप बैकअप की तरह, पथ बैकअप और restore live प्रगति के साथ **detached** चलते हैं, आपके चुने हुए
   संपीड़न का उपयोग करते हैं, और एक passphrase से एन्क्रिप्ट किए जा सकते हैं।
+
+### 5.8 सिस्टम फ़ाइलें (`/data/adb`)
+
+`/data/adb` वह जगह है जहाँ आपका root प्रबंधक इंस्टॉल किए गए मॉड्यूल, उनका डेटा और उनका कॉन्फ़िगरेशन रखता
+है - स्वयं root परिवेश। VDBackup इसका बैकअप ले सकता है, पूरा या आंशिक, ताकि आप अपने root सेटअप को किसी
+वाइप या ROM बदलाव के पार ले जा सकें।
+
+- **पूर्ण या चयनात्मक।** पूरे `/data/adb` का बैकअप लें, या फ़ाइल ट्री खोलें और ठीक वही फ़ोल्डर और फ़ाइलें चुनें
+  जो आप चाहते हैं; आधा-चेक किया गया फ़ोल्डर केवल उन्हीं संतानों को शामिल करता है जिन्हें आपने टिक किया।
+- **सब कुछ आपके हाथ में रहता है।** ट्री तटस्थ है - कुछ भी पहले से चयनित या छिपा हुआ नहीं है, सिवाय VDBackup
+  की अपनी कार्य फ़ाइलों के, जो अन्यथा बस स्वयं का ही बैकअप ले लेतीं। संपीड़न और एन्क्रिप्शन किसी भी अन्य बैकअप
+  जैसे ही पोर्टेबल विकल्प हैं।
+- **restore root को काम करता रखता है।** हर फ़ाइल उसके मूल स्वामी, समूह, मोड और SELinux संदर्भ के साथ वापस
+  लिखी जाती है, एक बार में एक फ़ाइल, जीवंत ट्री के ऊपर (कभी भी सम्पूर्ण वाइप नहीं), ताकि `/data/adb` के नीचे
+  भिन्न संदर्भ संरक्षित रहें और आपका root प्रबंधक अब भी बूट हो।
+- **उन्नत।** यह सीधे root परिवेश को छूता है। restore विनाशकारी है और आपसे पुष्टि माँगता है; एक चयनात्मक restore
+  केवल उन्हीं पथों को वापस लिखता है जिन्हें आपने चुना।
 
 ## 6. एक backup को restore करना
 

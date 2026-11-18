@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,10 @@ các bản sao lưu Neo-Backup và Android-DataBackup hiện có để bạn chu
   nhật ký hoạt động/kiểm toán cho mọi hành động phá hủy.
 - **Sao lưu đặc biệt:** tin nhắn (SMS/MMS/RCS), danh bạ và nhật ký cuộc gọi, Wi-Fi và Bluetooth,
   với một bản xuất JSON khả chuyển tùy chọn mà bạn có thể mở trên PC.
+- **Tệp hệ thống (`/data/adb`):** sao lưu chính môi trường root - các mô-đun, dữ liệu và cấu hình
+  của chúng - toàn bộ hoặc một cây con mà bạn chọn từ một cây tệp, với mỗi tệp được khôi phục về
+  chủ sở hữu và ngữ cảnh SELinux ban đầu của nó để root vẫn hoạt động. Nâng cao; chỉ những gì bạn
+  chọn.
 - **Lập lịch + tự động hóa:** các tác vụ **sao lưu hoặc khôi phục** định kỳ nhắm tới một ứng
   dụng, một tập hợp, hoặc tất cả ứng dụng, với việc tỉa bớt theo kiểu keep-N, cùng với tự động
   sao lưu opt-in khi cài đặt/cập nhật và một danh sách ứng dụng loại trừ.
@@ -118,6 +122,17 @@ khác. Một tác nhân có thể quản trị **mọi** hành động của mô
 API mà WebUI dùng, xem toàn bộ bề mặt điều khiển tại **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**, và
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) để đóng góp.
 
+## Cập nhật tăng dần (VDLU)
+
+VD Backup đi kèm engine **VDLU** (được nhúng trong `vdlu/`): mô-đun tự cập nhật bằng cách chỉ tải về những
+tệp đã thay đổi (các blob định địa chỉ theo nội dung + một `manifest.json` đã ký), thay vì tải lại toàn bộ
+`.zip`. Hồ sơ **được gia cố**: chữ ký ed25519 là bắt buộc và việc hạ cấp bị chặn; `.zip` đầy đủ vẫn hợp lệ
+như một phương án dự phòng.
+
+- **Chỉ LIVE** (không khởi động lại): các bản cập nhật được áp dụng ở lần khởi động kế tiếp qua `service.sh`, chạy nền, không làm gì khi không có feed nào truy cập được.
+- **Trạng thái** trong `/data/adb/vdbackup/vdlu/`, bên ngoài mô-đun, nên nó sống sót qua một lần flash lại.
+- **WebUI:** một bảng **Cập nhật** với toast tiến trình và nút hủy; tự động cập nhật là tùy chọn (opt-in).
+
 ## Tài liệu
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/vi-Home)**: tài liệu, duyệt trực tuyến.
@@ -139,6 +154,8 @@ Các dự án anh em của cùng tác giả:
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: các dịch vụ Google của bạn (RCS, Wallet, các chứng thực Play Integrity), đọc ngay trên thiết bị của bạn mà không cần internet.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: một trình giả lập thiết bị biến một fingerprint mới thành một hồ sơ mạch lạc, nhất quán.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: một SSH daemon độc lập chạy với quyền root (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## Contacts
 

@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · العربية · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -23,6 +23,7 @@
   - [5.5 التحقق والتشغيل التجريبي](#55-التحقق-والتشغيل-التجريبي)
   - [5.6 النسخ الاحتياطية الخاصة (الرسائل وسجل المكالمات وWi-Fi وBluetooth والتقويم والخلفية وDNS وإعدادات النظام)](#56-النسخ-الاحتياطية-الخاصة-الرسائل-وسجل-المكالمات-وwi-fi-وbluetooth-والتقويم-والخلفية-وdns-وإعدادات-النظام)
   - [5.7 النسخ الاحتياطية المستقلة للمجلدات والملفات](#57-النسخ-الاحتياطية-المستقلة-للمجلدات-والملفات)
+  - [5.8 ملفات النظام (/data/adb)](#58-ملفات-النظام-dataadb)
 - [6. استعادة نسخة احتياطية](#6-استعادة-نسخة-احتياطية)
 - [7. الوجهات: المحلية والبعيدة](#7-الوجهات-المحلية-والبعيدة)
   - [7.1 نسخ إعداداتك احتياطيًا](#71-نسخ-إعداداتك-احتياطيا)
@@ -292,6 +293,21 @@ RECOVERY حين تشفّره. تُحفَظ نسخ المسارات هذه على
   أن تكتب فوق أي شيء.
 - مثل نسخ التطبيقات، تعمل نسخ واستعادات المسارات **منفصلة** بتقدم حي، وتستخدم الضغط الذي تختاره،
   ويمكن تشفيرها بعبارة مرور.
+
+### 5.8 ملفات النظام (`/data/adb`)
+
+`/data/adb` هو حيث يحتفظ مدير الـ root بالوحدات المثبّتة وبياناتها وإعداداتها - بيئة الـ root
+نفسها. يستطيع VDBackup نسخ هذا، كله أو جزءا منه، كي تنقل إعداد الـ root عبر مسح أو تغيير ROM.
+
+- **كلّي أو انتقائي.** انسخ كل `/data/adb`، أو افتح شجرة الملفات واختر بالضبط المجلدات والملفات
+  التي تريدها؛ المجلد المؤشَّر جزئيا يشمل فقط الأبناء الذين أشّرتهم.
+- **كل شيء يبقى بين يديك.** الشجرة محايدة - لا شيء مُنتقى مسبقا أو مخفي، عدا ملفات عمل VDBackup
+  نفسها، التي لولا ذلك لنسخت نفسها فحسب. الضغط والتشفير هما نفس الخيارات المحمولة كأي نسخة أخرى.
+- **الاستعادة تُبقي الـ root عاملا.** يُكتَب كل ملف عائدا بمالكه الأصلي وفئته ونمطه وسياق SELinux،
+  ملفا واحدا في كل مرة، فوق الشجرة الحية (لا مسح شامل أبدا)، فتُحفَظ السياقات المختلفة تحت
+  `/data/adb` ويظل مدير الـ root يُقلِع.
+- **متقدم.** هذا يمسّ بيئة الـ root مباشرة. الاستعادة مدمّرة وتطلب منك التأكيد؛ الاستعادة الانتقائية
+  تكتب عائدة فقط المسارات التي اخترتها.
 
 ## 6. استعادة نسخة احتياطية
 

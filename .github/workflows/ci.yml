@@ -41,7 +41,7 @@ jobs:
 
       - name: Validate JSON
         run: |
-          for f in module/update.json module/webroot/config.json module/webroot/lang/*.json; do
+          for f in module/update.json module/update-*.json module/webroot/config.json module/webroot/lang/*.json; do
             python3 -c "import json,sys; json.load(open('$f'))" && echo "ok $f"
           done
 

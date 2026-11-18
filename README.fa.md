@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -74,6 +74,9 @@ Android-DataBackup** طراحی شده است: اجتماعِ کاری که آن
   هر اقدام ویرانگر نگه دارید.
 - **پشتیبان‌های ویژه:** پیام‌ها (SMS/MMS/RCS)، مخاطبان و گزارش تماس، Wi-Fi و Bluetooth، همراه با یک
   خروجی قابل حملِ JSON اختیاری که می‌توانید روی رایانه بازش کنید.
+- **فایل‌های سیستم (`/data/adb`):** از خودِ محیط root پشتیبان بگیرید - ماژول‌ها، داده‌ها و پیکربندی‌هایشان -
+  همهٔ آن یا زیردرختی که از یک درخت فایل برمی‌گزینید، با بازگرداندن هر فایل به مالک اصلی و زمینهٔ SELinux
+  اصلی‌اش تا root کارکردن ادامه دهد. پیشرفته؛ فقط آنچه برمی‌گزینید.
 - **زمان‌بندی + خودکارسازی:** کارهای تکرارشوندهٔ **پشتیبان‌گیری یا بازیابی** که یک برنامه، یک
   مجموعه، یا همهٔ برنامه‌ها را هدف می‌گیرند، با هرس keep-N، به‌علاوهٔ پشتیبان‌گیری خودکارِ با انتخاب
   صریح هنگام نصب/به‌روزرسانی و یک فهرست برنامه‌های مستثنا.
@@ -119,6 +122,14 @@ VDBackup طوری ساخته شده که نه‌فقط برای مردم، بل�
 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** و برای مشارکت به
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) نگاه کنید.
 
+## به‌روزرسانی‌های تدریجی (VDLU)
+
+VD Backup با موتور **VDLU** عرضه می‌شود (تعبیه‌شده در `vdlu/`): ماژول با گرفتن فقط فایل‌هایی که تغییر کرده‌اند خود را به‌روز می‌کند (بلاب‌های آدرس‌دهی‌شده بر پایهٔ محتوا + یک `manifest.json` امضاشده)، به جای دانلود دوبارهٔ کل `.zip`. نمایه **سخت‌سازی‌شده**: امضای ed25519 اجباری است و بازگشت به نسخهٔ پایین‌تر مسدود می‌شود؛ `.zip` کامل همچنان به‌عنوان جایگزین معتبر می‌ماند.
+
+- **فقط LIVE** (بدون راه‌اندازی مجدد): به‌روزرسانی‌ها در بوت بعدی از طریق `service.sh` در پس‌زمینه اعمال می‌شوند، و وقتی هیچ feed در دسترس نباشد کاری انجام نمی‌دهند.
+- **وضعیت** در `/data/adb/vdbackup/vdlu/`، بیرون از ماژول، تا پس از فلش مجدد باقی بماند.
+- **WebUI:** یک پنل **به‌روزرسانی‌ها** با یک اعلان پیشرفت و دکمهٔ لغو؛ به‌روزرسانی خودکار اختیاری است.
+
 ## مستندات
 
 - **[ویکی](https://github.com/VD171/VD-Backup/wiki/fa-Home)**: مستندات، قابل مرور به‌صورت آنلاین.
@@ -140,6 +151,8 @@ VDBackup طوری ساخته شده که نه‌فقط برای مردم، بل�
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: سرویس‌های Google شما (RCS، Wallet، گواهی‌های Play Integrity)، روی دستگاهتان و بدون اینترنت خوانده می‌شوند.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: یک جاعلِ دستگاه که یک اثرانگشت تازه را به یک پروفایلِ منسجم و یکدست تبدیل می‌کند.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: یک سرویس SSH مستقل با دسترسی روت (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## تماس
 

@@ -32,7 +32,7 @@ Asisten dan agen AI adalah kontributor kelas satu di sini, bukan sekadar pelengk
 - Jika Anda menjalankan VDBackup dari sebuah agen, gunakan keluaran JSON `helper.sh` sebagai
   kontrak; jangan scrape WebUI.
 - Standar yang sama untuk semua: fitur nyata tidak pernah dilemahkan, rahasia dan data perangkat
-  tidak pernah masuk ke repo (lihat [.gitignore](.gitignore) yang ketat), dan aksi yang
+  tidak pernah masuk ke repo (lihat [.gitignore](../../.gitignore) yang ketat), dan aksi yang
   mengubah tetap dikonfirmasi dan diaudit.
 
 ## Penyiapan dev

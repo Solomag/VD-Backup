@@ -29,6 +29,38 @@
 d="${0%/*}"; [ "$d" = "$0" ] && d="."; MODDIR="$(cd "$d/.." 2>/dev/null && pwd || echo "${d%/*}")"
 STATE=/data/adb/vdbackup
 bdir() { case "$1" in ''|*[!0-9]*) set -- 0 ;; esac; printf '/data/media/%s/VDBackup' "$1"; }  # /sdcard/VDBackup per Android user (credential-encrypted)
+# A backup sent to a local destination lives at that destination, not duplicated in the internal
+# store (destination-authoritative, issue #15): the user picks a local dest to keep the backup OFF
+# internal storage, so keeping an internal copy would defeat that and waste the space. list/restore/
+# delete therefore look in every backup root. local_dest_roots echoes each configured local
+# destination root ($path/vdbackup); backup_roots prepends the internal store for a user. Dest paths
+# are validated storage locations (safe_local_dest in worker.sh), no spaces.
+local_dest_roots() {
+  _ldj="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+  for _ldf in "$STATE/dests"/*.json; do
+    [ -f "$_ldf" ] || continue
+    [ "$("$_ldj" -r '.type // "local"' "$_ldf" 2>/dev/null)" = local ] || continue
+    _ldp="$("$_ldj" -r '.path // empty' "$_ldf" 2>/dev/null)"
+    case "$_ldp" in ''|null|*..*) continue ;; esac
+    printf '%s/vdbackup\n' "$_ldp"
+  done
+}
+backup_roots() { printf '%s\n' "$(bdir "$1")"; local_dest_roots; }   # <user>; one backup root per line
+# Echo the backup root a ref sits under - the internal store or a configured local destination -
+# or nothing if the ref is under no known root. `..` is refused first, so a ref can never traverse
+# out of its root. Used to scope delete and to validate backup-info. Space-safe (read -r).
+ref_root() {   # <ref>
+  case "$1" in
+    *..*) return 0 ;;
+    /data/media/*/VDBackup/*) printf '%s' "$1" | sed -E 's#(/data/media/[0-9]+/VDBackup)/.*#\1#'; return 0 ;;
+  esac
+  while IFS= read -r _rr; do
+    [ -n "$_rr" ] || continue
+    case "$1" in "$_rr"/*) printf '%s' "$_rr"; return 0 ;; esac
+  done <<EOF
+$(local_dest_roots)
+EOF
+}
 # Secrets (remote credentials, the age keypair, the rclone config) live on CREDENTIAL-
 # ENCRYPTED storage, locked until the user's first unlock (BFU), NOT in /data/adb which is
 # device-encrypted and readable before first unlock. Scheduled backups never need them
@@ -276,6 +308,9 @@ sched_too_hot() {
   for _tz in /sys/class/thermal/thermal_zone*/temp; do
     [ -r "$_tz" ] || continue
     _tzv="$(cat "$_tz" 2>/dev/null)"; case "$_tzv" in ''|*[!0-9]*) continue ;; esac
+    # Ignore bogus sensors: a connector/USB NTC idles at a ~125C sentinel (not real heat), and
+    # nothing below 60C is an overheat however low its own trip sits.
+    { [ "$_tzv" -ge 120000 ] || [ "$_tzv" -lt 60000 ]; } && continue
     _tzc=85000; _tzd="${_tz%/temp}"
     for _tp in "$_tzd"/trip_point_*_type; do
       [ -r "$_tp" ] || continue
@@ -483,7 +518,7 @@ case "$verb" in
     done
     printf '}}\n' ;;
 
-  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import|telegram-pull)
+  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|adb-backup|adb-restore|config-export|config-import|telegram-pull)
     opid="$(new_opid)"
     detach "$opid" "$verb" "$ARGS_B64"
     ok "\"opid\":\"$opid\"" ;;
@@ -607,6 +642,63 @@ case "$verb" in
     done
     printf ']}\n' ;;
 
+  adb-list)
+    # Lazy one-level listing of the /data/adb tree for the filesystem-backup picker. Returns each
+    # child's name/type/size/has_children. Confined to /data/adb; file size is exact, dir size is
+    # deferred (0) and fetched on demand (adb-du) so the listing stays snappy on large subtrees.
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    p="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.path // "/data/adb"' 2>/dev/null)"
+    case "$p" in /data/adb|/data/adb/*) : ;; *) err ERR_BAD_PATH "outside /data/adb"; exit 0 ;; esac
+    case "$p" in *..*) err ERR_BAD_PATH "traversal"; exit 0 ;; esac
+    [ -d "$p" ] || { err ERR_NO_PATH "not a directory"; exit 0; }
+    printf '{"ok":true,"path":"%s","entries":[' "$(jstr "$p")"
+    first=1
+    for e in "$p"/* "$p"/.*; do
+      { [ -e "$e" ] || [ -L "$e" ]; } || continue
+      nm="${e##*/}"; case "$nm" in .|..) continue ;; esac
+      if [ -L "$e" ]; then ty=link; sz=0; hc=false
+      elif [ -d "$e" ]; then
+        ty=dir; sz=0; hc=false
+        for _c in "$e"/* "$e"/.*; do case "${_c##*/}" in .|..) ;; *) { [ -e "$_c" ] || [ -L "$_c" ]; } && { hc=true; break; } ;; esac; done
+      else ty=file; sz="$(stat -c %s "$e" 2>/dev/null || echo 0)"; case "$sz" in ''|*[!0-9]*) sz=0 ;; esac; hc=false
+      fi
+      [ "$first" = 1 ] || printf ','; first=0
+      printf '{"name":"%s","type":"%s","size":%s,"has_children":%s}' "$(jstr "$nm")" "$ty" "$sz" "$hc"
+    done
+    printf ']}\n' ;;
+
+  adb-du)
+    # On-demand recursive size of one /data/adb subtree (bytes), for the picker to annotate a dir.
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    p="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.path // empty' 2>/dev/null)"
+    case "$p" in /data/adb|/data/adb/*) : ;; *) err ERR_BAD_PATH "outside /data/adb"; exit 0 ;; esac
+    case "$p" in *..*) err ERR_BAD_PATH "traversal"; exit 0 ;; esac
+    [ -e "$p" ] || { err ERR_NO_PATH "no path"; exit 0; }
+    sz="$(du -sk "$p" 2>/dev/null | cut -f1)"; case "$sz" in ''|*[!0-9]*) sz=0 ;; esac   # toybox du: -k (KiB), no -B
+    ok "\"path\":\"$(jstr "$p")\",\"size\":$((sz * 1024))" ;;
+
+  adb-backups)
+    # list the /data/adb filesystem backups (local .adb store, like path-list)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _bk="$(bdir 0)/.adb"
+    printf '{"ok":true,"backups":['
+    first=1
+    for m in "$_bk"/*/manifest.json; do
+      [ -f "$m" ] || continue
+      [ "$first" = 1 ] || printf ','; first=0
+      "$JQ" -c --arg ref "$(dirname "$m")" '{ref:$ref, created_at:.created_at, mode:.mode, paths:.paths, encryption:.encryption}' "$m" 2>/dev/null
+    done
+    printf ']}\n' ;;
+
+  adb-index)
+    # the stored verbose file listing of one /data/adb backup, for the restore tree picker
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    ref="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.ref // empty' 2>/dev/null)"
+    case "$ref" in /data/media/*/VDBackup/.adb/*) : ;; *) err ERR_BAD_REF "bad ref"; exit 0 ;; esac
+    case "$ref" in *..*) err ERR_BAD_REF "traversal"; exit 0 ;; esac
+    [ -f "$ref/index.txt.gz" ] || { err ERR_NO_BACKUP "no index"; exit 0; }
+    gzip -dc "$ref/index.txt.gz" 2>/dev/null | "$JQ" -R -s -c '{ok:true,lines:(split("\n")|map(select(length>0)))}' ;;
+
   progress)
     opid="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
     case "$opid" in ''|*[!A-Za-z0-9._-]*) err ERR_BAD_OPID "invalid opid"; exit 0 ;; esac   # same charset guard as detach(): opid feeds a path
@@ -681,9 +773,11 @@ case "$verb" in
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
     _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
     pkg="$(printf '%s' "$_a" | "$JQ" -r '.package // empty' 2>/dev/null)"
-    _bk="$(bdir "$(printf '%s' "$_a" | "$JQ" -r '.user // 0' 2>/dev/null)")"
+    _u="$(printf '%s' "$_a" | "$JQ" -r '.user // 0' 2>/dev/null)"
     printf '{"ok":true,"backups":['
     first=1
+    while IFS= read -r _bk; do
+    [ -n "$_bk" ] || continue
     for m in "$_bk"/${pkg:-*}/*/manifest.json; do
       [ -f "$m" ] || continue
       [ "$first" = 1 ] || printf ','; first=0
@@ -699,6 +793,9 @@ case "$verb" in
           versionCode:.package.versionCode, created_at:.created_at, mode:.mode,
           items:((if $hasapk then ["apk"] else [] end) + [.items[].type])}' "$m" 2>/dev/null
     done
+    done <<EOF
+$(backup_roots "$_u")
+EOF
     printf ']}\n' ;;
 
   path-list)
@@ -751,7 +848,7 @@ case "$verb" in
   backup-info)
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
     ref="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.ref // empty' 2>/dev/null)"
-    case "$ref" in /data/media/*/VDBackup/*) : ;; *) err ERR_BAD_REF "invalid ref"; exit 0 ;; esac
+    [ -n "$(ref_root "$ref")" ] || { err ERR_BAD_REF "invalid ref"; exit 0; }
     m="$ref/manifest.json"; [ -f "$m" ] || { err ERR_NO_BACKUP "manifest not found"; exit 0; }
     size="$(du -sk "$ref" 2>/dev/null | cut -f1)"; size="$((${size:-0} * 1024))"
     "$JQ" -c --argjson size "${size:-0}" \
@@ -768,7 +865,7 @@ case "$verb" in
     # shows it even when the app is no longer installed. No live app/APK needed.
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
     ref="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.ref // empty' 2>/dev/null)"
-    case "$ref" in /data/media/*/VDBackup/*) : ;; *) err ERR_BAD_REF "invalid ref"; exit 0 ;; esac
+    [ -n "$(ref_root "$ref")" ] || { err ERR_BAD_REF "invalid ref"; exit 0; }
     m="$ref/manifest.json"; [ -f "$m" ] || { err ERR_NO_BACKUP "manifest not found"; exit 0; }
     ic="$("$JQ" -r '.package.icon // empty' "$m" 2>/dev/null)"
     if [ -n "$ic" ]; then ok "\"icon\":\"$ic\""; else err ERR_ICON "no icon in manifest"; fi ;;
@@ -776,23 +873,23 @@ case "$verb" in
   delete-backup)
     ref="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | \
            "$(command -v "$BIN/jq" 2>/dev/null || echo jq)" -r '.ref // empty' 2>/dev/null)"
-    case "$ref" in
-      *..*) err ERR_BAD_REF "ref must not contain .." ;;
-      /data/media/*/VDBackup/*)
-        if rm -rf "$ref"; then
-          # Remove now-empty parent dirs up to (not including) the VDBackup root, so a
-          # deleted backup leaves no empty app folder behind (issue #14). rmdir only
-          # removes empty dirs and we stop at the first non-empty one.
-          _dd="$(dirname "$ref")"
-          while case "$_dd" in /data/media/*/VDBackup/?*) : ;; *) false ;; esac && rmdir "$_dd" 2>/dev/null; do
-            _dd="$(dirname "$_dd")"
-          done
-          printf '{"ts":"%s","op":"delete-backup","ref":"%s"}\n' \
-            "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$ref")" >> "$LOGS/audit.jsonl"
-          ok "\"deleted\":\"$(jstr "$ref")\""
-        else err ERR_DELETE "could not delete"; fi ;;
-      *) err ERR_BAD_REF "ref must be under the backups dir" ;;
-    esac ;;
+    # A backup lives under the internal store OR a configured local destination (issue #15).
+    # Resolve which root this ref sits under, so the delete and the empty-parent cleanup are
+    # scoped to a known backups dir, never an arbitrary path. `..` is rejected first (it matches
+    # no root), so no ref can traverse out of its root.
+    _root="$(ref_root "$ref")"
+    if [ -z "$_root" ]; then err ERR_BAD_REF "ref must be under a backups dir"
+    elif rm -rf "$ref"; then
+      # Remove now-empty parent dirs up to (not including) the root, so a deleted backup leaves
+      # no empty app folder behind (issue #14). rmdir only removes empty dirs; stop at the root.
+      _dd="$(dirname "$ref")"
+      while case "$_dd" in "$_root"/?*) : ;; *) false ;; esac && rmdir "$_dd" 2>/dev/null; do
+        _dd="$(dirname "$_dd")"
+      done
+      printf '{"ts":"%s","op":"delete-backup","ref":"%s"}\n' \
+        "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$ref")" >> "$LOGS/audit.jsonl"
+      ok "\"deleted\":\"$(jstr "$ref")\""
+    else err ERR_DELETE "could not delete"; fi ;;
 
   dests-list)
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
@@ -842,10 +939,26 @@ case "$verb" in
     ok "\"saved\":\"$(jstr "$id")\",\"removable\":$_rem" ;;
 
   dest-del)
-    id="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | \
-          "$(command -v "$BIN/jq" 2>/dev/null || echo jq)" -r '.id // empty' 2>/dev/null)"
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    id="$(printf '%s' "$_a" | "$JQ" -r '.id // empty' 2>/dev/null)"
+    _force="$(printf '%s' "$_a" | "$JQ" -r '.force // false' 2>/dev/null)"
     case "$id" in ""|*/*) err ERR_DEST_ID "invalid id" ;; *)
-      rm -f "$STATE/dests/$id.json" "$SECRETS/creds/$id.pass"; ok "\"deleted\":\"$(jstr "$id")\"" ;; esac ;;
+      # A local dest is authoritative for its backups (issue #15): deleting its config would orphan
+      # any app backup living under it - it drops out of list/restore/delete and no internal copy is
+      # left. Refuse while such backups exist, unless force:true, so the user moves/deletes them
+      # first. (Path backups keep an internal copy, and `*` skips the dotted .paths dir, so they do
+      # not count.)
+      _dj="$STATE/dests/$id.json"; _dcnt=0
+      if [ "$_force" != true ] && [ -f "$_dj" ] && [ "$("$JQ" -r '.type // "local"' "$_dj" 2>/dev/null)" = local ]; then
+        _dp="$("$JQ" -r '.path // empty' "$_dj" 2>/dev/null)"
+        case "$_dp" in ''|null|*..*) : ;; *)
+          for _m in "$_dp"/vdbackup/*/*/manifest.json; do [ -f "$_m" ] && _dcnt=$(( _dcnt + 1 )); done ;;
+        esac
+      fi
+      if [ "$_dcnt" -gt 0 ]; then err ERR_DEST_HAS_BACKUPS "destination still holds $_dcnt app backup(s); move or delete them first, or pass force"
+      else rm -f "$_dj" "$SECRETS/creds/$id.pass"; ok "\"deleted\":\"$(jstr "$id")\""; fi ;;
+    esac ;;
 
   remote-add)
     JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"

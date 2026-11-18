@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · 한국어 · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -11,32 +11,33 @@ Android-DataBackup을 써 본 적이 있다면 익숙하게 느껴질 것입니�
 
 ## 목차
 
-- [1. What VDBackup is](#1-what-vdbackup-is)
-- [2. Requirements](#2-requirements)
-- [3. Install and first run](#3-install-and-first-run)
-- [4. The WebUI tour](#4-the-webui-tour)
-- [5. Making a backup](#5-making-a-backup)
-  - [5.1 Choosing what to back up](#51-choosing-what-to-back-up)
-  - [5.2 Backup modes: Full, Snapshot, Mirror](#52-backup-modes-full-snapshot-mirror)
-  - [5.3 Compression](#53-compression)
-  - [5.4 Encryption](#54-encryption)
-  - [5.5 Verify and dry-run](#55-verify-and-dry-run)
-  - [5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)](#56-special-backups-messages-call-log-wi-fi-bluetooth-calendar-wallpaper-dns-system-settings)
-  - [5.7 Standalone folder and file backups](#57-standalone-folder-and-file-backups)
-- [6. Restoring a backup](#6-restoring-a-backup)
-- [7. Destinations: local and remote](#7-destinations-local-and-remote)
+- [1. VDBackup이란](#1-vdbackup이란)
+- [2. 요구 사항](#2-요구-사항)
+- [3. 설치와 첫 실행](#3-설치와-첫-실행)
+- [4. WebUI 둘러보기](#4-webui-둘러보기)
+- [5. 백업 만들기](#5-백업-만들기)
+  - [5.1 백업할 항목 고르기](#51-백업할-항목-고르기)
+  - [5.2 백업 모드: Full, Snapshot, Mirror](#52-백업-모드-full-snapshot-mirror)
+  - [5.3 압축](#53-압축)
+  - [5.4 암호화](#54-암호화)
+  - [5.5 Verify와 dry-run](#55-verify와-dry-run)
+  - [5.6 특수 백업 (메시지, 통화 기록, Wi-Fi, Bluetooth, 캘린더, 배경화면, DNS, 시스템 설정)](#56-특수-백업-메시지-통화-기록-wi-fi-bluetooth-캘린더-배경화면-dns-시스템-설정)
+  - [5.7 독립 폴더 및 파일 백업](#57-독립-폴더-및-파일-백업)
+  - [5.8 시스템 파일 (/data/adb)](#58-시스템-파일-dataadb)
+- [6. 백업 복원하기](#6-백업-복원하기)
+- [7. 대상: 로컬과 원격](#7-대상-로컬과-원격)
   - [7.1 설정 백업](#71-설정-백업)
-- [8. Scheduling and retention](#8-scheduling-and-retention)
-- [9. Migrating in: importing Neo-Backup and Android-DataBackup](#9-migrating-in-importing-neo-backup-and-android-databackup)
-- [10. SSAID (device ANDROID_ID)](#10-ssaid-device-android_id)
-- [11. Portability: opening backups on a PC](#11-portability-opening-backups-on-a-pc)
-- [12. Driving VDBackup from an AI assistant](#12-driving-vdbackup-from-an-ai-assistant)
-- [13. Troubleshooting and FAQ](#13-troubleshooting-and-faq)
-- [14. Uninstalling](#14-uninstalling)
+- [8. 예약과 보존](#8-예약과-보존)
+- [9. 이전: Neo-Backup과 Android-DataBackup 가져오기](#9-이전-neo-backup과-android-databackup-가져오기)
+- [10. SSAID (기기 ANDROID_ID)](#10-ssaid-기기-android_id)
+- [11. 이식성: PC에서 백업 열기](#11-이식성-pc에서-백업-열기)
+- [12. AI 어시스턴트로 VDBackup 다루기](#12-ai-어시스턴트로-vdbackup-다루기)
+- [13. 문제 해결과 FAQ](#13-문제-해결과-faq)
+- [14. 제거하기](#14-제거하기)
 
 ---
 
-## 1. What VDBackup is
+## 1. VDBackup이란
 
 VDBackup은 앱과 그 데이터를 백업하고 복원하는, WebUI가 내장된 root 모듈입니다. Swift
 Backup, Neo-Backup, Android-DataBackup의 개방적이고 root 네이티브인 후계자로 설계되었습니다:
@@ -59,7 +60,7 @@ VDBackup이 생성하는 모든 것은 **표준 형식**(tar, gzip, zstd, age, z
 | **대상** | **설정** | **활동 로그** |
 | ![대상](../screenshots/ko/destinations-dark.png) | ![설정](../screenshots/ko/settings-dark.png) | ![활동 로그](../screenshots/ko/activitylog-dark.png) |
 
-## 2. Requirements
+## 2. 요구 사항
 
 - **KernelSU**, **APatch** 또는 **Magisk**로 관리되는 **루팅된 Android 기기**. VDBackup은
   해당 매니저에서 모듈로 설치됩니다.
@@ -73,7 +74,7 @@ VDBackup이 생성하는 모든 것은 **표준 형식**(tar, gzip, zstd, age, z
 의존합니다. 모듈은 이를 평범한 셸 폴백과 함께 내부적으로 처리하며, 기기에서 사용할 수 없을
 때는 우아하게 성능이 저하됩니다.
 
-## 3. Install and first run
+## 3. 설치와 첫 실행
 
 1. 최신 `VD-Backup-vX.Y.zip` 릴리스를 다운로드합니다.
 2. KernelSU / APatch / Magisk 매니저에서 다른 모듈처럼 모듈 zip을 플래시합니다.
@@ -124,7 +125,7 @@ Android 사용자별로 폴더 하나씩:
 두 가지 이유로 이를 기억해 두세요: 백업은 `/sdcard/VDBackup` 아래에서 공간을 차지하고,
 문제가 생겼을 때 들여다볼 곳은 `/data/adb/vdbackup/logs/`입니다.
 
-## 4. The WebUI tour
+## 4. WebUI 둘러보기
 
 WebUI는 몇 개의 탭으로 구성됩니다:
 
@@ -157,7 +158,7 @@ WebUI는 몇 개의 탭으로 구성됩니다:
 보여 줍니다. 셸 알림을 표시하는 ROM에서는 작업이 시작되고
 끝날 때 Android 알림도 받습니다. 어느 쪽이든 인앱 진행 카드가 믿을 수 있는 지표입니다.
 
-## 5. Making a backup
+## 5. 백업 만들기
 
 기본 흐름: **Apps**를 열고, 앱을 고르고, 포함할 항목을 선택하고, 모드를 고르고, 압축과
 (선택적으로) 암호화를 설정한 다음 실행합니다. 진행 상황이 실시간으로 나타나고, 완료되면
@@ -165,7 +166,7 @@ WebUI는 몇 개의 탭으로 구성됩니다:
 
 백업 대화상자에서 이 백업의 **대상**도 선택할 수 있습니다, 로컬 저장소나 추가한 클라우드/원격 대상, 설정에서 기본 대상을 먼저 바꾸지 않아도 됩니다.
 
-### 5.1 Choosing what to back up
+### 5.1 백업할 항목 고르기
 
 각 앱에 대해 다음 항목의 어떤 조합이든 포함할 수 있습니다:
 
@@ -184,7 +185,7 @@ WebUI는 몇 개의 탭으로 구성됩니다:
 VDBackup은 복원을 충실하게 만들어 주는 것들도 보존합니다: SELinux 컨텍스트, uid/gid 소유권,
 파일 modes, 확장 속성(xattr), 그리고 capabilities.
 
-### 5.2 Backup modes: Full, Snapshot, Mirror
+### 5.2 백업 모드: Full, Snapshot, Mirror
 
 VDBackup은 세 가지 모드를 제공합니다. WebUI는 대부분의 사람에게 적절한 선택인 **Full**을
 미리 선택해 둡니다.
@@ -201,7 +202,7 @@ VDBackup은 세 가지 모드를 제공합니다. WebUI는 대부분의 사람�
   대상에서 삭제됩니다). 추천 용도: 예컨대 클라우드 원격으로 가는, 빠르고 항상 최신인 사본.
   mirror에서도 APK는 원본이 아니라 여전히 압축되어 저장된다는 점에 유의하세요.
 
-### 5.3 Compression
+### 5.3 압축
 
 Full 백업의 압축을 고를 수 있습니다:
 
@@ -215,7 +216,7 @@ Full 백업의 압축을 고를 수 있습니다:
 
 선택하지 않으면 VDBackup은 설정된 기본값(합리적인 레벨의 zstd)을 사용합니다.
 
-### 5.4 Encryption
+### 5.4 암호화
 
 암호화는 **선택 사항**이며 이식 가능합니다. VDBackup은 암호문(scrypt)을 사용하는 **age**로
 암호화하며, 이는 바로 이식성을 위해 선택되었습니다: 어떤 운영체제의 표준 `age` 도구든
@@ -235,7 +236,7 @@ Full 백업의 압축을 고를 수 있습니다:
   암호화되지 **않습니다**. APK도 암호화하길 특별히 원한다면 APK 암호화 토글을 명시적으로
   활성화하세요.
 
-### 5.5 Verify and dry-run
+### 5.5 Verify와 dry-run
 
 두 가지 안전 옵션이 백업을 신뢰하기 전에 도움이 됩니다:
 
@@ -252,7 +253,7 @@ Full 백업의 압축을 고를 수 있습니다:
 명확한 **"공간 부족"** 오류와 함께 조기에 중단합니다. (공간 검사는 Full 업로드에 적용됩니다.
 Mirror는 델타 동기화이므로 예외입니다.)
 
-### 5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)
+### 5.6 특수 백업 (메시지, 통화 기록, Wi-Fi, Bluetooth, 캘린더, 배경화면, DNS, 시스템 설정)
 
 **Backups** 탭의 앱 목록 아래에 있는 **Special backups**는 단일 앱에 묶이지 않은 시스템 전역
 데이터를 다룹니다. 범주를 고르고 백업하세요. 이들은 앱 백업과 동일한 SELinux/xattr 보존과
@@ -283,7 +284,7 @@ PC에서 읽을 수 있는 기기 간 사본을 갖게 됩니다.
 복원되므로, 같은 백업을 두 번 복원해도 결코 중복이 생기지 않으며, DNS와 시스템 설정은 그저
 다시 적용됩니다.
 
-### 5.7 Standalone folder and file backups
+### 5.7 독립 폴더 및 파일 백업
 
 때로는 앱이 아닌 평범한 폴더나 파일, 카메라 폴더, 문서 디렉터리, 단일 데이터베이스, 을
 백업하고 싶을 때가 있습니다. VDBackup은 공유 저장소나 `/data` 아래의 **임의의 절대 경로**를
@@ -298,7 +299,24 @@ PC에서 읽을 수 있는 기기 간 사본을 갖게 됩니다.
 - 앱 백업과 마찬가지로, 경로 백업과 복원은 실시간 진행 상황과 함께 **detached**로 실행되고,
   선택한 압축을 사용하며, 암호문으로 암호화할 수 있습니다.
 
-## 6. Restoring a backup
+### 5.8 시스템 파일 (`/data/adb`)
+
+`/data/adb`는 당신의 root 매니저가 설치된 모듈, 그 데이터와 구성을 보관하는 곳, 곧 root 환경
+자체입니다. VDBackup은 이를 전체 또는 일부만 백업할 수 있어, 초기화나 ROM 변경을 넘어 당신의
+root 설정을 가지고 다닐 수 있습니다.
+
+- **전체 또는 선택.** `/data/adb` 전체를 백업하거나, 파일 트리를 열어 원하는 폴더와 파일을 정확히
+  고르세요. 절반만 체크된 폴더는 체크한 자식만 포함합니다.
+- **모든 것이 당신의 손안에.** 트리는 중립적입니다 - 아무것도 미리 선택되거나 숨겨지지 않으며,
+  다만 VDBackup 자신의 작업 파일은 예외인데, 그렇지 않으면 자기 자신을 백업하게 되기 때문입니다.
+  압축과 암호화는 다른 어떤 백업과도 같은 이식 가능한 옵션입니다.
+- **복원해도 root는 계속 작동합니다.** 각 파일은 원래 소유자, 그룹, 모드, SELinux 컨텍스트와 함께,
+  한 번에 한 파일씩, 살아 있는 트리 위에 다시 기록됩니다(전면 초기화는 결코 하지 않습니다). 그래서
+  `/data/adb` 아래의 서로 다른 컨텍스트가 보존되고 당신의 root 매니저는 여전히 부팅됩니다.
+- **고급.** 이것은 root 환경을 직접 건드립니다. 복원은 파괴적이며 확인을 요청합니다. 선택적 복원은
+  당신이 고른 경로만 다시 기록합니다.
+
+## 6. 백업 복원하기
 
 **Backups** 탭을 열고, 원하는 백업을 고르고, 복원을 시작합니다. 복원은 파괴적인 동작이므로
 VDBackup은 먼저 **확인**을 요청하고, 그 동작을 로컬 감사 로그에 기록합니다.
@@ -341,7 +359,7 @@ VDBackup 오버레이 서브모듈로 스테이징하여 root 매니저가 이�
 KernelSU에서 **NoMount**가 있으면 라이브로 적용되고, 그렇지 않으면 재부팅 후에 적용됩니다.
 이것은 NoMount가 설치되어 있는지에 결코 의존하지 않습니다.
 
-## 7. Destinations: local and remote
+## 7. 대상: 로컬과 원격
 
 기본적으로 백업은 모듈의 상태 디렉터리 아래의 **로컬** 저장소에 기록됩니다. **Destinations**
 탭에서 원격 대상을 추가할 수도 있습니다. 로컬 대상의 경우 **Browse**를 누르면 경로를 입력하는 대신
@@ -399,7 +417,7 @@ VDBackup 설정 자체, 즉 대상, 예약, 사전 설정, 저장된 자격 증�
 - **설정 가져오기**는 그런 파일을 다시 읽어 이미 있는 것을 제거하지 않고 이 기기에 병합합니다.
 - **저장된 자격 증명 지우기**는 저장된 원격 비밀번호와 기기 암호화 키를 한 번에 제거합니다. 대상, 예약, 백업은 그대로 유지됩니다.
 
-## 8. Scheduling and retention
+## 8. 예약과 보존
 
 VDBackup은 예약에 따라 백업을, 그리고 복원을, 자동으로 실행할 수 있습니다. 스케줄러에서
 다음으로 작업을 정의합니다:
@@ -446,7 +464,7 @@ VDBackup은 예약에 따라 백업을, 그리고 복원을, 자동으로 실행
 최신순으로 보여 주는 전체 화면을 (즉시) 여는 **View activity log** 버튼이 있습니다. **Export logs**
 동작은 피드백이나 버그 리포트에 첨부할 수 있는 로그 파일을 (백업 폴더 아래에) 저장합니다.
 
-## 9. Migrating in: importing Neo-Backup and Android-DataBackup
+## 9. 이전: Neo-Backup과 Android-DataBackup 가져오기
 
 Neo-Backup이나 Android-DataBackup에서 넘어오는 경우, 처음부터 다시 시작할 필요가 없습니다.
 **Backups** 탭에서 기존 백업을 **가져올** 수 있습니다:
@@ -460,7 +478,7 @@ Neo-Backup이나 Android-DataBackup에서 넘어오는 경우, 처음부터 다�
 가져올 수 있습니다, 필요할 때 **비밀번호를 묻고**, 비밀번호는 복호화에만 사용되며 명령줄에는
 결코 저장되지 않습니다.
 
-## 10. SSAID (device ANDROID_ID)
+## 10. SSAID (기기 ANDROID_ID)
 
 SSAID는 앱별 `ANDROID_ID`, 일부 앱이 읽는 기기 수준 식별자입니다. VDBackup은 이를 백업하고
 복원할 수 있지만, 이것은 건드리는 것 중 가장 민감한 것이므로 각별한 주의로 다룹니다:
@@ -480,7 +498,7 @@ SSAID는 앱별 `ANDROID_ID`, 일부 앱이 읽는 기기 수준 식별자입니
 신중하게 이전 중인 특정 앱) SSAID는 꺼 두세요. 일반적인 앱과 데이터 백업에는 필요하지
 않습니다.
 
-## 11. Portability: opening backups on a PC
+## 11. 이식성: PC에서 백업 열기
 
 당신의 백업은 **이 모듈에 종속되지 않으며** **결코 하드웨어에 묶이지 않습니다**. 모든 것이
 표준 형식을 사용하므로, VDBackup이 설치되지 않은 Windows, macOS 또는 Linux에서 백업을 열 수
@@ -505,7 +523,7 @@ SELinux 컨텍스트, uid/gid, modes는 tar 안에 저장되며 Android에서 �
 적용된다는 점에 유의하세요, PC에서는 여전히 모든 파일을 얻지만, Android 특유의 소유권이
 강제되지는 않습니다.
 
-## 12. Driving VDBackup from an AI assistant
+## 12. AI 어시스턴트로 VDBackup 다루기
 
 VDBackup은 사람뿐 아니라 AI 어시스턴트와 에이전트에게도 친화적으로 만들어졌습니다. WebUI는
 작은 JSON API의 한 클라이언트일 뿐이며, 에이전트는 바로 그 같은 API를 통해 모듈의 **모든**
@@ -517,7 +535,7 @@ VDBackup은 사람뿐 아니라 AI 어시스턴트와 에이전트에게도 친�
 [`AI-AGENTS.md`](AI-AGENTS.md)로 그것을 겨누세요: 명령 계약, 각 동사와 그 인자 및 반환값,
 그리고 에이전트가 반드시 지켜야 할 안전 규칙.
 
-## 13. Troubleshooting and FAQ
+## 13. 문제 해결과 FAQ
 
 **로그는 어디에 있나요?** 모듈 상태 디렉터리 아래, `/data/adb/vdbackup/logs/`에 있습니다.
 실행 중인 작업의 실시간 진행 상황은 `progress-<opid>.json`에 있고, 변경 동작(복원, 삭제,
@@ -552,7 +570,7 @@ VDBackup은 사람뿐 아니라 AI 어시스턴트와 에이전트에게도 친�
 **암호화된 백업이 열리지 않습니다, 암호문을 잃어버렸습니다.** 설계상 복구 백도어가
 없습니다. 백업을 보호하는 것은 암호문입니다. 안전하게 보관하세요.
 
-## 14. Uninstalling
+## 14. 제거하기
 
 VDBackup을 다른 모듈처럼 KernelSU / APatch / Magisk 관리자에서 제거하세요. 제거는 **설정을 보존**하고 임시 상태만 지우므로, 나중에 다시 설치하면 구성, 대상, 예약을 이어받습니다. 백업은 `/sdcard/VDBackup`(표준 형식, 모듈 없이 PC에서 열 수 있음)에, 구성은 `/data/adb/vdbackup`에, 저장된 자격 증명·rclone.conf·age 키는 자격 증명 암호화된 `/data/misc_ce/0/vdbackup`(첫 잠금 해제 전까지 잠김)에 보관합니다. 이 중 하나도 제거하려면 제거 후 해당 디렉터리를 수동으로 삭제하세요.
 

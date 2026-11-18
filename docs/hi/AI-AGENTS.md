@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · हिन्दी · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · हिन्दी · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` किसी भी निरपेक्ष पथ का `tar.zst`+`manifest.json` के रूप में `.paths/` के अंतर्गत backup लेता है (detached) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` किसी पथ backup को उसके मूल स्थान पर restore करता है (`confirm` इसे गेट करता है; detached) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` /data/adb ट्री का एक lazy स्तर (डिफ़ॉल्ट `/data/adb`), picker के लिए। |
+| `adb-du` | `{path}` | `{ok,size}` /data/adb के एक सबट्री का पुनरावर्ती बाइट आकार, माँग पर। |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` /data/adb का backup - पूर्ण (`paths` छोड़ें) या चुने गए उप-पथ - प्रति-फ़ाइल SELinux/स्वामी निष्ठा के साथ, `.adb/` के अंतर्गत (detached) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` /data/adb backup को जीवित ट्री के ऊपर restore करता है - पूर्ण या चुने गए उप-पथ - प्रत्येक फ़ाइल का संदर्भ बनाए रखते हुए (कभी भी सर्वव्यापी chcon नहीं); `confirm` इसे गेट करता है (detached) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` /data/adb फ़ाइल-सिस्टम के backups। |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` किसी backup की संग्रहीत विस्तृत फ़ाइल सूची, restore ट्री picker के लिए। |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | किसी इंस्टॉल्ड ऐप को सिस्टम ऐप के रूप में माउंट करें (systemless उप-मॉड्यूल; NoMount के ज़रिए live अन्यथा अगले बूट पर) |
 | `companion-status` / `companion-install` | `{}` | Google Drive साथी स्थिति / ऑन-डिमांड इंस्टॉल |
@@ -102,6 +108,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` आयात के लिए उपलब्ध एन्क्रिप्टेड कॉन्फ़िग फ़ाइलें सूचीबद्ध करता है। |
 | `wipe-credentials` | `{}` | `{ok,wiped}` सहेजे गए रिमोट पासवर्ड और डिवाइस एन्क्रिप्शन कुंजी हटाता है; गंतव्य, जॉब और बैकअप बने रहते हैं। |
 | `log-prune` | `{}` | `{ok}` बहुत पहले पूर्ण हो चुके ऑप लॉग छाँटता है, ऑडिट ट्रेल सीमित करता है और पुराने आइकन हटाता है (बूट सेवा इसे कॉल करती है)। |
+| `sanitize` | `{}` | `{ok}` हर Android उपयोगकर्ता में बैकअप फ़ोल्डरों की दृश्यता (0755) फिर से लागू करता है, ताकि एक फ़ाइल मैनेजर उन फ़ोल्डरों को खोल सके जिन्हें एक कच्ची root कॉपी या v1.03.2 से पहले के बैकअप ने केवल-स्वामी छोड़ दिया था। |
 
 ### `progress` फ़ील्ड
 
@@ -208,6 +215,14 @@ restore-test):
 है, एक निर्धारित कार्रवाई छोड़ दी जाती है। हर गेट स्किप audit trail में `op:"scheduler-gated"` के
 रूप में `wifi` / `charging` / `battery` / `days` / `thermal` में से किसी `reason` के साथ लिखा
 जाता है।
+
+### बैच विश्वसनीयता
+
+एक बैच (`packages` के साथ `backup`, `refs` के साथ `restore`) हर ऐप को उसके अपने सबशेल में चलाता है, ताकि एक ऐप बाकियों को न बिगाड़ सके:
+
+- **`batch_app_timeout`** (कॉन्फ़िग, सेकंड, डिफ़ॉल्ट `1800`, `0` बंद करता है): अगर कोई ऐप इससे ज़्यादा समय लेता है, तो उसका प्रोसेस ट्री समाप्त कर दिया जाता है, उसे `ERR_TIMEOUT` के रूप में दर्ज किया जाता है, और बैच जारी रहता है, ताकि एक अटका हुआ ऐप पूरे रन को कभी फ़्रीज़ न करे।
+- **आंशिक परिणाम**: अंतिम लेखन में `ok`, `of` में से `n`, विफलता के कारण बताने वाला `fails` योग `{code:count}` (जैसे `{"ERR_NO_SPACE":24}`), और `free` (बैकअप फ़ाइल सिस्टम में बचे बाइट) शामिल होते हैं। आंशिक बैच `ERR_BATCH_PARTIAL` होता है, कभी अंधी त्रुटि नहीं।
+- **थर्मल पेसिंग** (कॉन्फ़िग `thermal_throttle`, डिफ़ॉल्ट चालू): ऐप्स के बीच जब डिवाइस गर्म होता है तो वर्कर ठंडा होने के लिए रुकता है, `cooling` प्रगति चरण भेजते हुए, ताकि लंबा रन डिवाइस को ज़्यादा गर्म न करे।
 
 ### `remote-add` के args
 
@@ -318,6 +333,25 @@ VDBackup के अपने प्रारूप में `tar.zst` तथा
   करता है, `special-restore` की तरह एक भारी-घर्षण वाला गेट। एक `ref` जो वैध पथ backup नहीं है,
   `ERR_BAD_REF` के साथ विफल होता है।
 - दोनों **detached** चलते हैं; लौटाए गए `opid` के साथ `progress` को poll करें।
+
+### /data/adb फ़ाइल-सिस्टम backup
+
+`adb-backup` / `adb-restore` /data/adb के अंतर्गत root परिवेश (मॉड्यूल, उनका डेटा और configs) का
+backup और restore करते हैं, एक lazy ट्री picker द्वारा संचालित (`adb-list` एक बार में एक स्तर,
+`adb-du` माँग पर किसी फ़ोल्डर के आकार के लिए)।
+
+- दोनों सिरों पर पूर्ण या चयनात्मक: सब कुछ के लिए `paths` छोड़ें, या चुने गए उप-पथ पास करें
+  (/data/adb के सापेक्ष); restore वही `paths` लेता है।
+- **प्रति-फ़ाइल निष्ठा:** संग्रह प्रत्येक फ़ाइल का SELinux संदर्भ, स्वामी और xattrs रखता है, और
+  restore उसी पर निर्भर करता है - यह कभी भी सर्वव्यापी `chcon` लागू नहीं करता, जो /data/adb के
+  विषम संदर्भों को समतल कर देगा और root को तोड़ देगा। `adb-restore` जीवित ट्री के ऊपर निकालता है;
+  यह उसे कभी नहीं मिटाता।
+- स्व-संदर्भ: backup का अपना आउटपुट और मॉड्यूल का staging बाहर रखे जाते हैं, इसलिए कोई backup
+  कभी स्वयं को नहीं रखता।
+- `adb-index` किसी backup की संग्रहीत फ़ाइल सूची लौटाता है ताकि restore अपना ट्री दिखा सके; UI
+  चयन पूरी तरह `paths` के माध्यम से व्यक्त होता है (पूरी तरह चिह्नित फ़ोल्डर एक पथ है; आंशिक रूप से
+  चिह्नित अपने चिह्नित बच्चों तक उतरता है, इसलिए किसी exclude सूची की आवश्यकता नहीं)।
+- `adb-restore` के लिए `"confirm": true` आवश्यक है (भारी-घर्षण वाला गेट); दोनों detached चलते हैं, `progress` को poll करें।
 
 ### `update-check`
 

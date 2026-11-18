@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · Italiano · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · Italiano · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ destinazioni cloud (`rclone`/`restic`/ssh) comunicano con la rete.
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` esegue il backup di qualsiasi percorso assoluto come `tar.zst`+`manifest.json` sotto `.paths/` (staccato) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` ripristina un backup di percorso nella sua posizione originale (`confirm` lo abilita; staccato) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` un livello lazy dell'albero /data/adb (default `/data/adb`), per il selettore. |
+| `adb-du` | `{path}` | `{ok,size}` dimensione ricorsiva in byte di un sottoalbero /data/adb, su richiesta. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` esegue il backup di /data/adb - totale (ometti `paths`) o le sotto-path scelte - con fedeltà SELinux/proprietario per file, sotto `.adb/` (staccato) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` ripristina un backup /data/adb SOPRA l'albero vivo - totale o sotto-path scelte - mantenendo il contesto di ogni file (mai un chcon generale); `confirm` lo abilita (staccato) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` i backup del filesystem /data/adb. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` l'elenco file dettagliato memorizzato di un backup, per il selettore dell'albero di ripristino. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | monta un'app installata come app di sistema (sottomodulo systemless ; a caldo tramite NoMount altrimenti al boot successivo) |
 | `companion-status` / `companion-install` | `{}` | stato del companion Google Drive / installazione su richiesta |
@@ -102,6 +108,7 @@ destinazioni cloud (`rclone`/`restic`/ssh) comunicano con la rete.
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` elenca i file di config cifrati disponibili per l'importazione. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` rimuove le password remote salvate e la chiave di cifratura del dispositivo; destinazioni, job e backup restano. |
 | `log-prune` | `{}` | `{ok}` pota i log di op concluse da tempo, limita la traccia di audit e rimuove le icone obsolete (lo chiama il servizio di avvio). |
+| `sanitize` | `{}` | `{ok}` riafferma la visibilità (0755) delle cartelle di backup per ogni utente Android, così che un gestore di file possa aprire cartelle che una copia root grezza o un backup precedente a v1.03.2 hanno lasciato accessibili solo al proprietario. |
 
 ### Campi di `progress`
 
@@ -209,6 +216,14 @@ Un controllo minimo di **sicurezza termica** è sempre applicato oltre a questi 
 viene saltata mentre il dispositivo è criticamente caldo. Ogni salto di gate viene scritto nella
 traccia di audit come `op:"scheduler-gated"` con un `reason` tra `wifi` / `charging` / `battery` /
 `days` / `thermal`.
+
+### Affidabilità del lotto
+
+Un lotto (`backup` con `packages`, `restore` con `refs`) esegue ogni app nella propria subshell, così un'app non può compromettere le altre:
+
+- **`batch_app_timeout`** (config, secondi, predefinito `1800`, `0` disattiva): se un'app impiega più tempo, il suo albero di processi viene terminato, viene registrata come `ERR_TIMEOUT` e il lotto continua, così un'app bloccata non congela mai l'intera esecuzione.
+- **Risultato parziale**: la scrittura finale riporta `ok`, `n` di `of`, un conteggio `fails` `{code:count}` (es. `{"ERR_NO_SPACE":24}`) e `free` (byte liberi nel filesystem dei backup). Un lotto parziale è `ERR_BATCH_PARTIAL`, mai un errore cieco.
+- **Ritmo termico** (config `thermal_throttle`, attivo per impostazione predefinita): tra le app il worker si mette in pausa per raffreddarsi quando il dispositivo è caldo, emettendo una fase di avanzamento `cooling`, così un'esecuzione lunga non surriscalda il dispositivo.
 
 ### Args di `remote-add`
 
@@ -322,6 +337,26 @@ per-app. L'archivio è scritto come `tar.zst` più un `manifest.json` nel format
   `"confirm": true`, un gate ad alto attrito, come `special-restore`. Una `ref` che non è un backup
   di percorso valido fallisce con `ERR_BAD_REF`.
 - Entrambi vengono eseguiti **staccati** ; interroga `progress` con l'`opid` restituito.
+
+### Backup del filesystem /data/adb
+
+`adb-backup` / `adb-restore` eseguono il backup e il ripristino dell'ambiente root sotto /data/adb
+(moduli, i loro dati e configurazioni), guidati da un selettore ad albero lazy (`adb-list` un livello
+alla volta, `adb-du` per la dimensione di una cartella su richiesta).
+
+- Totale o selettivo a entrambi gli estremi: ometti `paths` per tutto, oppure passa le sotto-path
+  scelte (relative a /data/adb); il ripristino prende le stesse `paths`.
+- **Fedeltà per file:** l'archivio conserva il contesto SELinux, il proprietario e gli xattrs di ogni
+  file, e il ripristino ci si affida - non applica MAI un `chcon` generale, che appiattirebbe i
+  contesti eterogenei di /data/adb e romperebbe root. `adb-restore` estrae SOPRA l'albero vivo; non lo
+  cancella mai.
+- Auto-riferimento: l'output stesso del backup e lo staging del modulo sono esclusi, quindi un backup
+  non contiene mai sé stesso.
+- `adb-index` restituisce l'elenco file memorizzato di un backup affinché un ripristino possa mostrarne
+  l'albero; la selezione della UI è espressa interamente tramite `paths` (una cartella interamente
+  spuntata è una path; una spuntata parzialmente scende ai suoi figli spuntati, quindi non serve alcuna
+  lista di esclusione).
+- `adb-restore` richiede `"confirm": true` (gate ad alto attrito); entrambi vengono eseguiti staccati, interroga `progress`.
 
 ### `update-check`
 

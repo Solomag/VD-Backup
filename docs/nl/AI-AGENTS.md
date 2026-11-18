@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · Nederlands · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · [한국어](../ko/AI-AGENTS.md) · Nederlands · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ backup/restore; alleen cloudbestemmingen (`rclone`/`restic`/ssh) praten met het 
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` maak een back-up van elk absoluut pad als `tar.zst`+`manifest.json` onder `.paths/` (losgekoppeld) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` herstel een pad-back-up naar zijn oorspronkelijke locatie (`confirm` schermt het af; losgekoppeld) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` een luie laag van de /data/adb-boom (standaard `/data/adb`), voor de kiezer. |
+| `adb-du` | `{path}` | `{ok,size}` recursieve byte-grootte van een /data/adb-deelboom, op aanvraag. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` maakt een back-up van /data/adb - volledig (laat `paths` weg) of de gekozen sub-paden - met per-bestand SELinux-/eigenaar-trouw, onder `.adb/` (losgekoppeld) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` herstelt een /data/adb-back-up OVER de live boom - volledig of gekozen sub-paden - met behoud van de context van elk bestand (nooit een algemene chcon); `confirm` schermt het af (losgekoppeld) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` de /data/adb-bestandssysteem-back-ups. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` de opgeslagen uitgebreide bestandslijst van een back-up, voor de herstel-boomkiezer. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | koppel een geïnstalleerde app als system-app aan (systemless submodule; live via NoMount anders volgende boot) |
 | `companion-status` / `companion-install` | `{}` | status / on-demand-installatie van de Google Drive-begeleider |
@@ -102,6 +108,7 @@ backup/restore; alleen cloudbestemmingen (`rclone`/`restic`/ssh) praten met het 
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` somt de versleutelde configbestanden op die beschikbaar zijn om te importeren. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` verwijdert opgeslagen externe wachtwoorden en de versleutelingssleutel van het apparaat; bestemmingen, taken en back-ups blijven. |
 | `log-prune` | `{}` | `{ok}` snoeit allang voltooide op-logs, beperkt het auditspoor en verwijdert verouderde iconen (de opstartservice roept dit aan). |
+| `sanitize` | `{}` | `{ok}` herbevestigt de zichtbaarheid (0755) van back-upmappen voor elke Android-gebruiker, zodat een bestandsbeheerder mappen kan openen die een rauwe root-kopie of een back-up van vóór v1.03.2 alleen voor de eigenaar toegankelijk liet. |
 
 ### `progress`-velden
 
@@ -211,6 +218,14 @@ Daarbovenop wordt altijd een minimale **thermische veiligheidscontrole** toegepa
 operatie wordt overgeslagen terwijl het apparaat kritiek heet is. Elke gate-overslag wordt naar het
 auditspoor geschreven als `op:"scheduler-gated"` met een `reason` van `wifi` / `charging` /
 `battery` / `days` / `thermal`.
+
+### Betrouwbaarheid van de batch
+
+Een batch (`backup` met `packages`, `restore` met `refs`) voert elke app in zijn eigen subshell uit, zodat één app de rest niet kan breken:
+
+- **`batch_app_timeout`** (config, seconden, standaard `1800`, `0` schakelt uit): duurt een app langer, dan wordt zijn procesboom beëindigd, wordt hij als `ERR_TIMEOUT` geregistreerd en gaat de batch door, zodat één vastgelopen app nooit de hele run bevriest.
+- **Gedeeltelijk resultaat**: de afsluitende schrijfactie bevat `ok`, `n` van `of`, een `fails`-telling `{code:count}` (bijv. `{"ERR_NO_SPACE":24}`) en `free` (resterende bytes op het back-upbestandssysteem). Een gedeeltelijke batch is `ERR_BATCH_PARTIAL`, nooit een blinde fout.
+- **Thermische tempering** (config `thermal_throttle`, standaard aan): tussen apps pauzeert de worker om af te koelen wanneer het apparaat heet is, met een `cooling`-voortgangsfase, zodat een lange run het apparaat niet oververhit.
 
 ### `remote-add`-args
 
@@ -325,6 +340,25 @@ archief wordt geschreven als `tar.zst` plus een `manifest.json` in VDBackups eig
   vereist `"confirm": true`, een zware-frictie-afscherming, zoals `special-restore`. Een `ref`
   die geen geldige pad-back-up is mislukt met `ERR_BAD_REF`.
 - Beide draaien **losgekoppeld**; pol `progress` met de teruggegeven `opid`.
+
+### /data/adb-bestandssysteem-back-up
+
+`adb-backup` / `adb-restore` maken een back-up van en herstellen de root-omgeving onder /data/adb
+(modules, hun data en configuraties), aangestuurd door een luie boomkiezer (`adb-list` één laag per
+keer, `adb-du` voor de grootte van een map op aanvraag).
+
+- Volledig of selectief aan beide kanten: laat `paths` weg voor alles, of geef de gekozen sub-paden
+  (relatief aan /data/adb); het herstel neemt dezelfde `paths`.
+- **Per-bestand-trouw:** het archief behoudt de SELinux-context, eigenaar en xattrs van elk bestand, en
+  het herstel vertrouwt daarop - het past NOOIT een algemene `chcon` toe, die de heterogene contexten
+  van /data/adb zou platslaan en root zou breken. `adb-restore` extraheert OVER de live boom; het wist
+  die nooit.
+- Zelfreferentie: de eigen uitvoer van de back-up en de staging van de module worden uitgesloten, zodat
+  een back-up nooit zichzelf bevat.
+- `adb-index` geeft de opgeslagen bestandslijst van een back-up terug zodat een herstel zijn boom kan
+  tonen; de UI-selectie wordt volledig uitgedrukt via `paths` (een volledig aangevinkte map is één pad;
+  een deels aangevinkte daalt af naar zijn aangevinkte kinderen, dus er is geen exclude-lijst nodig).
+- `adb-restore` vereist `"confirm": true` (zware-frictie-afscherming); beide draaien losgekoppeld, pol `progress`.
 
 ### `update-check`
 

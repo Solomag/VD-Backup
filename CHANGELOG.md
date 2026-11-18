@@ -1,10 +1,37 @@
-> **Languages:** English · [العربية](docs/ar/CHANGELOG.md) · [Čeština](docs/cs/CHANGELOG.md) · [Deutsch](docs/de/CHANGELOG.md) · [Español](docs/es/CHANGELOG.md) · [فارسی](docs/fa/CHANGELOG.md) · [Français](docs/fr/CHANGELOG.md) · [हिन्दी](docs/hi/CHANGELOG.md) · [Bahasa Indonesia](docs/in/CHANGELOG.md) · [Italiano](docs/it/CHANGELOG.md) · [日本語](docs/ja/CHANGELOG.md) · [한국어](docs/ko/CHANGELOG.md) · [Nederlands](docs/nl/CHANGELOG.md) · [Polski](docs/pl/CHANGELOG.md) · [Português](docs/pt/CHANGELOG.md) · [Русский](docs/ru/CHANGELOG.md) · [Svenska](docs/sv/CHANGELOG.md) · [ไทย](docs/th/CHANGELOG.md) · [Türkçe](docs/tr/CHANGELOG.md) · [Українська](docs/uk/CHANGELOG.md) · [Tiếng Việt](docs/vi/CHANGELOG.md) · [中文](docs/zh/CHANGELOG.md)
+> **Languages:** English · [العربية](docs/ar/CHANGELOG.md) · [Čeština](docs/cs/CHANGELOG.md) · [Deutsch](docs/de/CHANGELOG.md) · [Español](docs/es/CHANGELOG.md) · [فارسی](docs/fa/CHANGELOG.md) · [Français](docs/fr/CHANGELOG.md) · [हिन्दी](docs/hi/CHANGELOG.md) · [Bahasa Indonesia](docs/id/CHANGELOG.md) · [Italiano](docs/it/CHANGELOG.md) · [日本語](docs/ja/CHANGELOG.md) · [한국어](docs/ko/CHANGELOG.md) · [Nederlands](docs/nl/CHANGELOG.md) · [Polski](docs/pl/CHANGELOG.md) · [Português](docs/pt/CHANGELOG.md) · [Русский](docs/ru/CHANGELOG.md) · [Svenska](docs/sv/CHANGELOG.md) · [ไทย](docs/th/CHANGELOG.md) · [Türkçe](docs/tr/CHANGELOG.md) · [Українська](docs/uk/CHANGELOG.md) · [Tiếng Việt](docs/vi/CHANGELOG.md) · [中文](docs/zh/CHANGELOG.md)
 
 ---
 
 # Changelog
 
 All notable changes to VDBackup are documented here. English only.
+
+## v1.11
+
+Reliability:
+
+- A long batch no longer stalls on a single app. If one app takes too long to back up or restore, VDBackup records why and moves on, so one stuck app can no longer freeze the whole run.
+- When a batch cannot finish everything, the result now says why: how many apps succeeded, the reason the others failed (for example, the storage filled up), and how much room is left, instead of ending without explanation.
+- An app that is running an active VPN is now backed up while it keeps running, instead of being force-stopped, so your connection is not dropped mid-backup.
+- Long backups no longer overheat the device. Between apps, VDBackup pauses briefly to let it cool when it runs hot, and resumes on its own; a new switch in Settings turns this off. A cool device with a quirky temperature sensor is never paused by mistake.
+
+Fixes:
+
+- A backup saved to the sdcard no longer also keeps a copy in internal storage, and deleting it now removes the real file in the location you chose.
+- Updating from your root manager now keeps the edition you installed (lite, full, or your device's architecture) instead of always replacing it with the full edition.
+- A blocked app comes back blocked after a restore even on ROMs that keep the block only in memory. VDBackup now reads the per-app network-access policy straight from the system when backing up, so it is captured even when the ROM has not written it to disk yet. (#9)
+- Text in the "Updates" panel is now readable in the light theme.
+- Notifications now appear correctly in Indonesian and Ukrainian.
+
+New:
+
+- You can now back up /data/adb itself - the root environment (modules, their data and configs) - all of it or a subtree you pick from a file tree, and restore it the same way. Each file is written back with its original owner and SELinux context, so root keeps working. It is advanced, and only what you choose is ever included.
+
+Interface:
+
+- Long screens are easier to scan. The heaviest sections across Settings, Destinations, Backups and Schedule are now collapsible groups you open only when you need them, each shown as a clearly tappable card, while your existing backups and jobs stay in view.
+- Settings save the moment you change them; there is no separate Save step to forget.
+- "Check for updates" and the update notice moved to the Updates tab, where you would look for them.
 
 ## v1.10
 

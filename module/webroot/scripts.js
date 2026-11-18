@@ -146,11 +146,31 @@ function vdluExec(cmd) {
     throw new Error(r.stderr || r.stdout || ("rc=" + r.errno));
   });
 }
+// VDLU panel translations: the active language's dict is loaded on demand from
+// vdlu-i18n/<lang>.js (sets window.VDLU_I18N_<UPPER>), passed to VDLU.init({i18n}).
+// English is the widget's built-in default; a missing/failed file falls back to it.
+function loadVdluI18n(lang) {
+  return new Promise(function (resolve) {
+    if (!lang || lang === "en") return resolve(null);
+    var file = (lang === "pt") ? "pt-BR" : lang;
+    var g = "VDLU_I18N_" + file.toUpperCase().replace(/-/g, "_");
+    if (typeof window[g] !== "undefined") return resolve(window[g]);
+    var s = document.createElement("script");
+    s.src = "vdlu-i18n/" + file + ".js";
+    s.onload = function () { resolve((typeof window[g] !== "undefined") ? window[g] : null); };
+    s.onerror = function () { resolve(null); };
+    document.head.appendChild(s);
+  });
+}
 function initVdlu() {
   if (_vdluReady || !window.VDLU) return;
   _vdluReady = true;
-  VDLU.init({ exec: vdluExec, moduleDir: MOD, vdluDir: VDLU_STATE_DIR, modid: "vdbackup", module: "VDBackup" });
-  VDLU.onWebUIOpen().catch(function () {});
+  loadVdluI18n(currentUiLang()).then(function (dict) {
+    var opts = { exec: vdluExec, moduleDir: MOD, vdluDir: VDLU_STATE_DIR, modid: "vdbackup", module: "VDBackup" };
+    if (dict) opts.i18n = dict;
+    VDLU.init(opts);
+    VDLU.onWebUIOpen().catch(function () {});
+  });
 }
 function openUpdatesPanel() {
   if (!window.VDLU) return;
@@ -1697,11 +1717,11 @@ var CFG = {};
 // language option labels: each language shown in the current UI language AND in its
 // own native name (e.g. "Ingles / English"); the chosen UI language shows once.
 // Intl.DisplayNames localizes both when the webview supports it; a static endonym
-// map is the fallback (then only the native name is shown). The app uses the Android
-// code "in" for Indonesian, which Intl expects as "id".
+// map is the fallback (then only the native name is shown). Indonesian uses the ISO
+// code "id"; Android reports the legacy "in", which is normalized on detection.
 var LANG_ENDONYM = {
   ar: "العربية", cs: "Čeština", de: "Deutsch", en: "English", es: "Español",
-  fa: "فارسی", fr: "Français", hi: "हिन्दी", in: "Bahasa Indonesia", it: "Italiano",
+  fa: "فارسی", fr: "Français", hi: "हिन्दी", id: "Bahasa Indonesia", it: "Italiano",
   ja: "日本語", ko: "한국어", nl: "Nederlands", pl: "Polski", pt: "Português",
   ru: "Русский", sv: "Svenska", th: "ไทย", tr: "Türkçe", uk: "Українська", vi: "Tiếng Việt", zh: "中文"
 };
@@ -1709,15 +1729,15 @@ function currentUiLang() {
   var c = CFG.language;
   if (c && c !== "auto" && I18N.AVAILABLE.indexOf(c) >= 0) return c;
   var l = (navigator.language || "en").toLowerCase().slice(0, 2);
-  if (l === "id") l = "in";
+  if (l === "in") l = "id";
   return I18N.AVAILABLE.indexOf(l) >= 0 ? l : "en";
 }
 function capFirst(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function langDisplayName(code, inLocale) {
   try {
     if (typeof Intl !== "undefined" && Intl.DisplayNames) {
-      var dnCode = (code === "in") ? "id" : code;
-      var dnLocale = (inLocale === "in") ? "id" : inLocale;
+      var dnCode = code;
+      var dnLocale = inLocale;
       var name = new Intl.DisplayNames([dnLocale], { type: "language" }).of(dnCode);
       if (name && name !== dnCode) return capFirst(name);
     }
@@ -1753,6 +1773,7 @@ function loadSettings() {
   if ($("#set-netpolicy")) $("#set-netpolicy").value = CFG.network_policy || "any";
   if ($("#set-auto"))     $("#set-auto").checked = !!CFG.auto_backup;
   if ($("#set-auto-keep")) $("#set-auto-keep").value = CFG.auto_backup_keep || 5;
+  if ($("#set-thermal"))  $("#set-thermal").checked = (CFG.thermal_throttle !== false);
   if ($("#set-spoof"))    $("#set-spoof").checked = (CFG.spoof_installer !== false);
   var bs = $("#block-app-search"); if (bs) bs.value = "";
   var as = $("#ai-app-search"); if (as) as.value = "";
@@ -1768,6 +1789,7 @@ function loadSettings() {
   syncSegments();
 }
 function saveSettings() {
+  var _prevLang = CFG.language;
   CFG.compression = $("#set-comp").value;
   CFG.encrypt_data = $("#set-enc-data").checked;
   CFG.encrypt_apk = $("#set-enc-apk").checked;
@@ -1778,16 +1800,21 @@ function saveSettings() {
   if ($("#set-netpolicy")) CFG.network_policy = $("#set-netpolicy").value;
   if ($("#set-auto")) CFG.auto_backup = $("#set-auto").checked;
   if ($("#set-auto-keep")) CFG.auto_backup_keep = parseInt($("#set-auto-keep").value, 10) || 5;
+  if ($("#set-thermal")) CFG.thermal_throttle = $("#set-thermal").checked;
   if ($("#set-spoof")) CFG.spoof_installer = $("#set-spoof").checked;
   CFG.language = $("#set-lang").value;
   helper("config-set", CFG).then(function (r) {
     $("#set-status").textContent = (r && r.ok !== false) ? I18N.t("saved") : errMsg(r);
-    I18N.init(CFG.language || "auto").then(function () {
-      I18N.apply(); buildLangOptions();
-      // Re-render the app list so dynamically-built labels (e.g. the per-app "Back up"
-      // button, created with I18N.t at render time) pick up the new language too (issue #12).
-      if (typeof renderApps === "function") renderApps($("#search") ? $("#search").value : "");
-    });
+    // Only re-init i18n when the language actually changed; auto-save fires on every field, and
+    // re-rendering the whole UI on each toggle would be jarring (and lose focus).
+    if (CFG.language !== _prevLang) {
+      I18N.init(CFG.language || "auto").then(function () {
+        I18N.apply(); buildLangOptions();
+        // Re-render the app list so dynamically-built labels (e.g. the per-app "Back up"
+        // button, created with I18N.t at render time) pick up the new language too (issue #12).
+        if (typeof renderApps === "function") renderApps($("#search") ? $("#search").value : "");
+      });
+    }
   });
 }
 
@@ -2119,6 +2146,7 @@ function loadSpecial() {
   });
   helper("special-list", { user: activeUser }).then(function (r) { renderSpecialList(r && r.backups ? r.backups : []); });
   loadPathBackups();
+  loadAdbBackups();
 }
 function renderSpecialList(list) {
   var ul = $("#special-list"); ul.innerHTML = "";
@@ -2277,6 +2305,249 @@ function runPathRestore(bk, password) {
     args.password = "";
     if (r && r.opid) trackOp(r.opid, ctx);
     else modalAlert(errMsg(r));
+  });
+}
+
+// --- /data/adb filesystem backup (lazy tree picker) ------------------------
+// Pick a subtree of /data/adb to back up or restore. The tree is lazy: one level per expand, from
+// adb-list for a backup or from the stored index for a restore. Selection is tri-state - a fully
+// checked folder is sent as one path (tar recurses); unchecking a child turns its folder partial
+// and we descend, so .paths alone expresses any selection and no exclude list is needed.
+var ADB = null, _adbSeq = 0;
+function adbFmtSize(b) {
+  b = +b || 0; if (!b) return "";
+  var u = ["B", "KB", "MB", "GB", "TB"], i = 0;
+  while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
+  return (i ? b.toFixed(b < 10 ? 1 : 0) : b) + " " + u[i];
+}
+function adbIcon(t) { return t === "dir" ? "📁" : t === "link" ? "🔗" : "📄"; }
+function adbMkNode(e, parent) {
+  var pp = parent ? parent.path : "";
+  return { name: e.name, path: (pp ? pp + "/" : "") + e.name, type: e.type, size: e.size || 0,
+    hasKids: !!e.has_children, depth: parent ? parent.depth + 1 : 0, parent: parent || null,
+    state: parent ? parent.state : 0, expanded: false, loaded: false, children: [],
+    sizeKnown: e.type !== "dir" };
+}
+function adbShow() {
+  var m = $("#adb-modal"); $("#adb-filter").value = ""; $("#adb-selinfo").textContent = "";
+  $("#adb-tree").innerHTML = "<div class='adb-busy'>" + I18N.t("ui_adb_loading") + "</div>";
+  $("#adb-total").checked = false; m.hidden = false;
+}
+function adbHide() { $("#adb-modal").hidden = true; ADB = null; }
+function adbHelperList(path, cb) {
+  helper("adb-list", { path: path }).then(function (r) {
+    if (!r || r.ok === false) { modalAlert(errMsg(r)); cb([]); return; }
+    cb(r.entries || []);
+  }).catch(function () { cb([]); });
+}
+function adbOpenBackup() {
+  ADB = { mode: "backup", nodes: [], seq: ++_adbSeq };
+  $("#adb-title").textContent = I18N.t("ui_adb_opts_title");
+  $("#adb-sub").textContent = I18N.t("ui_adb_pick");
+  $("#adb-bkopts").hidden = false; $("#adb-restwarn").hidden = true;
+  var enc = $("#adb-enc"); enc.checked = !!CFG.encrypt_data;
+  $("#adb-comp").value = CFG.compression || "zstd:10";
+  $("#adb-pass").hidden = !enc.checked; $("#adb-pass").value = "";
+  enc.onchange = function () { $("#adb-pass").hidden = !enc.checked; };
+  $("#adb-ok").textContent = I18N.t("ui_adb_do");
+  adbShow();
+  var _s = ADB.seq;
+  adbHelperList("/data/adb", function (entries) {
+    if (!ADB || ADB.seq !== _s) return;   // modal closed/reopened while loading
+    ADB.nodes = entries.map(function (e) { return adbMkNode(e, null); });
+    adbRender();
+  });
+}
+function adbOpenRestore(bk) {
+  ADB = { mode: "restore", nodes: [], ref: bk.ref, enc: !!(bk.encryption && bk.encryption !== "none"), idx: {}, seq: ++_adbSeq };
+  $("#adb-title").textContent = I18N.t("ui_adb_restore_title");
+  $("#adb-sub").textContent = I18N.t("ui_adb_restore_pick");
+  $("#adb-bkopts").hidden = true; $("#adb-restwarn").hidden = false;
+  $("#adb-pass").hidden = !ADB.enc; $("#adb-pass").value = "";
+  $("#adb-ok").textContent = I18N.t("restore");
+  adbShow();
+  var _s = ADB.seq;
+  helper("adb-index", { ref: bk.ref }).then(function (r) {
+    if (!ADB || ADB.seq !== _s) return;   // a later open supersedes this one (never cross backups)
+    if (!r || r.ok === false) { modalAlert(errMsg(r)); adbHide(); return; }
+    var parsed = adbParseIndex(r.lines || []);
+    ADB.idx = parsed.map; ADB.dirs = parsed.dirs;
+    ADB.nodes = adbIdxLevel("", null);
+    adbRender();
+  });
+}
+function adbParseIndex(lines) {
+  var map = Object.create(null), dirs = Object.create(null);   // null-proto: a file named "constructor"/"__proto__" must not collide
+  lines.forEach(function (ln) {
+    var m = ln.match(/^([dl-])\S*\s+\S+\s+(\d+)\s+\S+\s+\S+\s+(.*)$/);
+    if (!m) return;
+    var type = m[1] === "d" ? "dir" : m[1] === "l" ? "link" : "file";
+    var p = m[3]; if (type === "link") p = p.replace(/ -> .*$/, "");
+    p = p.replace(/\/+$/, "");
+    // reject absolute + a real `..` SEGMENT (not a substring like foo..bar); the backend validates too
+    if (!p || p.charAt(0) === "/" || ("/" + p + "/").indexOf("/../") >= 0) return;
+    map[p] = { type: type, size: +m[2] || 0 };
+    for (var i = p.indexOf("/"); i >= 0; i = p.indexOf("/", i + 1)) dirs[p.slice(0, i)] = true;   // every ancestor is a parent dir (O(1) hasKids)
+  });
+  return { map: map, dirs: dirs };
+}
+function adbIdxLevel(prefix, parent) {
+  var pre = prefix ? prefix + "/" : "", seen = Object.create(null), out = [];
+  Object.keys(ADB.idx).forEach(function (p) {
+    if (pre && p.indexOf(pre) !== 0) return;
+    var name = p.slice(pre.length).split("/")[0];
+    if (!name || seen[name]) return; seen[name] = 1;
+    var full = pre + name, info = ADB.idx[full] || { type: "dir", size: 0 };
+    var hasKids = info.type === "dir" && !!ADB.dirs[full];
+    out.push({ name: name, path: full, type: info.type, size: info.size, hasKids: hasKids,
+      depth: parent ? parent.depth + 1 : 0, parent: parent || null,
+      state: parent ? parent.state : 0, expanded: false, loaded: false, children: [], sizeKnown: true });
+  });
+  return out;
+}
+function adbLoadChildren(node, cb) {
+  if (node.loaded) { cb(); return; }
+  if (ADB.mode === "restore") {
+    node.children = adbIdxLevel(node.path, node); node.loaded = true; cb();
+  } else {
+    var _s = ADB.seq;
+    adbHelperList("/data/adb/" + node.path, function (entries) {
+      if (!ADB || ADB.seq !== _s) return;   // stale: modal closed/reopened mid-load
+      node.children = entries.map(function (e) { return adbMkNode(e, node); }); node.loaded = true; cb();
+    });
+  }
+}
+function adbMatch(n, f) {
+  if (!f) return true;
+  if (n.name.toLowerCase().indexOf(f) >= 0) return true;
+  return n.loaded && n.children.some(function (c) { return adbMatch(c, f); });
+}
+function adbRender() {
+  var box = $("#adb-tree"); box.innerHTML = "";
+  var f = ($("#adb-filter").value || "").toLowerCase().trim();
+  (function walk(nodes) {
+    nodes.forEach(function (n) {
+      if (!adbMatch(n, f)) return;
+      box.appendChild(adbRowEl(n));
+      // while filtering, descend into loaded children too, so a match in a collapsed-but-loaded
+      // folder is actually revealed (not just its parent shown)
+      if ((n.expanded || f) && n.children.length) walk(n.children);
+    });
+  })(ADB.nodes);
+  if (!box.firstChild) box.innerHTML = "<div class='adb-busy'>" + I18N.t("ui_adb_nothing") + "</div>";
+  adbUpdateSel();
+}
+function adbRowEl(n) {
+  var row = el("div", "adb-row"); row.style.paddingLeft = (10 + n.depth * 16) + "px";
+  var branch = n.type === "dir" && n.hasKids;
+  var tw = el("span", "adb-twisty" + (branch ? "" : " leaf"), n.expanded ? "▾" : "▸");
+  if (branch) tw.onclick = function (e) { e.stopPropagation(); adbToggle(n); };
+  var cb = el("input", "adb-cb"); cb.type = "checkbox";
+  cb.checked = n.state === 1; cb.indeterminate = n.state === 2;
+  cb.onclick = function (e) { e.stopPropagation(); adbSet(n, cb.checked); };
+  var nm = el("span", "adb-name", n.name); if (branch) nm.onclick = function () { adbToggle(n); };
+  var sz = el("span", "adb-size", n.sizeKnown ? adbFmtSize(n.size) : "");
+  row.appendChild(tw); row.appendChild(cb); row.appendChild(el("span", "adb-ic", adbIcon(n.type)));
+  row.appendChild(nm); row.appendChild(sz);
+  if (n.type === "dir" && !n.sizeKnown && ADB.mode === "backup") {
+    n.sizeKnown = true;
+    helper("adb-du", { path: "/data/adb/" + n.path }).then(function (r) {
+      if (r && r.size != null) { n.size = r.size; if (sz.isConnected) sz.textContent = adbFmtSize(r.size); }
+    }).catch(function () {});
+  }
+  return row;
+}
+function adbToggle(n) {
+  if (n.expanded) { n.expanded = false; adbRender(); return; }
+  if (n.loaded) { n.expanded = true; adbRender(); return; }
+  if (n.loading) return;   // a second tap before children arrive must not fire adb-list twice
+  n.loading = true;
+  adbLoadChildren(n, function () {
+    n.loading = false;
+    if (n.state === 1) n.children.forEach(function (c) { adbSetDown(c, 1); });
+    n.expanded = true; adbRender();
+  });
+}
+function adbSetDown(n, s) { n.state = s; if (n.loaded) n.children.forEach(function (c) { adbSetDown(c, s); }); }
+function adbUp(n) {
+  while (n) {
+    var all = n.children.length > 0 && n.children.every(function (c) { return c.state === 1; });
+    var none = n.children.every(function (c) { return c.state === 0; });
+    n.state = all ? 1 : (none ? 0 : 2); n = n.parent;
+  }
+}
+function adbSet(n, checked) {
+  adbSetDown(n, checked ? 1 : 0); adbUp(n.parent);
+  $("#adb-total").checked = ADB.nodes.length > 0 && ADB.nodes.every(function (x) { return x.state === 1; });
+  adbRender();
+}
+function adbTotalToggle() {
+  var on = $("#adb-total").checked;
+  ADB.nodes.forEach(function (n) { adbSetDown(n, on ? 1 : 0); });
+  adbRender();
+}
+function adbSelPaths() {
+  var out = [];
+  (function walk(nodes) {
+    nodes.forEach(function (n) {
+      if (n.state === 1) out.push(n.path);
+      else if (n.state === 2 && n.loaded) walk(n.children);
+    });
+  })(ADB.nodes);
+  return out;
+}
+function adbUpdateSel() {
+  var total = $("#adb-total").checked, paths = total ? [] : adbSelPaths(), info = $("#adb-selinfo");
+  info.textContent = total ? I18N.t("ui_adb_sel_all")
+    : (paths.length ? I18N.t("ui_adb_sel_n", { n: paths.length }) : I18N.t("ui_adb_sel_none"));
+  $("#adb-ok").disabled = !total && !paths.length;
+}
+function adbSubmit() {
+  var total = $("#adb-total").checked, paths = total ? [] : adbSelPaths();
+  if (!total && !paths.length) return;
+  if (ADB.mode === "backup") {
+    var enc = $("#adb-enc").checked, pass = $("#adb-pass").value;
+    if (enc && !pass) { $("#adb-pass").focus(); return; }
+    var a = { compression: $("#adb-comp").value, encrypt_data: enc };
+    if (!total) a.paths = paths;
+    if (enc) a.password = pass;
+    adbHide(); $("#adb-pass").value = "";
+    helper("adb-backup", a).then(function (r) {
+      if (r && r.opid) trackOp(r.opid, { onDone: loadAdbBackups }); else modalAlert(errMsg(r));
+    });
+  } else {
+    var p2 = ADB.enc ? $("#adb-pass").value : null;
+    if (ADB.enc && !p2) { $("#adb-pass").focus(); return; }
+    var a2 = { ref: ADB.ref, confirm: true };
+    if (!total) a2.paths = paths;
+    if (p2) a2.password = p2;
+    adbHide(); $("#adb-pass").value = "";
+    helper("adb-restore", a2).then(function (r) {
+      a2.password = "";
+      if (r && r.opid) trackOp(r.opid, { onDone: loadAdbBackups }); else modalAlert(errMsg(r));
+    });
+  }
+}
+function loadAdbBackups() {
+  helper("adb-backups", {}).then(function (out) {
+    renderAdbBackups(out && out.backups ? out.backups : []);
+  }).catch(function () { renderAdbBackups([]); });
+}
+function renderAdbBackups(list) {
+  var ul = $("#adbbk-list"); if (!ul) return; ul.innerHTML = "";
+  $("#adbbk-empty").hidden = !!(list && list.length);
+  (list || []).forEach(function (bk) {
+    var li = el("li", "row"), grow = el("div", "grow");
+    grow.appendChild(el("div", "badge", I18N.t("ui_adb_badge")));
+    var what = bk.mode === "selective" && bk.paths && bk.paths.length ? bk.paths.join(", ") : I18N.t("ui_adb_sel_all");
+    grow.appendChild(el("div", "name", what));
+    grow.appendChild(el("div", "sub", shortDate(bk.created_at)));
+    var btn = el("button", "btn go small", I18N.t("restore"));
+    btn.onclick = function () { adbOpenRestore(bk); };
+    var del = el("button", "btn danger small", I18N.t("delete"));
+    del.onclick = function () { deleteBackup(bk.ref, loadAdbBackups); };
+    li.appendChild(grow); li.appendChild(btn); li.appendChild(del);
+    ul.appendChild(li);
   });
 }
 
@@ -2499,6 +2770,17 @@ function boot() {
   if ($("#update-banner-x")) $("#update-banner-x").onclick = function () { $("#update-banner").classList.remove("show"); };
   $("#user-sel").onchange = function () { activeUser = this.value | 0; CFG.user = activeUser; loadApps(); loadOverview(); };
   $("#set-save").onclick = saveSettings;
+  // Auto-save: persist every Settings control the moment it changes (the app-pickers already did),
+  // removing the deferred-Save island where toggling a field and leaving silently lost it. Scoped to
+  // the set-* controls (pickers self-save); debounced for fast-firing selects. The Save button stays
+  // as a harmless manual trigger.
+  if ($("#settings")) {
+    var _setSaveT;
+    $("#settings").addEventListener("change", function (e) {
+      if (!e.target || !/^set-/.test(e.target.id || "")) return;
+      clearTimeout(_setSaveT); _setSaveT = setTimeout(saveSettings, 250);
+    });
+  }
   if ($("#cfg-export")) $("#cfg-export").onclick = exportConfig;
   if ($("#cfg-import")) $("#cfg-import").onclick = importConfig;
   if ($("#cfg-wipe")) $("#cfg-wipe").onclick = wipeCredentials;
@@ -2508,6 +2790,13 @@ function boot() {
   $("#d-browse").onclick = function () { openDirPicker("#d-path"); };
   $("#pb-browse").onclick = function () { openDirPicker("#pb-path"); };
   $("#pb-backup").onclick = openPathBackup;
+  if ($("#adb-backup-open")) {
+    $("#adb-backup-open").onclick = adbOpenBackup;
+    $("#adb-cancel").onclick = adbHide;
+    $("#adb-ok").onclick = adbSubmit;
+    $("#adb-total").onchange = adbTotalToggle;
+    $("#adb-filter").oninput = function () { if (ADB) adbRender(); };
+  }
   $("#r-save").onclick = addRemote;
   $("#r-backend").onchange = syncRemoteFields;
   $("#r-add-param").onclick = addParamRow;

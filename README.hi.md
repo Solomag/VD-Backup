@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -73,6 +73,9 @@ WebUI के साथ उपलब्ध हो।
   करके उन सभी को एक साथ पुनर्स्थापित करें; बैकअप हटाएँ और हर विध्वंसक क्रिया का एक गतिविधि/ऑडिट लॉग रखें।
 - **विशेष बैकअप:** संदेश (SMS/MMS/RCS), संपर्क और कॉल लॉग, Wi-Fi और Bluetooth, एक वैकल्पिक पोर्टेबल JSON
   निर्यात के साथ जिसे आप किसी PC पर खोल सकते हैं।
+- **सिस्टम फ़ाइलें (`/data/adb`):** स्वयं root परिवेश का बैकअप लें - मॉड्यूल, उनका डेटा और कॉन्फ़िग - यह सब या एक
+  उपवृक्ष जिसे आप एक फ़ाइल ट्री से चुनते हैं, जिसमें हर फ़ाइल उसके मूल स्वामी और SELinux संदर्भ के साथ पुनर्स्थापित
+  होती है ताकि root काम करता रहे। उन्नत; केवल वही जो आप चुनते हैं।
 - **शेड्यूलिंग + ऑटोमेशन:** एक अकेले ऐप, एक समूह, या सभी ऐप्स को लक्षित करने वाले दोहराए जाने वाले **बैकअप या restore**
   कार्य, keep-N छँटाई के साथ, साथ ही इंस्टॉल/अपडेट पर ऑप्ट-इन स्वचालित बैकअप और एक बहिष्कृत-ऐप्स सूची।
 - **इंस्टॉल स्रोत:** पुनर्स्थापित ऐप्स डिफ़ॉल्ट रूप से अपने इंस्टॉल स्रोत के रूप में Play Store बताते हैं
@@ -117,6 +120,14 @@ VDBackup को केवल लोगों के लिए ही नही�
 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)** देखें, और योगदान के लिए
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome) देखें।
 
+## वृद्धिशील अपडेट (VDLU)
+
+VD Backup **VDLU** इंजन के साथ आता है (`vdlu/` में अंतर्निहित): मॉड्यूल पूरे `.zip` को दोबारा डाउनलोड करने के बजाय केवल बदली हुई फ़ाइलों को लाकर खुद को अपडेट करता है (कंटेंट-एड्रेस्ड ब्लॉब्स + एक हस्ताक्षरित `manifest.json`)। **सुदृढ़** प्रोफ़ाइल: ed25519 हस्ताक्षर अनिवार्य है और डाउनग्रेड अवरुद्ध रहते हैं; पूरा `.zip` एक फ़ॉलबैक के रूप में मान्य बना रहता है।
+
+- **केवल LIVE** (कोई रीबूट नहीं): अपडेट अगले बूट पर `service.sh` के ज़रिए पृष्ठभूमि में लागू होते हैं, और जब कोई feed पहुँच योग्य नहीं होता तो कुछ नहीं करते।
+- **स्थिति** `/data/adb/vdbackup/vdlu/` में है, मॉड्यूल के बाहर, ताकि यह रीफ़्लैश के बाद भी बनी रहे।
+- **WebUI:** प्रगति टोस्ट और रद्द करने वाला एक **अपडेट** पैनल; स्वतः-अपडेट वैकल्पिक (opt-in) है।
+
 ## दस्तावेज़ीकरण
 
 - **[विकी](https://github.com/VD171/VD-Backup/wiki/hi-Home)**: दस्तावेज़, ऑनलाइन ब्राउज़ करने योग्य।
@@ -138,6 +149,8 @@ VDBackup को केवल लोगों के लिए ही नही�
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: आपकी Google सेवाएँ (RCS, Wallet, Play Integrity प्रमाणन), बिना इंटरनेट के आपके डिवाइस पर पढ़ी जाती हैं।
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: एक डिवाइस स्पूफ़र जो एक ताज़ा फ़िंगरप्रिंट को एक सुसंगत, संगत प्रोफ़ाइल में बदल देता है।
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: एक स्वतंत्र रूटेड SSH डीमन (Dropbear)।
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## संपर्क
 

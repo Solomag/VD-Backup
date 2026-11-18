@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · Tiếng Việt · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · Tiếng Việt · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -23,6 +23,7 @@ này sẽ thấy quen thuộc, chỉ là mọi thứ diễn ra ở một nơi, k
   - [5.5 Xác minh và chạy thử (dry-run)](#55-xác-minh-và-chạy-thử-dry-run)
   - [5.6 Sao lưu đặc biệt (tin nhắn, nhật ký cuộc gọi, Wi-Fi, Bluetooth, lịch, hình nền, DNS, cài đặt hệ thống)](#56-sao-lưu-đặc-biệt-tin-nhắn-nhật-ký-cuộc-gọi-wi-fi-bluetooth-lịch-hình-nền-dns-cài-đặt-hệ-thống)
   - [5.7 Sao lưu thư mục và tệp độc lập](#57-sao-lưu-thư-mục-và-tệp-độc-lập)
+  - [5.8 Tệp hệ thống (/data/adb)](#58-tệp-hệ-thống-dataadb)
 - [6. Khôi phục một bản sao lưu](#6-khôi-phục-một-bản-sao-lưu)
 - [7. Đích: cục bộ và từ xa](#7-đích-cục-bộ-và-từ-xa)
   - [7.1 Sao lưu cài đặt của bạn](#71-sao-lưu-cài-đặt-của-bạn)
@@ -323,6 +324,24 @@ ghi chú RECOVERY khi bạn mã hóa nó. Các bản sao lưu đường dẫn n�
   cầu bạn **xác nhận** trước khi nó ghi đè bất cứ thứ gì.
 - Giống các bản sao lưu ứng dụng, sao lưu và khôi phục đường dẫn chạy **tách rời** với tiến trình
   trực tiếp, dùng nén bạn chọn, và có thể được mã hóa bằng một cụm mật khẩu.
+
+### 5.8 Tệp hệ thống (`/data/adb`)
+
+`/data/adb` là nơi trình quản lý root của bạn giữ các mô-đun đã cài đặt, dữ liệu và cấu hình của
+chúng, tức là chính môi trường root. VDBackup có thể sao lưu nó, toàn bộ hoặc một phần, để bạn có
+thể mang theo thiết lập root của mình qua một lần xóa sạch hoặc một lần đổi ROM.
+
+- **Toàn bộ hoặc chọn lọc.** Sao lưu toàn bộ `/data/adb`, hoặc mở cây tệp và chọn chính xác các
+  thư mục và tệp bạn muốn; một thư mục được tích một nửa chỉ bao gồm các mục con mà bạn đã tích.
+- **Mọi thứ nằm trong tay bạn.** Cây là trung lập - không có gì được chọn trước hoặc bị ẩn, ngoại
+  trừ các tệp làm việc của chính VDBackup, mà nếu không thì nó sẽ chỉ sao lưu chính mình. Nén và
+  mã hóa là cùng các tùy chọn khả chuyển như bất kỳ bản sao lưu nào khác.
+- **Khôi phục giữ cho root hoạt động.** Mỗi tệp được ghi lại với chủ sở hữu, nhóm, chế độ và ngữ
+  cảnh SELinux ban đầu của nó, mỗi lần một tệp, lên trên cây đang hoạt động (không bao giờ là một
+  lần xóa toàn bộ), nên các ngữ cảnh khác nhau dưới `/data/adb` được bảo tồn và trình quản lý root
+  của bạn vẫn khởi động.
+- **Nâng cao.** Điều này chạm trực tiếp vào môi trường root. Khôi phục có tính phá hủy và yêu cầu
+  bạn xác nhận; một lần khôi phục chọn lọc chỉ ghi lại các đường dẫn bạn đã chọn.
 
 ## 6. Khôi phục một bản sao lưu
 

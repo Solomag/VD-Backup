@@ -329,6 +329,16 @@ freeze() {
   case "$1" in ru.vd171.vdbackup|android|system|"") return 0 ;; esac
   # Only quiesce an app that is actually running: a stopped app's data is already at rest.
   pidof "$1" >/dev/null 2>&1 || return 0
+  # Never kill the ACTIVE VPN: killing the process that owns a live tun tears down the device's
+  # routing and can wedge networking for the rest of the batch. Only when a tun/ppp link is
+  # actually UP (a VPN is routing) do we check whether THIS app is a VpnService; if so, back up
+  # its (static) data live instead - no kill, no teardown. The `ip` check is cheap and local, so
+  # the dumpsys only runs in the rare case a VPN is up.
+  if ip -o link show 2>/dev/null | grep -E ': (tun|ppp)[0-9]' | grep -q 'UP'; then
+    if fw dumpsys package "$1" 2>/dev/null | grep -q 'permission android.permission.BIND_VPN_SERVICE'; then
+      audit "quiesce: not killing active-VPN app $1 (tun up), backing up live"; return 0
+    fi
+  fi
   # Quiesce by SIGKILLing the app's own processes directly - a kernel syscall, NOT
   # `am force-stop`. Every `am`/`cmd activity force-stop` is an ActivityManager binder
   # transaction, and ~100-120 of them in a bulk backup exhaust the binder/transaction buffer
@@ -1100,11 +1110,16 @@ backup() {
         EXCL="--exclude=$base/lib --exclude=$base/no_backup"
         [ "$(cfg .include_cache)" = true ] || EXCL="$EXCL --exclude=$base/cache --exclude=$base/code_cache" ;;
     esac
+    # A FATAL tar exit (>1, e.g. an unreadable node) yields a valid-but-short archive that the
+    # readback below would pass. A sentinel captures it; a benign exit 1 (live file changed) is
+    # ignored. Pairs with the readback, which catches a truncated write.
+    rm -f "$DEST/.trc"
     if use_data_age; then out="$out.age"; enc=age
-      exec_ns "$TAR" $TARC $EXCL -C "$parent" -c "$base" 2>/dev/null | comp "$COMP" | enc_age "$out"
+      { exec_ns "$TAR" $TARC $EXCL -C "$parent" -c "$base" 2>/dev/null || { _tc=$?; [ "$_tc" -gt 1 ] && echo "$_tc" > "$DEST/.trc"; }; } | comp "$COMP" | enc_age "$out"
     else
-      exec_ns "$TAR" $TARC $EXCL -C "$parent" -c "$base" 2>/dev/null | comp "$COMP" > "$out"
+      { exec_ns "$TAR" $TARC $EXCL -C "$parent" -c "$base" 2>/dev/null || { _tc=$?; [ "$_tc" -gt 1 ] && echo "$_tc" > "$DEST/.trc"; }; } | comp "$COMP" > "$out"
     fi
+    [ -f "$DEST/.trc" ] && { audit "backup tar aborted (exit $(cat "$DEST/.trc" 2>/dev/null)) $typ $PKG"; rm -f "$DEST/.trc"; finish false ERR_BACKUP; return 1; }
     # completeness check: GNU tar may exit 1 on live data (file changed) which is
     # fine, so we cannot trust the pipeline rc; instead confirm the written archive
     # reads back as a complete tar (catches a truncated write: disk full, interrupt).
@@ -1225,14 +1240,27 @@ backup() {
   # <uid-policy> in /data/system/netpolicy.xml; its restore rewrites a system file, so it
   # is captured only when asked. Store the policy integer for the app's current uid.
   NETPOL=""
-  if [ "$(jget "$ARGS" '.netpolicy')" = true ] && [ -f /data/system/netpolicy.xml ]; then
-    _npx="$STATE/staging/npcap.$OPID.xml"
-    if is_abx /data/system/netpolicy.xml; then abx_to_xml /data/system/netpolicy.xml "$_npx" 2>/dev/null; else cp /data/system/netpolicy.xml "$_npx"; fi
-    _npau="$(stat -c %u "/data/user/$U/$PKG" 2>/dev/null)"
-    case "$_npau" in ''|*[!0-9]*) : ;; *)
-      NETPOL="$(grep -o "<uid-policy uid=\"$_npau\" policy=\"[0-9]*\"" "$_npx" 2>/dev/null | grep -o 'policy="[0-9]*"' | grep -o '[0-9]*' | head -1)" ;;
-    esac
-    rm -f "$_npx"
+  if [ "$(jget "$ARGS" '.netpolicy')" = true ]; then
+    _npau="$(stat -c %u "/data/user/$U/$PKG" 2>/dev/null)"; case "$_npau" in ''|*[!0-9]*) _npau="" ;; esac
+    # Framework-first capture: read the LIVE policy via getUidPolicy. The running NPMS keeps the
+    # policy in memory and can lag netpolicy.xml, so a UID with an active REJECT_ALL may have no
+    # <uid-policy> entry on disk yet - the file capture then records nothing and the restore has
+    # nothing to apply (issue #9, confirmed on a reporter device: policy active, absent from file).
+    if [ -n "$_npau" ] && [ -f "$MODDIR/etc/vdbackup_helper.dex" ]; then
+      _ngr="$(LD_LIBRARY_PATH= app_process -Djava.class.path="$MODDIR/etc/vdbackup_helper.dex" \
+          /system/bin ru.vd171.vdbackup.Helper netpolicy-get "$_npau" 2>/dev/null)"
+      _ngp="$(printf '%s' "$_ngr" | sed -n 's/.*"policy":\(-\{0,1\}[0-9]\{1,\}\).*/\1/p')"
+      case "$_ngp" in ''|-*|0) : ;; *) NETPOL="$_ngp" ;; esac
+    fi
+    # Fallback: parse netpolicy.xml, only when the framework read gave nothing (ROM without the call).
+    if [ -z "$NETPOL" ] && [ -n "$_npau" ] && [ -f /data/system/netpolicy.xml ]; then
+      _npx="$STATE/staging/npcap.$OPID.xml"
+      if is_abx /data/system/netpolicy.xml; then abx_to_xml /data/system/netpolicy.xml "$_npx" 2>/dev/null; else cp /data/system/netpolicy.xml "$_npx"; fi
+      # attribute-order-independent: the ABX->XML decode can emit uid/policy in either order
+      # (varies by ROM/version), so match the <uid-policy> element by uid, then pull policy.
+      NETPOL="$(grep -oE "<uid-policy [^>]*>" "$_npx" 2>/dev/null | grep "uid=\"$_npau\"" | grep -oE 'policy="[0-9]+"' | grep -oE '[0-9]+' | head -1)"
+      rm -f "$_npx"
+    fi
   fi
 
   # manifest
@@ -1305,6 +1333,11 @@ backup() {
   # transfer_full already calls finish false + returns non-zero on failure;
   # do not overwrite that with success.
   prog 95 transfer "$PKG"; transfer_full || return
+  # destination-authoritative for a local dest (issue #15): an APP backup lives at the dest only -
+  # list/restore/delete/info are dest-aware via backup_roots - so drop the internal copy the user
+  # chose to keep off internal storage. Done HERE, not in transfer_full: path/special backups share
+  # transfer_full but their list/restore are internal-only, so they must keep the internal copy.
+  if [ "$DTYPE" = local ] && [ -n "$DPATH" ] && [ "$DPATH" != "$BACKUPS" ]; then rm -rf "$DEST"; fi
   audit "backup done $PKG -> $DEST"; notify backup_done "$PKG"
   finish true ERR_NONE
 }
@@ -2232,52 +2265,279 @@ do_path_restore() {
   finish true ERR_NONE
 }
 
+# Back up a selection of the /data/adb tree (total, or chosen sub-paths). Unlike do_path_backup
+# this relies on tar's PER-FILE SELinux/xattr/owner preservation (TARC) - a single blanket
+# chcon -R on restore would flatten the heterogeneous contexts across modules and break root,
+# so no root_context is stored; the contexts live inside the archive. A verbose file index is
+# kept (also the completeness check) so a restore can be selective. Self-reference: the module's
+# own in-progress staging, and the destination if it sits under /data/adb, are excluded, so a
+# backup never contains itself or a prior backup. The user controls everything else.
+do_adb_backup() {
+  COMP="$(jget "$ARGS" '.compression')"; { [ -z "$COMP" ] || [ "$COMP" = null ]; } && COMP="$(cfg .compression)"; [ -n "$COMP" ] || COMP="zstd:10"
+  PW="$(jget "$ARGS" '.password')"; [ "$PW" = null ] && PW=""
+  ENCDATA="$(jget "$ARGS" '.encrypt_data')"; [ "$ENCDATA" = null ] && ENCDATA="$(cfg .encrypt_data)"
+  if [ "$ENCDATA" = true ] && [ -z "$PW" ]; then finish false ERR_CRYPTO_PASS; return; fi
+  if [ "$ENCDATA" = true ] && ! crypto_available; then finish false ERR_CRYPTO_UNAVAIL; return; fi
+  use_data_age() { [ "$ENCDATA" = true ] && [ -n "$PW" ]; }
+  U=0   # /data/adb is system-wide, not per-user
+  resolve_dest
+  transport_guard full || return
+  prog 2 preparing "adb"; audit "adb-backup start"; notify backup_start "adb"
+  BACKUPS="$(backups_dir "$U")"; BK="$BACKUPS/.adb"; TS="$(date -u +%Y%m%dT%H%M%SZ)"; DEST="$BK/$TS"
+  media_own "$BACKUPS"; media_own "$BK"; mkdir -p "$DEST"
+  _st="$STATE/staging"; mkdir -p "$_st"; _lst="$_st/adb.$OPID.list"; _exl="$_st/adb.$OPID.excl"; : > "$_lst"; : > "$_exl"
+  # include list: validated chosen relpaths (no leading / and no traversal, must exist), or "." total
+  _hadpaths="$(printf '%s' "$ARGS" | "$JQ" -r '(.paths // []) | length' 2>/dev/null)"; case "$_hadpaths" in ''|*[!0-9]*) _hadpaths=0 ;; esac
+  printf '%s\n' "$(printf '%s' "$ARGS" | "$JQ" -r '.paths[]? // empty' 2>/dev/null)" | while IFS= read -r _p; do
+    [ -n "$_p" ] || continue; case "$_p" in /*|*..*|-*) continue ;; esac   # no abs/traversal, no leading - (tar -T option injection)
+    exec_ns test -e "/data/adb/$_p" || continue
+    printf '%s\n' "$_p" >> "$_lst"
+  done
+  # a NON-empty .paths that all got rejected must fail, not silently back up everything
+  if [ -s "$_lst" ]; then _mode=selective
+  elif [ "$_hadpaths" -gt 0 ]; then rm -f "$_lst" "$_exl"; audit "adb-backup: all selected paths invalid"; finish false ERR_BAD_PATH; return
+  else printf '.\n' > "$_lst"; _mode=total; fi
+  # self-reference excludes + user excludes (all relative to /data/adb)
+  # self-reference + volatile module state: staging (in-progress archive), logs (stale pids/progress
+  # that would confuse list-ops on restore), and the regenerable icon cache.
+  printf 'vdbackup/staging\nvdbackup/logs\nvdbackup/iconcache\n' >> "$_exl"
+  case "$DEST" in /data/adb/*) printf '%s\n' "${DEST#/data/adb/}" >> "$_exl" ;; esac
+  printf '%s\n' "$(printf '%s' "$ARGS" | "$JQ" -r '.exclude[]? // empty' 2>/dev/null)" | while IFS= read -r _x; do
+    [ -n "$_x" ] || continue; case "$_x" in /*|*..*) continue ;; esac; printf '%s\n' "$_x" >> "$_exl"
+  done
+  ext="$(comp_ext "$COMP")"; enc=none; arc="data.$ext"
+  # pipefail is off + comp/enc is the pipe's last element, so tar's exit is masked. A sentinel file
+  # captures a FATAL tar-creation exit (>1, e.g. an unreadable node) so a valid-but-short archive is
+  # not reported as success (a benign exit 1 "file changed as we read it" is ignored). Pairs with the
+  # readback-exit check below, which catches truncation.
+  _trc="$_st/adb.$OPID.trc"; rm -f "$_trc"
+  prog 20 archiving "adb"
+  if use_data_age; then enc=age; arc="$arc.age"
+    { exec_ns "$TAR" $TARC -C /data/adb --exclude-from="$_exl" -c -T "$_lst" 2>/dev/null || { _tc=$?; [ "$_tc" -gt 1 ] && echo "$_tc" > "$_trc"; }; } | comp "$COMP" | enc_age "$DEST/$arc" \
+      || { audit "adb-backup archive failed"; rm -f "$_lst" "$_exl" "$_trc"; finish false ERR_BACKUP; return; }
+  else
+    { exec_ns "$TAR" $TARC -C /data/adb --exclude-from="$_exl" -c -T "$_lst" 2>/dev/null || { _tc=$?; [ "$_tc" -gt 1 ] && echo "$_tc" > "$_trc"; }; } | comp "$COMP" > "$DEST/$arc" \
+      || { audit "adb-backup archive failed"; rm -f "$_lst" "$_exl" "$_trc"; finish false ERR_BACKUP; return; }
+  fi
+  [ -f "$_trc" ] && { audit "adb-backup: tar aborted (exit $(cat "$_trc" 2>/dev/null)), archive incomplete"; rm -f "$_lst" "$_exl" "$_trc"; finish false ERR_BACKUP; return; }
+  prog 80 manifest "adb"
+  # verbose index; this read-back doubles as the completeness check (a truncated archive fails tar)
+  if [ "$enc" = age ]; then
+    dec_age "$DEST/$arc" | { case "$COMP" in gzip) "$GZIP" -dc ;; lz4) "$ZSTD" -dq --format=lz4 -c ;; none) cat ;; *) "$ZSTD" -dqc ;; esac; } | exec_ns "$TAR" -tv > "$DEST/index.txt" 2>/dev/null; _irc=$?
+  else decomp "$DEST/$arc" | exec_ns "$TAR" -tv > "$DEST/index.txt" 2>/dev/null; _irc=$?; fi
+  # gate on the readback tar's exit (last in the pipe, so its status survives pipefail-off): a
+  # truncated archive makes tar -tv fail, which a non-empty-index check alone would pass as success.
+  { [ "$_irc" -eq 0 ] && [ -s "$DEST/index.txt" ]; } || { audit "adb-backup incomplete/index failed"; rm -f "$_lst" "$_exl"; finish false ERR_BACKUP; return; }
+  "$GZIP" -f "$DEST/index.txt" 2>/dev/null
+  sha="$(sha256sum "$DEST/$arc" 2>/dev/null | cut -d' ' -f1)"
+  _paths="$("$JQ" -R -s -c 'split("\n")|map(select(length>0))' < "$_lst")"
+  FP="$(getprop ro.build.fingerprint)"; SDK="$(getprop ro.build.version.sdk)"; SEL="$(getenforce 2>/dev/null | tr 'A-Z' 'a-z')"
+  "$JQ" -n --arg producer "VDBackup $(sed -n 's/^version=//p' "$MODDIR/module.prop")" \
+    --arg created "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --argjson epoch "$(date +%s)" \
+    --arg fp "$FP" --argjson sdk "${SDK:-0}" --arg abi "$abi" --arg sel "${SEL:-unknown}" \
+    --argjson paths "$_paths" --arg mode "$_mode" --arg archive "$arc" --arg comp "$COMP" --arg enc "$enc" --arg sha "$sha" \
+    '{format_version:1, kind:"adb", producer:$producer, created_at:$created, created_epoch:$epoch,
+      device:{fingerprint:$fp, sdk:$sdk, abi:$abi, selinux:$sel}, root:"/data/adb", mode:$mode,
+      paths:$paths, archive:$archive, index:"index.txt.gz", compression:$comp, encryption:$enc, sha256:$sha}' > "$DEST/manifest.json"
+  sha256sum "$DEST/manifest.json" | cut -d' ' -f1 > "$DEST/manifest.json.sha256"
+  use_data_age && cp "$MODDIR/etc/RECOVERY.md" "$DEST/RECOVERY.md" 2>/dev/null
+  media_own -R "$DEST"; rm -f "$_lst" "$_exl" "$_trc"
+  [ -s "$DEST/manifest.json" ] || { finish false ERR_BACKUP; return; }
+  PKG=".adb/$TS"; VC="$TS"
+  prog 95 transfer "adb"; transfer_full || return
+  audit "adb-backup done -> $DEST ($_mode)"; notify backup_done "adb"
+  finish true ERR_NONE
+}
+
+# Restore files from an /data/adb backup - total, or only chosen sub-paths. Extracts OVER the
+# live tree: it NEVER wipes /data/adb (a blanket rm would delete the running root environment),
+# relying on tar's per-file SELinux/xattr/owner restoration (TARX) instead of a blanket chcon.
+# The user picks total or a subset; we confirm + audit, never silently overwrite.
+do_adb_restore() {
+  REF="$(jget "$ARGS" '.ref')"
+  case "$REF" in /data/media/*/VDBackup/.adb/*) : ;; *) finish false ERR_BAD_REF; return ;; esac
+  case "$REF" in *..*) finish false ERR_BAD_REF; return ;; esac
+  M="$REF/manifest.json"; [ -f "$M" ] || { finish false ERR_NO_BACKUP; return; }
+  [ "$(jget "$ARGS" '.confirm')" = true ] || { finish false ERR_CONFIRM; return; }   # heavy-friction gate
+  PW="$(jget "$ARGS" '.password')"; [ "$PW" = null ] && PW=""
+  if [ -f "$M.sha256" ]; then
+    want="$(cat "$M.sha256")"; got="$(sha256sum "$M" | cut -d' ' -f1)"
+    [ "$want" = "$got" ] || { finish false ERR_MANIFEST_SHA; return; }
+  fi
+  arc="$("$JQ" -r '.archive // empty' "$M")"; enc="$("$JQ" -r '.encryption // "none"' "$M")"
+  { [ -n "$arc" ] && [ "$arc" != null ]; } || { finish false ERR_NO_BACKUP; return; }
+  if [ "$enc" = age ] && [ -z "$PW" ]; then finish false ERR_CRYPTO_PASS; return; fi
+  if [ "$enc" = age ] && ! crypto_available; then finish false ERR_CRYPTO_UNAVAIL; return; fi
+  prog 5 preparing "adb"; audit "adb-restore start $REF"; notify restore_start "adb"
+  # a wrong passphrase otherwise surfaces late as ERR_RESTORE (empty decrypt -> empty extract); probe
+  # once here so the user gets a clear ERR_CRYPTO_PASS. One scrypt KDF, cheap next to a real restore.
+  if [ "$enc" = age ] && [ "$(dec_age "$REF/$arc" 2>/dev/null | head -c 1 | wc -c)" -lt 1 ]; then
+    audit "adb-restore: wrong passphrase"; finish false ERR_CRYPTO_PASS; return; fi
+  _renc=none; [ "$enc" = age ] && _renc=age
+  archive_safe "$REF/$arc" "$_renc" || { audit "adb-restore unsafe archive"; finish false ERR_UNSAFE_ARCHIVE; return; }   # anti-traversal BEFORE writing
+  want="$("$JQ" -r '.sha256 // empty' "$M")"
+  if [ -n "$want" ] && [ "$want" != null ]; then
+    got="$(sha256sum "$REF/$arc" 2>/dev/null | cut -d' ' -f1)"
+    [ "$want" = "$got" ] || { audit "adb-restore sha mismatch"; finish false ERR_VERIFY; return; }
+  fi
+  _st="$STATE/staging"; mkdir -p "$_st"; _sel="$_st/adbr.$OPID.list"; : > "$_sel"
+  _hadpaths="$(printf '%s' "$ARGS" | "$JQ" -r '(.paths // []) | length' 2>/dev/null)"; case "$_hadpaths" in ''|*[!0-9]*) _hadpaths=0 ;; esac
+  printf '%s\n' "$(printf '%s' "$ARGS" | "$JQ" -r '.paths[]? // empty' 2>/dev/null)" | while IFS= read -r _p; do
+    [ -n "$_p" ] || continue; case "$_p" in /*|*..*|-*) continue ;; esac; printf '%s\n' "$_p" >> "$_sel"
+  done
+  # a NON-empty .paths that all got rejected must NOT fall through to a FULL restore over the live tree
+  if [ ! -s "$_sel" ] && [ "$_hadpaths" -gt 0 ]; then rm -f "$_sel"; audit "adb-restore: all selected paths invalid"; finish false ERR_BAD_PATH; return; fi
+  _decode() { if [ "$enc" = age ]; then dec_age "$REF/$arc" | { case "$arc" in *.tar.gz*) "$GZIP" -dc ;; *.tar.lz4*) "$ZSTD" -dq --format=lz4 -c ;; *.tar.zst*) "$ZSTD" -dqc ;; *) cat ;; esac; }; else decomp "$REF/$arc"; fi; }
+  prog 40 extracting "adb"
+  if [ -s "$_sel" ]; then _decode | exec_ns "$TAR" $TARX -x -C /data/adb -T "$_sel" 2>/dev/null
+  else _decode | exec_ns "$TAR" $TARX -x -C /data/adb 2>/dev/null; fi
+  _rc=$?; rm -f "$_sel"
+  [ "$_rc" -eq 0 ] || { audit "adb-restore extract failed"; finish false ERR_RESTORE; return; }
+  prog 97 finalizing "adb"; audit "adb-restore done $REF"; notify restore_done "adb"
+  finish true ERR_NONE
+}
+
 # --- batch backup / restore -------------------------------------------------------------
 # One detached worker drives the WHOLE list, so closing the WebUI or the root manager never
 # stops it. The WebUI used to chain per-app in JavaScript (trackOp.onDone -> next), which
 # died with the webview and left a bulk backup half-done (issue #5). Each app reuses the
 # single-app backup()/restore() unchanged; finish() records the per-app result (IN_BATCH)
 # instead of ending the op, and progx reports the app position (n of N).
-batch_finish() {  # <ok_count> <total> <fail_count>
-  printf '{"opid":"%s","percent":100,"phase":"finished","done":true,"ok":%s,"code":"%s","n":%s,"of":%s}\n' \
+#
+# Each item runs in a WATCHDOG'd background subshell so one app that hangs - a VPN whose kill
+# wedges the networking stack, a stuck mount, an unkillable archive - can never freeze the whole
+# batch (issue #5, separate from the disk cause). Past the per-app budget the subshell AND its
+# whole process tree (tar/zstd/...) are killed and the app is recorded ERR_TIMEOUT, then the
+# batch moves on. Budget via config .batch_app_timeout (default 1800s, generous for a big app);
+# 0 disables the watchdog.
+_killtree() {   # <pid>: kill a pid and every descendant, children first (/proc-walked; no awk/pgrep -P)
+  for _ktp in /proc/[0-9]*; do
+    [ -r "$_ktp/status" ] || continue
+    [ "$(grep -E '^PPid:' "$_ktp/status" 2>/dev/null | cut -f2)" = "$1" ] && _killtree "${_ktp##*/}"
+  done
+  kill -9 "$1" 2>/dev/null
+}
+_run_item() {   # <fn> <rcf> <label>: run fn (backup|restore) in a background subshell; result -> rcf
+  : > "$2"
+  ( LAST_OK=false; LAST_CODE=ERR_UNKNOWN; "$1"; printf '%s %s' "$LAST_OK" "$LAST_CODE" > "$2" ) &
+  _rip=$!; _rit=0
+  while kill -0 "$_rip" 2>/dev/null; do
+    [ "${_BTO:-0}" -gt 0 ] && [ "$_rit" -ge "$_BTO" ] && {
+      audit "batch: $3 exceeded ${_BTO}s, killing its process tree and skipping"
+      _killtree "$_rip"; printf 'false ERR_TIMEOUT' > "$2"; break; }
+    sleep 5; _rit=$((_rit + 5))
+  done
+  wait "$_rip" 2>/dev/null
+}
+# Thermal governor: between batch items, cool the device down if the SoC is near its own
+# critical trip, so a long unattended run cannot cook it (scheduled ops have a pre-flight gate,
+# but nothing adapted mid-run and interactive runs had no thermal awareness at all). Reads only
+# sysfs - no binder. Echoes "" (fine) | warm (>=90% of a zone's critical trip) | hot (>=100%);
+# per-zone fallback critical = 85C, same zone-walk as the scheduler's sched_too_hot.
+thermal_level() {
+  _tl_worst=0
+  for _tz in /sys/class/thermal/thermal_zone*/temp; do
+    [ -r "$_tz" ] || continue
+    _tzv="$(cat "$_tz" 2>/dev/null)"; case "$_tzv" in ''|*[!0-9]*) continue ;; esac
+    # Ignore bogus sensors: a connector/USB NTC idles at a ~125C sentinel (not real heat), and
+    # nothing below 60C is an overheat however low its own trip sits.
+    { [ "$_tzv" -ge 120000 ] || [ "$_tzv" -lt 60000 ]; } && continue
+    _tzc=85000; _tzd="${_tz%/temp}"
+    for _tp in "$_tzd"/trip_point_*_type; do
+      [ -r "$_tp" ] || continue
+      case "$(cat "$_tp" 2>/dev/null)" in
+        critical|hot)
+          _tpv="$(cat "${_tp%_type}_temp" 2>/dev/null)"
+          case "$_tpv" in ''|*[!0-9]*) ;; *) _tzc="$_tpv"; break ;; esac ;;
+      esac
+    done
+    [ "$_tzc" -gt 0 ] || continue
+    _tlr=$(( _tzv * 100 / _tzc )); [ "$_tlr" -gt "$_tl_worst" ] && _tl_worst="$_tlr"
+  done
+  if [ "$_tl_worst" -ge 100 ]; then echo hot
+  elif [ "$_tl_worst" -ge 90 ]; then echo warm; fi
+}
+# Pace the batch by temperature: a short breather when warm, pause-until-cool when hot - capped
+# at ~10min so a device that never cools (charging, hot ambient) still finishes. The pause emits
+# a `cooling` progress so the UI shows an intentional wait, never a frozen bar (would look like
+# the #5 hang). Toggle cfg .thermal_throttle (default on); off/false/0 disables.
+thermal_pace() {
+  case "$(cfg .thermal_throttle)" in off|false|0) return 0 ;; esac
+  _tpl="$(thermal_level)"; [ -n "$_tpl" ] || return 0
+  [ "$_tpl" = warm ] && { sleep 5; return 0; }
+  audit "thermal: HOT, pausing batch to cool before ${BATCH_CUR:-next}"
+  _tpw=0
+  while [ "$(thermal_level)" = hot ]; do
+    [ "$_tpw" -ge 600 ] && { audit "thermal: still hot after ${_tpw}s, proceeding anyway"; break; }
+    progx 0 cooling "${BATCH_CUR:-}" "" "" 0 0 ""
+    sleep 20; _tpw=$(( _tpw + 20 ))
+  done
+}
+batch_finish() {  # <ok_count> <total> <fail_count> <fails_json> <free_bytes>
+  # `fails` names WHY apps failed (a {code:count} tally) so a partial result is never a blind
+  # "something went wrong" - e.g. {"ERR_NO_SPACE":24} says the destination filled (issue #5).
+  # `free` is the bytes left on the backups filesystem, so the UI can say how much space remains.
+  printf '{"opid":"%s","percent":100,"phase":"finished","done":true,"ok":%s,"code":"%s","n":%s,"of":%s,"fails":%s,"free":%s}\n' \
     "$OPID" "$([ "$3" -eq 0 ] && echo true || echo false)" \
-    "$([ "$3" -eq 0 ] && echo ERR_NONE || echo ERR_BATCH_PARTIAL)" "$1" "$2" > "$PROG"; }
+    "$([ "$3" -eq 0 ] && echo ERR_NONE || echo ERR_BATCH_PARTIAL)" "$1" "$2" "$4" "$5" > "$PROG"; }
 backup_batch() {
-  _lst="$STATE/staging/batch.$OPID"; mkdir -p "$STATE/staging"
+  _lst="$STATE/staging/batch.$OPID"; _rcf="$STATE/staging/batchrc.$OPID"; mkdir -p "$STATE/staging"
   jget "$ARGS" '.packages[]?' > "$_lst"
   BATCH_N="$(grep -c . "$_lst" 2>/dev/null)"; case "$BATCH_N" in ''|*[!0-9]*) BATCH_N=0 ;; esac
   [ "$BATCH_N" -gt 0 ] || { rm -f "$_lst"; finish false ERR_NO_PACKAGE; return; }
   audit "batch backup start: $BATCH_N apps"
-  _base="$ARGS"; IN_BATCH=1; BATCH_I=0; _bok=0; _bfail=0
+  _base="$ARGS"; IN_BATCH=1; BATCH_I=0; _bok=0; _bfail=0; _bcodes=""
+  _bu="$(jget "$_base" '.user // 0')"; case "$_bu" in ''|*[!0-9]*) _bu=0 ;; esac
+  _BTO="$(cfg .batch_app_timeout)"; case "$_BTO" in ''|null|*[!0-9]*) _BTO=1800 ;; esac
   # read the list on FD 3: backup() (am/pm/app_process) must not consume the loop's stdin,
   # which would swallow the remaining packages and stop the batch after the first app.
+  # Each app runs in a SUBSHELL so its fds / shell state are reclaimed per app (the batch
+  # stays robust for ANY app count), and its result (ok + the failure code) comes back through
+  # a tiny status file. The failure codes are tallied so the finished result NAMES why apps
+  # failed instead of a blind partial (issue #5).
   while IFS= read -r _p <&3; do
     [ -n "$_p" ] || continue
     BATCH_I=$((BATCH_I + 1)); BATCH_CUR="$_p"
     ARGS="$("$JQ" -nc --argjson b "$_base" --arg p "$_p" '$b + {package:$p} | del(.packages)')"
-    LAST_OK=false; backup
-    if [ "$LAST_OK" = true ]; then _bok=$((_bok + 1)); else _bfail=$((_bfail + 1)); fi
+    thermal_pace
+    _run_item backup "$_rcf" "$_p"
+    _lok=false; _lcode=ERR_UNKNOWN; read -r _lok _lcode < "$_rcf" 2>/dev/null
+    [ "$_lok" = true ] || _lok=false; [ -n "$_lcode" ] || _lcode=ERR_UNKNOWN
+    if [ "$_lok" = true ]; then _bok=$((_bok + 1)); else _bfail=$((_bfail + 1)); _bcodes="$_bcodes $_lcode"; fi
   done 3< "$_lst"
-  rm -f "$_lst"; ARGS="$_base"; IN_BATCH=0
-  audit "batch backup done: $_bok ok, $_bfail failed"
-  batch_finish "$_bok" "$BATCH_N" "$_bfail"; }
+  rm -f "$_lst" "$_rcf"; ARGS="$_base"; IN_BATCH=0
+  _bfails="$(printf '%s\n' $_bcodes | "$JQ" -R -s -c 'split("\n")|map(select(length>0))|group_by(.)|map({key:.[0],value:length})|from_entries' 2>/dev/null)"
+  case "$_bfails" in ''|null) _bfails='{}' ;; esac
+  _bfree="$(fs_free "$(backups_dir "$_bu")" 2>/dev/null)"; case "$_bfree" in ''|*[!0-9]*) _bfree=0 ;; esac
+  audit "batch backup done: $_bok ok, $_bfail failed, fails=$_bfails free=$_bfree"
+  batch_finish "$_bok" "$BATCH_N" "$_bfail" "$_bfails" "$_bfree"; }
 restore_batch() {
-  _lst="$STATE/staging/batch.$OPID"; mkdir -p "$STATE/staging"
+  _lst="$STATE/staging/batch.$OPID"; _rcf="$STATE/staging/batchrc.$OPID"; mkdir -p "$STATE/staging"
   jget "$ARGS" '.refs[]?' > "$_lst"
   BATCH_N="$(grep -c . "$_lst" 2>/dev/null)"; case "$BATCH_N" in ''|*[!0-9]*) BATCH_N=0 ;; esac
   [ "$BATCH_N" -gt 0 ] || { rm -f "$_lst"; finish false ERR_NO_REF; return; }
   audit "batch restore start: $BATCH_N backups"
-  _base="$ARGS"; IN_BATCH=1; BATCH_I=0; _bok=0; _bfail=0
+  _base="$ARGS"; IN_BATCH=1; BATCH_I=0; _bok=0; _bfail=0; _bcodes=""
+  _bu="$(jget "$_base" '.user // 0')"; case "$_bu" in ''|*[!0-9]*) _bu=0 ;; esac
+  _BTO="$(cfg .batch_app_timeout)"; case "$_BTO" in ''|null|*[!0-9]*) _BTO=1800 ;; esac
+  # each restore runs in a SUBSHELL (fds / shell state reclaimed per item) and reports back
+  # through a status file; failure codes are tallied so a partial names why (issue #5, as backup).
   while IFS= read -r _r <&3; do
     [ -n "$_r" ] || continue
     BATCH_I=$((BATCH_I + 1)); BATCH_CUR="$_r"
     ARGS="$("$JQ" -nc --argjson b "$_base" --arg r "$_r" '$b + {ref:$r} | del(.refs)')"
-    LAST_OK=false; restore
-    if [ "$LAST_OK" = true ]; then _bok=$((_bok + 1)); else _bfail=$((_bfail + 1)); fi
+    thermal_pace
+    _run_item restore "$_rcf" "$_r"
+    _lok=false; _lcode=ERR_UNKNOWN; read -r _lok _lcode < "$_rcf" 2>/dev/null
+    [ "$_lok" = true ] || _lok=false; [ -n "$_lcode" ] || _lcode=ERR_UNKNOWN
+    if [ "$_lok" = true ]; then _bok=$((_bok + 1)); else _bfail=$((_bfail + 1)); _bcodes="$_bcodes $_lcode"; fi
   done 3< "$_lst"
-  rm -f "$_lst"; ARGS="$_base"; IN_BATCH=0
-  audit "batch restore done: $_bok ok, $_bfail failed"
-  batch_finish "$_bok" "$BATCH_N" "$_bfail"; }
+  rm -f "$_lst" "$_rcf"; ARGS="$_base"; IN_BATCH=0
+  _bfails="$(printf '%s\n' $_bcodes | "$JQ" -R -s -c 'split("\n")|map(select(length>0))|group_by(.)|map({key:.[0],value:length})|from_entries' 2>/dev/null)"
+  case "$_bfails" in ''|null) _bfails='{}' ;; esac
+  _bfree="$(fs_free "$(backups_dir "$_bu")" 2>/dev/null)"; case "$_bfree" in ''|*[!0-9]*) _bfree=0 ;; esac
+  audit "batch restore done: $_bok ok, $_bfail failed, fails=$_bfails"
+  batch_finish "$_bok" "$BATCH_N" "$_bfail" "$_bfails" "$_bfree"; }
 
 # --- portable config export / import ----------------------------------------------------
 # Carry the module's own state (config + jobs + destinations + credentials + keys) to a new
@@ -2379,6 +2639,8 @@ case "$VERB" in
   cloud-fetch)     do_cloud_fetch ;;
   path-backup)     do_path_backup ;;
   path-restore)    do_path_restore ;;
+  adb-backup)      do_adb_backup ;;
+  adb-restore)     do_adb_restore ;;
   telegram-pull)   do_telegram_pull ;;
   *)               finish false ERR_UNKNOWN_VERB ;;
 esac

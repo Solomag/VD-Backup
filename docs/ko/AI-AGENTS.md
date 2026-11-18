@@ -1,4 +1,4 @@
-> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../in/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · 한국어 · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
+> **Languages:** [English](../AI-AGENTS.md) · [العربية](../ar/AI-AGENTS.md) · [Čeština](../cs/AI-AGENTS.md) · [Deutsch](../de/AI-AGENTS.md) · [Español](../es/AI-AGENTS.md) · [فارسی](../fa/AI-AGENTS.md) · [Français](../fr/AI-AGENTS.md) · [हिन्दी](../hi/AI-AGENTS.md) · [Bahasa Indonesia](../id/AI-AGENTS.md) · [Italiano](../it/AI-AGENTS.md) · [日本語](../ja/AI-AGENTS.md) · 한국어 · [Nederlands](../nl/AI-AGENTS.md) · [Polski](../pl/AI-AGENTS.md) · [Português](../pt/AI-AGENTS.md) · [Русский](../ru/AI-AGENTS.md) · [Svenska](../sv/AI-AGENTS.md) · [ไทย](../th/AI-AGENTS.md) · [Türkçe](../tr/AI-AGENTS.md) · [Українська](../uk/AI-AGENTS.md) · [Tiếng Việt](../vi/AI-AGENTS.md) · [中文](../zh/AI-AGENTS.md)
 
 ---
 
@@ -75,6 +75,12 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `special-list` | `{}` | `{ok,backups:[{ref,created_at,categories}]}` |
 | `path-backup` | `{path,compression?,password?}` | `{ok,opid}` 임의의 절대 경로를 `.paths/` 아래에 `tar.zst`+`manifest.json`로 백업 (detached) |
 | `path-restore` | `{ref,confirm:true,password?}` | `{ok,opid}` 경로 백업을 원래 위치로 복원 (`confirm`이 이를 막음; detached) |
+| `adb-list` | `{path?}` | `{ok,entries:[{name,type,size,has_children}]}` /data/adb 트리의 한 지연 레벨 (기본 `/data/adb`), 선택기용. |
+| `adb-du` | `{path}` | `{ok,size}` /data/adb 하위 트리 하나의 재귀적 바이트 크기, 요청 시. |
+| `adb-backup` | `{paths?,exclude?,compression?,encrypt_data?,password?}` | `{ok,opid}` /data/adb 백업 - 전체 (`paths` 생략) 또는 선택한 하위 경로 - 파일별 SELinux/소유자 충실도로, `.adb/` 아래 (detached) |
+| `adb-restore` | `{ref,paths?,confirm:true,password?}` | `{ok,opid}` /data/adb 백업을 살아 있는 트리 위에 복원 - 전체 또는 선택한 하위 경로 - 각 파일의 컨텍스트를 유지하며 (전면적 chcon은 절대 아님); `confirm`이 이를 막음 (detached) |
+| `adb-backups` | `{}` | `{ok,backups:[{ref,created_at,mode,paths,encryption}]}` /data/adb 파일 시스템 백업. |
+| `adb-index` | `{ref}` | `{ok,lines:[...]}` 백업의 저장된 상세 파일 목록, 복원 트리 선택기용. |
 | `sysmount-status` | `{}` | `{ok,nomount,nm,ksu,live_capable}` |
 | `sysmount-add` / `sysmount-del` / `sysmount-list` | `{package,priv?}` | 설치된 앱을 시스템 앱으로 마운트 (시스템리스 서브모듈; NoMount로 라이브, 아니면 다음 부팅 시) |
 | `companion-status` / `companion-install` | `{}` | Google Drive 컴패니언 상태 / 온디맨드 설치 |
@@ -102,6 +108,7 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `config-exports` | `{}` | `{ok,exports:[{ref,name,size}]}` 가져올 수 있는 암호화된 구성 파일을 나열합니다. |
 | `wipe-credentials` | `{}` | `{ok,wiped}` 저장된 원격 비밀번호와 기기 암호화 키를 제거합니다. 대상, 작업, 백업은 유지됩니다. |
 | `log-prune` | `{}` | `{ok}` 오래전에 완료된 작업 로그를 정리하고 감사 추적을 제한하며 오래된 아이콘을 제거합니다(부팅 서비스가 호출). |
+| `sanitize` | `{}` | `{ok}` 모든 Android 사용자에서 백업 폴더의 가시성(0755)을 다시 적용하여, 원시 root 복사본이나 v1.03.2 이전 백업이 소유자 전용으로 남긴 폴더를 파일 관리자가 열 수 있게 합니다. |
 
 ### `progress` 필드
 
@@ -206,6 +213,14 @@ config에서, 설치 시점에 installer를 Play Store로 설정)와 `"deep_spoo
 뜨거운 동안에는 스케줄된 작업이 건너뛰어집니다. 모든 게이트에 의한 건너뜀은
 `wifi` / `charging` / `battery` / `days` / `thermal` 중 하나의 `reason`과 함께
 `op:"scheduler-gated"`로 audit trail에 기록됩니다.
+
+### 배치 안정성
+
+배치(`packages`가 있는 `backup`, `refs`가 있는 `restore`)는 각 앱을 자체 서브셸에서 실행하므로, 한 앱이 나머지를 망가뜨릴 수 없습니다:
+
+- **`batch_app_timeout`**(설정, 초, 기본값 `1800`, `0`이면 비활성화): 앱이 이보다 오래 걸리면 해당 프로세스 트리가 종료되고 `ERR_TIMEOUT`으로 기록되며 배치가 계속되므로, 멈춘 앱 하나가 전체 실행을 절대 멈추지 않습니다.
+- **부분 결과**: 종료 기록에는 `ok`, `of` 중 `n`, 실패 이유를 나타내는 `fails` 집계 `{code:count}`(예: `{"ERR_NO_SPACE":24}`), 그리고 `free`(백업 파일 시스템의 남은 바이트)가 포함됩니다. 부분 배치는 `ERR_BATCH_PARTIAL`이며, 원인 불명의 오류가 아닙니다.
+- **열 페이싱**(설정 `thermal_throttle`, 기본 켜짐): 앱 사이에 기기가 뜨거우면 워커가 식히기 위해 일시정지하고 `cooling` 진행 단계를 내보내므로, 긴 실행이 기기를 과열시키지 않습니다.
 
 ### `remote-add` 인자
 
@@ -312,6 +327,25 @@ Mirror 복원)은 먼저 활성 전송 수단을 확인하고, 일치하지 않�
   `special-restore`처럼 강한 마찰 장치입니다. 유효한 경로 백업이 아닌 `ref`는 `ERR_BAD_REF`로
   실패합니다.
 - 둘 다 **detached**로 실행됩니다. 반환된 `opid`로 `progress`를 폴링하세요.
+
+### /data/adb 파일 시스템 백업
+
+`adb-backup` / `adb-restore`는 /data/adb 아래의 root 환경(모듈, 그 데이터와 설정)을 백업하고
+복원하며, 지연 트리 선택기로 구동됩니다(`adb-list`는 한 번에 한 레벨, `adb-du`는 폴더 크기를
+요청 시).
+
+- 양쪽 끝에서 전체 또는 선택적: 모든 것에는 `paths`를 생략하거나, 선택한 하위 경로를 전달합니다
+  (/data/adb 기준 상대). 복원은 동일한 `paths`를 취합니다.
+- **파일별 충실도:** 아카이브는 각 파일의 SELinux 컨텍스트, 소유자, xattrs를 보존하며, 복원은
+  그것에 의존합니다 - 전면적 `chcon`을 절대 적용하지 않습니다. 그것은 /data/adb의 이질적인
+  컨텍스트를 평탄화하고 root를 망가뜨립니다. `adb-restore`는 살아 있는 트리 위에 추출합니다; 결코
+  지우지 않습니다.
+- 자기 참조: 백업 자신의 출력과 모듈의 staging은 제외되므로, 백업이 자기 자신을 포함하는 일은
+  결코 없습니다.
+- `adb-index`는 백업의 저장된 파일 목록을 반환하여 복원이 그 트리를 보여줄 수 있게 합니다; UI 선택은
+  전적으로 `paths`로 표현됩니다(완전히 체크된 폴더는 하나의 경로; 부분적으로 체크된 폴더는 체크된
+  자식으로 내려가므로 exclude 목록이 필요 없습니다).
+- `adb-restore`는 `"confirm": true`가 필요합니다(강한 마찰 장치); 둘 다 detached로 실행되며, `progress`를 폴링하세요.
 
 ### `update-check`
 

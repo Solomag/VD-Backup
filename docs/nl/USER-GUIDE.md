@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · Nederlands · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · [Français](../fr/USER-GUIDE.md) · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · Nederlands · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -24,6 +24,7 @@ plek, met niets om te "toestaan".
   - [5.5 Verify en dry-run](#55-verify-en-dry-run)
   - [5.6 Speciale back-ups (berichten, belgeschiedenis, Wi-Fi, Bluetooth, agenda, achtergrond, DNS, systeeminstellingen)](#56-speciale-back-ups-berichten-belgeschiedenis-wi-fi-bluetooth-agenda-achtergrond-dns-systeeminstellingen)
   - [5.7 Zelfstandige back-ups van mappen en bestanden](#57-zelfstandige-back-ups-van-mappen-en-bestanden)
+  - [5.8 Systeembestanden (/data/adb)](#58-systeembestanden-dataadb)
 - [6. Een backup herstellen](#6-een-backup-herstellen)
 - [7. Bestemmingen: lokaal en op afstand](#7-bestemmingen-lokaal-en-op-afstand)
   - [7.1 Je instellingen back-uppen](#71-je-instellingen-back-uppen)
@@ -333,6 +334,25 @@ backups-map.
 - Net als app-backups draaien pad-back-ups en -herstelbewerkingen **losgekoppeld** met live
   voortgang, gebruiken ze de door jou gekozen compressie en kunnen ze met een wachtwoordzin
   worden versleuteld.
+
+### 5.8 Systeembestanden (`/data/adb`)
+
+`/data/adb` is waar je root-manager de geïnstalleerde modules, hun gegevens en hun configuratie
+bewaart - de root-omgeving zelf. VDBackup kan hiervan een back-up maken, geheel of gedeeltelijk,
+zodat je je root-setup kunt meenemen over een wipe of een ROM-wissel heen.
+
+- **Totaal of selectief.** Maak een back-up van heel `/data/adb`, of open de bestandsboom en kies
+  precies de mappen en bestanden die je wilt; een half aangevinkte map bevat alleen de kinderen die
+  je hebt aangevinkt.
+- **Alles blijft in jouw handen.** De boom is neutraal - niets is vooraf geselecteerd of verborgen,
+  behalve de eigen werkbestanden van VDBackup, die anders gewoon zichzelf zouden back-uppen.
+  Compressie en versleuteling zijn dezelfde draagbare opties als bij elke andere back-up.
+- **Herstellen houdt root werkend.** Elk bestand wordt teruggeschreven met zijn oorspronkelijke
+  eigenaar, groep, modus en SELinux-context, één bestand per keer, over de levende boom (nooit een
+  totale wipe), zodat de verschillende contexten onder `/data/adb` behouden blijven en je
+  root-manager nog steeds opstart.
+- **Geavanceerd.** Dit raakt de root-omgeving rechtstreeks. Herstellen is destructief en vraagt je
+  om te bevestigen; een selectief herstel schrijft alleen de paden terug die je hebt gekozen.
 
 ## 6. Een backup herstellen
 

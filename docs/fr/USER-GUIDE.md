@@ -1,4 +1,4 @@
-> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · Français · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../in/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
+> **Languages:** [English](../USER-GUIDE.md) · [العربية](../ar/USER-GUIDE.md) · [Čeština](../cs/USER-GUIDE.md) · [Deutsch](../de/USER-GUIDE.md) · [Español](../es/USER-GUIDE.md) · [فارسی](../fa/USER-GUIDE.md) · Français · [हिन्दी](../hi/USER-GUIDE.md) · [Bahasa Indonesia](../id/USER-GUIDE.md) · [Italiano](../it/USER-GUIDE.md) · [日本語](../ja/USER-GUIDE.md) · [한국어](../ko/USER-GUIDE.md) · [Nederlands](../nl/USER-GUIDE.md) · [Polski](../pl/USER-GUIDE.md) · [Português](../pt/USER-GUIDE.md) · [Русский](../ru/USER-GUIDE.md) · [Svenska](../sv/USER-GUIDE.md) · [ไทย](../th/USER-GUIDE.md) · [Türkçe](../tr/USER-GUIDE.md) · [Українська](../uk/USER-GUIDE.md) · [Tiếng Việt](../vi/USER-GUIDE.md) · [中文](../zh/USER-GUIDE.md)
 
 ---
 
@@ -12,28 +12,29 @@ endroit, sans rien à "autoriser".
 
 ## Table des matières
 
-- [1. What VDBackup is](#1-what-vdbackup-is)
-- [2. Requirements](#2-requirements)
-- [3. Install and first run](#3-install-and-first-run)
-- [4. The WebUI tour](#4-the-webui-tour)
-- [5. Making a backup](#5-making-a-backup)
-  - [5.1 Choosing what to back up](#51-choosing-what-to-back-up)
-  - [5.2 Backup modes: Full, Snapshot, Mirror](#52-backup-modes-full-snapshot-mirror)
+- [1. Ce qu'est VDBackup](#1-ce-quest-vdbackup)
+- [2. Prérequis](#2-prérequis)
+- [3. Installation et premier lancement](#3-installation-et-premier-lancement)
+- [4. Visite de la WebUI](#4-visite-de-la-webui)
+- [5. Créer une sauvegarde](#5-créer-une-sauvegarde)
+  - [5.1 Choisir ce qu'il faut sauvegarder](#51-choisir-ce-quil-faut-sauvegarder)
+  - [5.2 Modes de sauvegarde : Full, Snapshot, Mirror](#52-modes-de-sauvegarde--full-snapshot-mirror)
   - [5.3 Compression](#53-compression)
-  - [5.4 Encryption](#54-encryption)
-  - [5.5 Verify and dry-run](#55-verify-and-dry-run)
-  - [5.6 Special backups (messages, call log, Wi-Fi, Bluetooth, calendar, wallpaper, DNS, system settings)](#56-special-backups-messages-call-log-wi-fi-bluetooth-calendar-wallpaper-dns-system-settings)
-  - [5.7 Standalone folder and file backups](#57-standalone-folder-and-file-backups)
-- [6. Restoring a backup](#6-restoring-a-backup)
-- [7. Destinations: local and remote](#7-destinations-local-and-remote)
+  - [5.4 Chiffrement](#54-chiffrement)
+  - [5.5 Verify et dry-run](#55-verify-et-dry-run)
+  - [5.6 Sauvegardes spéciales (messages, journal d'appels, Wi-Fi, Bluetooth, calendrier, fond d'écran, DNS, réglages système)](#56-sauvegardes-spéciales-messages-journal-dappels-wi-fi-bluetooth-calendrier-fond-décran-dns-réglages-système)
+  - [5.7 Sauvegardes autonomes de dossiers et de fichiers](#57-sauvegardes-autonomes-de-dossiers-et-de-fichiers)
+  - [5.8 Fichiers système (/data/adb)](#58-fichiers-système-dataadb)
+- [6. Restaurer une sauvegarde](#6-restaurer-une-sauvegarde)
+- [7. Destinations : locale et distante](#7-destinations--locale-et-distante)
   - [7.1 Sauvegarder vos réglages](#71-sauvegarder-vos-réglages)
-- [8. Scheduling and retention](#8-scheduling-and-retention)
-- [9. Migrating in: importing Neo-Backup and Android-DataBackup](#9-migrating-in-importing-neo-backup-and-android-databackup)
-- [10. SSAID (device ANDROID_ID)](#10-ssaid-device-android_id)
-- [11. Portability: opening backups on a PC](#11-portability-opening-backups-on-a-pc)
-- [12. Driving VDBackup from an AI assistant](#12-driving-vdbackup-from-an-ai-assistant)
-- [13. Troubleshooting and FAQ](#13-troubleshooting-and-faq)
-- [14. Uninstalling](#14-uninstalling)
+- [8. Planification et rétention](#8-planification-et-rétention)
+- [9. Migrer : importer Neo-Backup et Android-DataBackup](#9-migrer--importer-neo-backup-et-android-databackup)
+- [10. SSAID (ANDROID_ID de l'appareil)](#10-ssaid-android_id-de-lappareil)
+- [11. Portabilité : ouvrir les sauvegardes sur un PC](#11-portabilité--ouvrir-les-sauvegardes-sur-un-pc)
+- [12. Piloter VDBackup depuis un assistant IA](#12-piloter-vdbackup-depuis-un-assistant-ia)
+- [13. Dépannage et FAQ](#13-dépannage-et-faq)
+- [14. Désinstallation](#14-désinstallation)
 
 ---
 
@@ -311,6 +312,25 @@ dossier `.paths` dans votre répertoire de sauvegardes.
 - Comme les sauvegardes d'apps, les sauvegardes et restaurations de chemin s'exécutent **détachées**
   avec une progression en direct, utilisent la compression que vous choisissez, et peuvent être
   chiffrées avec une phrase secrète.
+
+### 5.8 Fichiers système (`/data/adb`)
+
+`/data/adb` est l'endroit où votre gestionnaire root conserve les modules installés, leurs données et
+leur configuration - l'environnement root lui-même. VDBackup peut le sauvegarder, en entier ou en partie,
+afin que vous emportiez votre configuration root à travers un effacement ou un changement de ROM.
+
+- **Total ou sélectif.** Sauvegardez tout `/data/adb`, ou ouvrez l'arborescence de fichiers et choisissez
+  exactement les dossiers et fichiers que vous voulez ; un dossier à moitié coché n'inclut que les enfants
+  que vous avez cochés.
+- **Tout reste entre vos mains.** L'arbre est neutre - rien n'est présélectionné ni masqué, hormis les
+  fichiers de travail propres à VDBackup, qui sinon ne sauvegarderaient que lui-même. La compression et le
+  chiffrement sont les mêmes options portables que pour toute autre sauvegarde.
+- **La restauration garde root fonctionnel.** Chaque fichier est réécrit avec son propriétaire, son groupe,
+  son mode et son contexte SELinux d'origine, un fichier à la fois, sur l'arbre vivant (jamais un effacement
+  général), de sorte que les contextes différents sous `/data/adb` sont préservés et que votre gestionnaire
+  root démarre toujours.
+- **Avancé.** Ceci touche directement l'environnement root. La restauration est destructrice et vous demande
+  de confirmer ; une restauration sélective ne réécrit que les chemins que vous avez choisis.
 
 ## 6. Restaurer une sauvegarde
 

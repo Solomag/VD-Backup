@@ -32,7 +32,7 @@
   <a href="https://xdaforums.com/t/VD-Backup.4807267/">XDA thread</a>
 </p>
 
-> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.in.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
+> **Languages:** [English](README.md) · [العربية](README.ar.md) · [Čeština](README.cs.md) · [Deutsch](README.de.md) · [Español](README.es.md) · [فارسی](README.fa.md) · [Français](README.fr.md) · [हिन्दी](README.hi.md) · [Bahasa Indonesia](README.id.md) · [Italiano](README.it.md) · [日本語](README.ja.md) · [한국어](README.ko.md) · [Nederlands](README.nl.md) · [Polski](README.pl.md) · [Português](README.pt.md) · [Русский](README.ru.md) · [Svenska](README.sv.md) · [ไทย](README.th.md) · [Türkçe](README.tr.md) · [Українська](README.uk.md) · [Tiếng Việt](README.vi.md) · [中文](README.zh.md)
 
 | Home | Apps | Schedule |
 |:---:|:---:|:---:|
@@ -72,6 +72,9 @@ VDBackup은 앱과 그 데이터를 백업하고 복원하는 root **WebUI 모�
   한 번에 모두 복원합니다. 백업을 삭제하고 모든 파괴적 동작의 활동/감사 로그를 보관합니다.
 - **특수 백업:** 메시지(SMS/MMS/RCS), 연락처와 통화 기록, Wi-Fi와 Bluetooth. PC에서 열 수 있는
   선택적 이식형 JSON 내보내기와 함께.
+- **시스템 파일 (`/data/adb`):** root 환경 자체 - 모듈, 그 데이터와 구성 - 을 백업합니다. 전체를,
+  또는 파일 트리에서 고른 하위 트리를 대상으로 할 수 있고, 각 파일은 원래 소유자와 SELinux
+  컨텍스트로 복원되어 root가 계속 작동합니다. 고급; 당신이 고른 것만.
 - **스케줄링 + 자동화:** 단일 앱, 집합, 또는 모든 앱을 대상으로 하는 반복 **백업 또는 복원** 작업과
   keep-N 정리, 옵트인 방식의 설치/업데이트 시 자동 백업 및 제외 앱 목록.
 - **설치 출처:** 복원된 앱은 기본적으로 Play Store를 설치 출처로 보고합니다(전환 가능). 고급
@@ -123,6 +126,14 @@ JSON으로 말하고 (`helper.sh`의 모든 verb는 하나의 JSON 객체를 반
 관리할 수 있습니다, 전체 제어 표면은 **[docs/AI-AGENTS.md](docs/AI-AGENTS.md)**를, 기여는
 [CONTRIBUTING.md](CONTRIBUTING.md#ai-contributors-welcome)를 참고하세요.
 
+## 증분 업데이트 (VDLU)
+
+VD Backup은 **VDLU** 엔진을 포함합니다 (`vdlu/`에 내장). 모듈은 전체 `.zip`을 다시 내려받는 대신 변경된 파일만 가져와 자신을 업데이트합니다 (콘텐츠 주소 지정 블롭 + 서명된 `manifest.json`). **강화된** 프로파일: ed25519 서명이 필수이며 다운그레이드는 차단됩니다. 전체 `.zip`은 폴백으로 계속 유효합니다.
+
+- **LIVE 전용** (재부팅 없음): 업데이트는 `service.sh`를 통해 다음 부팅 시 백그라운드로 적용되며, 도달 가능한 피드가 없으면 아무 작업도 하지 않습니다.
+- **상태**는 `/data/adb/vdbackup/vdlu/`에 있으며, 모듈 외부에 있으므로 재플래시 후에도 유지됩니다.
+- **WebUI:** 진행 토스트와 취소가 있는 **업데이트** 패널이며, 자동 업데이트는 옵트인입니다.
+
 ## 문서
 
 - **[Wiki](https://github.com/VD171/VD-Backup/wiki/ko-Home)**: 온라인에서 둘러볼 수 있는 문서.
@@ -144,6 +155,8 @@ JSON으로 말하고 (`helper.sh`의 모든 verb는 하나의 JSON 객체를 반
 - **[VDGoogle](https://github.com/VD171/VD-Google)**: 여러분의 Google 서비스 (RCS, Wallet, Play Integrity 증명)를 인터넷 없이 기기에서 읽습니다.
 - **[COPG-VD](https://github.com/VD171/COPG-VD)**: 새 핑거프린트를 일관되고 정합성 있는 프로필로 바꾸는 기기 스푸퍼.
 - **[VD-dropbear](https://github.com/VD171/VD-dropbear)**: 독립 실행형 루트 SSH 데몬 (Dropbear).
+
+Telegram backend: **[@VictorGabriel7Dev/mtproto-store](https://github.com/VictorGabriel7Dev/mtproto-store)**.
 
 ## 연락처
 
