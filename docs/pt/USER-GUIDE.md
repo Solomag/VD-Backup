@@ -53,7 +53,7 @@ para ligar. Você abre a WebUI, escolhe o que fazer backup, e executa.
 
 Tudo o que o VDBackup produz usa **formatos padrão** (tar, gzip, zstd, age, zip,
 restic), então seus backups nunca ficam presos ao módulo e nunca ficam atrelados ao seu
-dispositivo específico. Veja a [seção 11](#seção-11).
+dispositivo específico. Veja a [seção 11](#11-portabilidade-abrindo-backups-num-pc).
 
 ## Capturas de tela
 
@@ -68,7 +68,7 @@ dispositivo específico. Veja a [seção 11](#seção-11).
 - **Um dispositivo Android rooteado** gerenciado por **KernelSU**, **APatch** ou **Magisk**.
   O VDBackup é instalado como um módulo a partir desse gerenciador.
 - Armazenamento livre suficiente para seus backups (backups locais vivem sob o diretório de
-  estado do módulo; veja a [seção 3](#seção-3)).
+  estado do módulo; veja a [seção 3](#3-instalação-e-primeira-execução)).
 - Nada mais. O módulo embarca todos os binários de que precisa (tar, zstd, lz4, rclone,
   rsync, ssh, restic), então **backup e restauração locais funcionam totalmente offline**. Só
   destinos de nuvem falam com a rede.
@@ -83,7 +83,7 @@ eles degradam graciosamente quando não estão disponíveis no seu dispositivo.
 2. No seu gerenciador KernelSU / APatch / Magisk, faça flash do zip do módulo como qualquer outro
    módulo.
 3. Ele é usável imediatamente, **sem precisar de reboot**. (Um reboot só é relevante
-   ao restaurar SSAID; veja a [seção 10](#seção-10).)
+   ao restaurar SSAID; veja a [seção 10](#10-ssaid-android_id-do-dispositivo).)
 4. Abra a **WebUI** do módulo a partir do gerenciador. Essa é a interface inteira.
 
 **Qual edição baixar.** Cada release vem como várias edições de zip flasheáveis, então você
@@ -149,7 +149,7 @@ A WebUI é organizada em algumas abas:
   você restaura, roda um restore-test, apaga um backup, ou importa backups do Neo-Backup ou do
   Android-DataBackup.
 - **Destinations**: gerencie para onde os backups vão: armazenamento local além de quaisquer
-  destinos remotos que você adicionar (veja a [seção 7](#seção-7)). Você pode
+  destinos remotos que você adicionar (veja a [seção 7](#7-destinos-local-e-remoto)). Você pode
   testar um destino aqui antes de depender dele.
 - **Settings**: um toggle de tema claro/escuro, um seletor de cor de destaque (presets, uma cor
   personalizada, ou reset), um seletor de idioma (a interface é renderizada da direita para a
@@ -157,7 +157,7 @@ A WebUI é organizada em algumas abas:
   para redimensionar toda a interface (cabeçalho, conteúdo e navegação inferior juntos) de 85% a 120% (100% é o padrão), para
   telas de diferentes densidades de pixels, padrões para novos
   jobs (compressão padrão, verify ligado/desligado, criptografia padrão), a política de rede para
-  transferências de nuvem (veja a [seção 7](#seção-7)), o backup automático e a lista de apps
+  transferências de nuvem (veja a [seção 7](#7-destinos-local-e-remoto)), o backup automático e a lista de apps
   excluídos, a opção de fonte de instalação, a chave de criptografia,
   e agendamento. As configurações de ligar/desligar usam interruptores de alternância no estilo Android.
 - **About**: versão, links, os projetos irmãos (See also), o manifesto de auditoria dos binários embarcados, e uma ação **Check for updates** que informa se uma versão mais nova foi publicada (com suas notas de versão). Você instala qualquer atualização pelo seu gerenciador root, do mesmo jeito que você instalou o módulo.
@@ -299,7 +299,7 @@ Para mensagens, registro de chamadas e contatos, uma **cópia portátil** (JSON 
 é escrita, então você tem uma cópia multi-dispositivo que pode ler num PC sem o módulo.
 
 **Configurações do sistema é opt-in e sobrescreve as configurações do seu dispositivo na
-restauração.** Assim como o SSAID (veja a [seção 10](#seção-10)), a categoria **Configurações
+restauração.** Assim como o SSAID (veja a [seção 10](#10-ssaid-android_id-do-dispositivo)), a categoria **Configurações
 do sistema** é a mais sensível: restaurá-la sobrescreve as configurações de todo o dispositivo,
 então ela fica desligada a menos que você a selecione deliberadamente, pede que você reconheça
 primeiro, e é escrita no log de atividade.
@@ -621,7 +621,7 @@ no módulo no build; nada é buscado para o dispositivo em runtime. Só destinos
 
 **Meu backup vai restaurar num celular diferente?** Sim, os backups são portáveis e não
 atrelados ao hardware do dispositivo. (O SSAID é a única exceção específica de dispositivo, e é opt-in
-e aplicado-no-reboot; veja a [seção 10](#seção-10).)
+e aplicado-no-reboot; veja a [seção 10](#10-ssaid-android_id-do-dispositivo).)
 
 **Meu backup criptografado não abre, eu perdi a passphrase.** Não há backdoor de recuperação
 por design; a passphrase é o que protege o backup. Mantenha-a segura.

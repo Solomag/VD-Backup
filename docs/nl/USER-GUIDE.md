@@ -53,7 +53,7 @@ te schakelen. Je opent de WebUI, kiest wat je back-upt en voert het uit.
 
 Alles wat VDBackup produceert gebruikt **standaardformaten** (tar, gzip, zstd, age, zip,
 restic), zodat je backups nooit vastzitten aan de module en nooit gebonden zijn aan jouw
-specifieke apparaat. Zie [sectie 11](#sectie-11).
+specifieke apparaat. Zie [sectie 11](#11-overdraagbaarheid-backups-openen-op-een-pc).
 
 ## Schermafbeeldingen
 
@@ -68,7 +68,7 @@ specifieke apparaat. Zie [sectie 11](#sectie-11).
 - **Een geroot Android-apparaat** beheerd door **KernelSU**, **APatch** of **Magisk**.
   VDBackup wordt als module geïnstalleerd vanuit die beheerder.
 - Voldoende vrije opslag voor je backups (lokale backups bevinden zich onder de
-  statusmap van de module; zie [sectie 3](#sectie-3)).
+  statusmap van de module; zie [sectie 3](#3-installeren-en-eerste-keer-draaien)).
 - Niets anders. De module bundelt alle binaries die het nodig heeft (tar, zstd, lz4, rclone,
   rsync, ssh, restic), zodat **lokale backup en restore volledig offline werken**. Alleen
   cloudbestemmingen praten met het netwerk.
@@ -82,7 +82,7 @@ degraderen gracieus wanneer ze op jouw apparaat niet beschikbaar zijn.
 1. Download de nieuwste `VD-Backup-vX.Y.zip`-release.
 2. Flash in je KernelSU-/APatch-/Magisk-beheerder de module-zip zoals elke andere module.
 3. Het is onmiddellijk bruikbaar, **geen herstart nodig**. (Een herstart is alleen ooit
-   relevant bij het herstellen van SSAID; zie [sectie 10](#sectie-10).)
+   relevant bij het herstellen van SSAID; zie [sectie 10](#10-ssaid-apparaat-android_id).)
 4. Open de **WebUI** van de module vanuit de beheerder. Dat is de volledige interface.
 
 **Welke editie je downloadt.** Elke release wordt geleverd als meerdere flashbare zip-edities,
@@ -148,7 +148,7 @@ De WebUI is georganiseerd in enkele tabbladen:
   ook, voer je een restore-test uit, verwijder je een backup of importeer je backups uit
   Neo-Backup of Android-DataBackup.
 - **Bestemmingen**: beheer waar backups naartoe gaan: lokale opslag plus eventuele
-  remote-bestemmingen die je toevoegt (zie [sectie 7](#sectie-7)). Je
+  remote-bestemmingen die je toevoegt (zie [sectie 7](#7-bestemmingen-lokaal-en-op-afstand)). Je
   kunt een bestemming hier testen voordat je erop vertrouwt.
 - **Instellingen**: een licht/donker-themaschakelaar, een accentkleurkiezer (presets, een aangepaste
   kleur, of resetten) en een taalkiezer (de interface wordt rechts-naar-links weergegeven voor
@@ -156,7 +156,7 @@ De WebUI is georganiseerd in enkele tabbladen:
   (header, inhoud en onderste navigatie samen) te herschalen van 85% tot 120% (100% is de standaard), voor schermen met
   verschillende pixeldichtheden, standaardwaarden voor
   nieuwe taken (standaardcompressie, verify aan/uit, standaardversleuteling), het netwerkbeleid
-  voor cloudoverdrachten (zie [sectie 7](#sectie-7)), automatische back-up en de lijst met uitgesloten
+  voor cloudoverdrachten (zie [sectie 7](#7-bestemmingen-lokaal-en-op-afstand)), automatische back-up en de lijst met uitgesloten
   apps, de installatiebron-optie, de
   versleutelingssleutel en het inplannen. Aan/uit-instellingen gebruiken schakelaars in Android-stijl.
 - **Over**: versie, links, de zusterprojecten (Zie ook), het auditmanifest van de gebundelde binaries, en een actie **Check for updates** die meldt of er een nieuwere versie is gepubliceerd (met de bijbehorende release-notes). Elke update installeer je via je root-manager, net zoals je de module hebt geflasht.
@@ -306,7 +306,7 @@ JSON) geschreven, zodat je een apparaatoverschrijdende kopie hebt die je zonder 
 pc kunt lezen.
 
 **Systeeminstellingen is opt-in en overschrijft bij herstel je apparaatinstellingen.** Net als
-SSAID (zie [sectie 10](#sectie-10)) is de categorie **Systeeminstellingen** de gevoeligste: het
+SSAID (zie [sectie 10](#10-ssaid-apparaat-android_id)) is de categorie **Systeeminstellingen** de gevoeligste: het
 herstellen ervan overschrijft je apparaatbrede instellingen, dus het staat uit tenzij je het
 bewust selecteert, vraagt je eerst om erkenning en wordt naar het activiteitenlogboek geschreven.
 
@@ -636,7 +636,7 @@ gebruikt.
 
 **Herstelt mijn backup op een andere telefoon?** Ja, backups zijn overdraagbaar en niet
 gebonden aan apparaathardware. (SSAID is de enige apparaatspecifieke uitzondering, en het is
-opt-in en wordt bij herstart toegepast; zie [sectie 10](#sectie-10).)
+opt-in en wordt bij herstart toegepast; zie [sectie 10](#10-ssaid-apparaat-android_id).)
 
 **Mijn versleutelde backup wil niet openen, ik ben de wachtwoordzin kwijt.** Er is door het
 ontwerp geen herstelachterdeur; de wachtwoordzin is wat de backup beschermt. Bewaar hem veilig.

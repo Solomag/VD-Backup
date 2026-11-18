@@ -58,7 +58,8 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (gắn lại sau khi kết nối lại) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | danh sách ứng dụng / lô biểu tượng base64 |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` đặt hoặc xóa tên tùy chỉnh của một bản sao lưu (`note`) và các `tags` tự do; được lưu trong một tệp đi kèm di chuyển cùng bản sao lưu, có thể tìm kiếm từ `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` người dùng Android của thiết bị (đa người dùng). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` thư mục con của một đường dẫn (bộ chọn thư mục). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` sao lưu thư mục/tệp độc lập. |
@@ -224,6 +225,7 @@ Một lô (`backup` với `packages`, `restore` với `refs`) chạy mỗi ứng
 - **`batch_app_timeout`** (cấu hình, giây, mặc định `1800`, `0` tắt): nếu một ứng dụng mất nhiều thời gian hơn, cây tiến trình của nó bị kết thúc, nó được ghi là `ERR_TIMEOUT`, và lô tiếp tục, để một ứng dụng bị kẹt không bao giờ làm đóng băng toàn bộ lần chạy.
 - **Kết quả một phần**: lần ghi kết thúc mang theo `ok`, `n` trên `of`, một bảng `fails` `{code:count}` (ví dụ `{"ERR_NO_SPACE":24}`), và `free` (số byte còn lại trên hệ thống tập tin sao lưu). Một lô một phần là `ERR_BATCH_PARTIAL`, không bao giờ là lỗi mù mờ.
 - **Điều tiết nhiệt** (cấu hình `thermal_throttle`, mặc định bật): giữa các ứng dụng, worker tạm dừng để hạ nhiệt khi thiết bị nóng, phát ra một pha tiến trình `cooling`, để một lần chạy dài không làm thiết bị quá nóng.
+- **Ước tính dung lượng trước khi chạy** (cấu hình `space_preflight`, mặc định bật): trước một lô đến đích cục bộ, dung lượng chưa nén của các ứng dụng đã chọn được cộng lại; nếu nó đã vượt quá dung lượng trống của đích, lô sẽ dừng trước với `ERR_NO_SPACE` (cùng một trường `need`) thay vì lấp đầy đĩa nửa chừng. Bỏ qua đối với các đích từ xa truyền phát.
 
 ### Đối số của `remote-add`
 

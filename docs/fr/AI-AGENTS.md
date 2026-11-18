@@ -58,7 +58,8 @@ destinations cloud (`rclone`/`restic`/ssh) communiquent avec le réseau.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (se rattache après reconnexion) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | liste d'apps / icônes base64 par lot |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` définit ou efface le nom personnalisé d'une sauvegarde (`note`) et les `tags` libres ; stocké dans un fichier annexe qui voyage avec la sauvegarde, interrogeable depuis `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` utilisateurs Android de l'appareil (multi-utilisateur). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` sous-dossiers d'un chemin (sélecteur de dossier). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` sauvegardes autonomes de dossier/fichier. |
@@ -226,6 +227,7 @@ Un lot (`backup` avec `packages`, `restore` avec `refs`) exécute chaque applica
 - **`batch_app_timeout`** (config, secondes, par défaut `1800`, `0` désactive) : si une application dépasse ce délai, son arbre de processus est arrêté, elle est enregistrée comme `ERR_TIMEOUT`, et le lot continue, afin qu'une application bloquée ne gèle jamais toute l'exécution.
 - **Résultat partiel** : l'écriture finale porte `ok`, `n` sur `of`, un décompte `fails` `{code:count}` (p. ex. `{"ERR_NO_SPACE":24}`) et `free` (octets restants sur le système de fichiers des sauvegardes). Un lot partiel est `ERR_BATCH_PARTIAL`, jamais une erreur aveugle.
 - **Régulation thermique** (config `thermal_throttle`, activée par défaut) : entre les applications, le worker fait une pause pour refroidir quand l'appareil est chaud, en émettant une phase de progression `cooling`, afin qu'une longue exécution ne surchauffe pas l'appareil.
+- **Estimation de l'espace avant exécution** (config `space_preflight`, activée par défaut) : avant un lot vers une destination locale, la taille non compressée des applications sélectionnées est additionnée ; si elle dépasse déjà l'espace libre de la destination, le lot s'arrête d'emblée avec `ERR_NO_SPACE` (plus un champ `need`) au lieu de remplir le disque à moitié. Ignoré pour les destinations distantes en flux.
 
 ### Args de `remote-add`
 

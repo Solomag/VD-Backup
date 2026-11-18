@@ -52,7 +52,7 @@ thuận, và không có gì phải bật lên. Bạn mở WebUI, chọn những 
 
 Mọi thứ VDBackup tạo ra đều dùng **các định dạng chuẩn** (tar, gzip, zstd, age, zip,
 restic), nên các bản sao lưu của bạn không bao giờ bị khóa vào mô-đun và không bao giờ
-gắn với thiết bị cụ thể của bạn. Xem [phần 11](#phần-11).
+gắn với thiết bị cụ thể của bạn. Xem [phần 11](#11-tính-di-động-mở-các-bản-sao-lưu-trên-pc).
 
 ## Ảnh chụp màn hình
 
@@ -67,7 +67,7 @@ gắn với thiết bị cụ thể của bạn. Xem [phần 11](#phần-11).
 - **Một thiết bị Android đã root** được quản lý bởi **KernelSU**, **APatch** hoặc
   **Magisk**. VDBackup được cài như một mô-đun từ trình quản lý đó.
 - Đủ bộ nhớ trống cho các bản sao lưu của bạn (các bản sao lưu cục bộ nằm dưới thư mục
-  trạng thái của mô-đun; xem [phần 3](#phần-3)).
+  trạng thái của mô-đun; xem [phần 3](#3-cài-đặt-và-chạy-lần-đầu)).
 - Không gì khác. Mô-đun đóng gói tất cả các tệp nhị phân nó cần (tar, zstd, lz4, rclone,
   rsync, ssh, restic), nên **sao lưu và khôi phục cục bộ hoạt động hoàn toàn ngoại tuyến**.
   Chỉ các đích đám mây mới nói chuyện với mạng.
@@ -82,7 +82,7 @@ một cách nhẹ nhàng khi chúng không khả dụng trên thiết bị của
 2. Trong trình quản lý KernelSU / APatch / Magisk của bạn, flash zip mô-đun như bất kỳ mô-đun
    nào khác.
 3. Nó dùng được ngay lập tức, **không cần khởi động lại**. (Khởi động lại chỉ liên quan khi
-   khôi phục SSAID; xem [phần 10](#phần-10).)
+   khôi phục SSAID; xem [phần 10](#10-ssaid-android_id-của-thiết-bị).)
 4. Mở **WebUI** của mô-đun từ trình quản lý. Đó là toàn bộ giao diện.
 
 **Nên tải phiên bản nào.** Mỗi bản phát hành đi kèm nhiều phiên bản zip có thể flash, nên bạn chỉ tải
@@ -147,13 +147,13 @@ WebUI được tổ chức thành một vài tab:
   Đây cũng là nơi bạn khôi phục, chạy một bài kiểm tra khôi phục, xóa một bản sao lưu, hoặc
   nhập các bản sao lưu từ Neo-Backup hay Android-DataBackup.
 - **Destinations**: quản lý nơi các bản sao lưu đi đến: bộ nhớ cục bộ cộng với bất kỳ đích
-  từ xa nào bạn thêm (xem [phần 7](#phần-7)). Bạn có thể kiểm tra một đích ở
+  từ xa nào bạn thêm (xem [phần 7](#7-đích-cục-bộ-và-từ-xa)). Bạn có thể kiểm tra một đích ở
   đây trước khi dựa vào nó.
 - **Settings**: một công tắc chủ đề sáng/tối, một bộ chọn màu nhấn (mẫu dựng sẵn, màu tùy chỉnh,
   hoặc đặt lại), một bộ chọn ngôn ngữ (giao diện hiển thị từ phải sang trái cho tiếng Ả Rập
   và tiếng Ba Tư), một thanh trượt tỷ lệ giao diện mà bạn kéo để co giãn toàn bộ
   giao diện (đầu trang, nội dung và thanh điều hướng dưới cùng cùng nhau) từ 85% đến 120% (100% là mặc định), cho các màn hình có mật độ điểm ảnh khác nhau, các mặc định cho công việc mới (nén mặc định, bật/tắt xác minh,
-  mã hóa mặc định), chính sách mạng cho các lần truyền đám mây (xem [phần 7](#phần-7)), sao lưu tự động
+  mã hóa mặc định), chính sách mạng cho các lần truyền đám mây (xem [phần 7](#7-đích-cục-bộ-và-từ-xa)), sao lưu tự động
   và danh sách ứng dụng loại trừ, tùy chọn nguồn cài đặt, khóa mã hóa, và lập lịch. Các thiết lập bật/tắt dùng công tắc gạt kiểu Android.
 - **About**: phiên bản, liên kết, các dự án anh em (See also), tệp kê khai kiểm toán nhị phân đi kèm, và một hành động **Check for updates** báo cáo liệu một phiên bản mới hơn đã được phát hành hay chưa (cùng với ghi chú phát hành của nó). Bạn cài đặt mọi bản cập nhật thông qua trình quản lý root của mình, giống như cách bạn đã flash mô-đun.
 
@@ -298,7 +298,7 @@ hạng mục là:
 ghi, nên bạn có một bản sao xuyên thiết bị mà bạn có thể đọc trên PC mà không cần mô-đun.
 
 **Cài đặt hệ thống là opt-in và ghi đè các cài đặt thiết bị của bạn khi khôi phục.** Giống hệt SSAID
-(xem [phần 10](#phần-10)), hạng mục **Cài đặt hệ thống** là hạng mục nhạy cảm nhất: khôi phục nó sẽ
+(xem [phần 10](#10-ssaid-android_id-của-thiết-bị)), hạng mục **Cài đặt hệ thống** là hạng mục nhạy cảm nhất: khôi phục nó sẽ
 ghi đè các cài đặt trên toàn thiết bị của bạn, nên nó tắt trừ khi bạn chủ ý chọn nó, yêu cầu bạn thừa
 nhận trước, và được ghi vào nhật ký hoạt động.
 
@@ -623,7 +623,7 @@ chúng.
 **Bản sao lưu của tôi có khôi phục được trên một điện thoại khác không?** Có, các bản sao
 lưu di động và không gắn với phần cứng thiết bị. (SSAID là ngoại lệ đặc thù thiết bị duy
 nhất, và nó là opt-in và áp dụng khi khởi động lại; xem
-[phần 10](#phần-10).)
+[phần 10](#10-ssaid-android_id-của-thiết-bị).)
 
 **Bản sao lưu đã mã hóa của tôi không mở được, tôi đã mất cụm mật khẩu.** Không có cửa hậu
 khôi phục theo thiết kế; cụm mật khẩu là thứ bảo vệ bản sao lưu. Hãy giữ nó an toàn.

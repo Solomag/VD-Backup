@@ -53,7 +53,7 @@ ke aktif. Anda membuka WebUI, memilih apa yang dibackup, dan menjalankannya.
 
 Semua yang dihasilkan VDBackup memakai **format standar** (tar, gzip, zstd, age, zip,
 restic), jadi backup Anda tidak pernah terkunci pada modul dan tidak pernah terikat pada
-perangkat spesifik Anda. Lihat [bagian 11](#bagian-11).
+perangkat spesifik Anda. Lihat [bagian 11](#11-portabilitas-membuka-backup-di-pc).
 
 ## Tangkapan layar
 
@@ -68,7 +68,7 @@ perangkat spesifik Anda. Lihat [bagian 11](#bagian-11).
 - **Perangkat Android yang di-root** yang dikelola oleh **KernelSU**, **APatch** atau **Magisk**.
   VDBackup dipasang sebagai modul dari manajer tersebut.
 - Penyimpanan kosong yang cukup untuk backup Anda (backup lokal berada di bawah direktori
-  state modul; lihat [bagian 3](#bagian-3)).
+  state modul; lihat [bagian 3](#3-pasang-dan-jalankan-pertama-kali)).
 - Tidak ada yang lain. Modul membundel semua biner yang dibutuhkannya (tar, zstd, lz4, rclone,
   rsync, ssh, restic), jadi **backup dan restore lokal bekerja sepenuhnya offline**. Hanya tujuan
   cloud yang berkomunikasi dengan jaringan.
@@ -83,7 +83,7 @@ dan mereka merosot dengan mulus saat tidak tersedia di perangkat Anda.
 2. Di manajer KernelSU / APatch / Magisk Anda, flash zip modul seperti modul
    lainnya.
 3. Ia langsung bisa dipakai, **tidak perlu reboot**. (Reboot hanya pernah relevan
-   saat merestore SSAID; lihat [bagian 10](#bagian-10).)
+   saat merestore SSAID; lihat [bagian 10](#10-ssaid-android_id-perangkat).)
 4. Buka **WebUI** modul dari manajer. Itulah seluruh antarmukanya.
 
 **Edisi mana yang diunduh.** Setiap rilis hadir sebagai beberapa edisi zip yang bisa di-flash, jadi Anda hanya mengunduh yang Anda butuhkan. Pilih salah satu:
@@ -131,14 +131,14 @@ WebUI diatur dalam beberapa tab:
   merestore, menjalankan restore-test, menghapus backup, atau mengimpor backup dari Neo-Backup atau
   Android-DataBackup.
 - **Destinations**: kelola ke mana backup pergi: penyimpanan lokal plus tujuan remote mana pun
-  yang Anda tambahkan (lihat [bagian 7](#bagian-7)). Anda bisa
+  yang Anda tambahkan (lihat [bagian 7](#7-tujuan-lokal-dan-remote)). Anda bisa
   menguji sebuah tujuan di sini sebelum mengandalkannya.
 - **Settings**: sakelar tema terang/gelap, pemilih warna aksen (preset, warna kustom,
   atau reset), dan pemilih bahasa (antarmuka ditampilkan dari kanan ke kiri untuk bahasa Arab dan Persia), penggeser skala antarmuka yang Anda seret untuk mengubah skala
   seluruh antarmuka (header, konten, dan navigasi bawah bersama-sama) dari 85% hingga 120% (100% adalah default), untuk layar dengan kepadatan piksel berbeda,
   default untuk pekerjaan
   baru (kompresi default, verify aktif/mati, enkripsi default), kebijakan jaringan untuk
-  transfer cloud (lihat [bagian 7](#bagian-7)), pencadangan otomatis dan daftar aplikasi
+  transfer cloud (lihat [bagian 7](#7-tujuan-lokal-dan-remote)), pencadangan otomatis dan daftar aplikasi
   yang dikecualikan, opsi sumber pemasangan, kunci enkripsi, dan penjadwalan. Pengaturan aktif/mati memakai sakelar bergaya Android.
 - **About**: versi, tautan, proyek saudara (See also), manifest audit biner yang dibundel, dan aksi **Check for updates** yang melaporkan apakah versi yang lebih baru telah dirilis (beserta catatan rilisnya). Anda memasang pembaruan apa pun melalui manajer root Anda, sama seperti saat Anda mem-flash modul.
 
@@ -280,7 +280,7 @@ Untuk pesan, log panggilan, dan kontak, sebuah **salinan portabel** (JSON yang d
 ditulis, sehingga Anda punya salinan lintas-perangkat yang bisa dibaca di PC tanpa modul.
 
 **Pengaturan sistem bersifat opt-in dan menimpa pengaturan perangkat Anda saat restore.** Sama seperti
-SSAID (lihat [bagian 10](#bagian-10)), kategori **Pengaturan sistem** adalah yang paling sensitif:
+SSAID (lihat [bagian 10](#10-ssaid-android_id-perangkat)), kategori **Pengaturan sistem** adalah yang paling sensitif:
 merestorenya menimpa pengaturan di seluruh perangkat Anda, jadi ia mati kecuali Anda sengaja memilihnya,
 meminta Anda mengakui terlebih dahulu, dan ditulis ke log aktivitas.
 
@@ -592,7 +592,7 @@ di modul saat build; tidak ada yang diambil ke perangkat saat runtime. Hanya tuj
 
 **Apakah backup saya akan direstore di ponsel lain?** Ya, backup portabel dan tidak
 terikat pada perangkat keras perangkat. (SSAID adalah satu pengecualian spesifik-perangkat, dan ia opt-in
-dan berlaku-reboot; lihat [bagian 10](#bagian-10).)
+dan berlaku-reboot; lihat [bagian 10](#10-ssaid-android_id-perangkat).)
 
 **Backup terenkripsi saya tidak mau terbuka, saya kehilangan passphrase.** Tidak ada backdoor
 pemulihan berdasarkan desain; passphrase itulah yang melindungi backup. Jaga agar tetap aman.

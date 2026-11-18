@@ -58,7 +58,8 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (yeniden bağlandıktan sonra yeniden eklenir) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | uygulama listesi / toplu base64 simgeler |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` bir yedeğin özel adını (`note`) ve serbest `tags` değerini ayarlar veya temizler; yedekle birlikte taşınan bir yardımcı dosyada saklanır, `list-backups` üzerinden aranabilir. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` cihazın Android kullanıcıları (çoklu kullanıcı). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` bir yolun alt dizinleri (klasör seçici). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` bağımsız klasör/dosya yedekleri. |
@@ -225,6 +226,7 @@ Bir toplu işlem (`packages` ile `backup`, `refs` ile `restore`) her uygulamayı
 - **`batch_app_timeout`** (yapılandırma, saniye, varsayılan `1800`, `0` devre dışı bırakır): bir uygulama daha uzun sürerse işlem ağacı sonlandırılır, `ERR_TIMEOUT` olarak kaydedilir ve toplu işlem devam eder, böylece takılan bir uygulama tüm çalışmayı asla dondurmaz.
 - **Kısmi sonuç**: bitiş yazması `ok`, `of` içinden `n`, bir `fails` dökümü `{code:count}` (örn. `{"ERR_NO_SPACE":24}`) ve `free` (yedeklerin dosya sistemindeki boş bayt) içerir. Kısmi bir toplu işlem `ERR_BATCH_PARTIAL` değeridir, asla kör bir hata değil.
 - **Termal hız ayarı** (yapılandırma `thermal_throttle`, varsayılan açık): uygulamalar arasında cihaz sıcakken worker soğumak için duraklar ve bir `cooling` ilerleme aşaması yayar, böylece uzun bir çalışma cihazı aşırı ısıtmaz.
+- **Çalıştırma öncesi alan tahmini** (yapılandırma `space_preflight`, varsayılan açık): yerel bir hedefe toplu işlemden önce, seçilen uygulamaların sıkıştırılmamış boyutu toplanır; bu zaten hedefin boş alanını aşıyorsa, toplu işlem diski yarıya kadar doldurmak yerine önceden `ERR_NO_SPACE` (ve bir `need` alanı) ile durur. Akışlı uzak hedefler için atlanır.
 
 ### `remote-add` argümanları
 

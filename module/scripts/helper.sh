@@ -787,16 +787,38 @@ case "$verb" in
       # otherwise the restore dialog can never offer it and an uninstalled app is never
       # reinstalled. Detect by disk so imported (Neo/DataBackup) backups count too.
       _hasapk=false; ls "$ref"/base*.apk.zst* >/dev/null 2>&1 && _hasapk=true
-      "$JQ" -c --arg ref "$ref" --argjson hasapk "$_hasapk" \
+      # user-set name + tags live in a sidecar note.json in the backup dir, so they travel with
+      # the backup on export/import and never touch the immutable manifest. Default when absent.
+      _nt="$("$JQ" -c '{note:(.note//""),tags:((.tags//[])|map(select(type=="string")))}' "$ref/note.json" 2>/dev/null)"; case "$_nt" in '') _nt='{"note":"","tags":[]}' ;; esac
+      "$JQ" -c --arg ref "$ref" --argjson hasapk "$_hasapk" --argjson nt "$_nt" \
         '{ref:$ref, package:.package.name, label:(.package.label // .package.name),
           versionName:.package.versionName,
           versionCode:.package.versionCode, created_at:.created_at, mode:.mode,
+          note:$nt.note, tags:$nt.tags,
           items:((if $hasapk then ["apk"] else [] end) + [.items[].type])}' "$m" 2>/dev/null
     done
     done <<EOF
 $(backup_roots "$_u")
 EOF
     printf ']}\n' ;;
+
+  note-set)
+    # set or clear a backup's user name + tags (sidecar note.json in the backup dir, so it
+    # travels with the backup on export/import). ref must be inside a VDBackup store; no traversal.
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    ref="$(printf '%s' "$_a" | "$JQ" -r '.ref // empty' 2>/dev/null)"
+    case "$ref" in /data/media/*/VDBackup/*) : ;; *) err ERR_BAD_REF "bad ref"; exit 0 ;; esac
+    case "$ref" in *..*) err ERR_BAD_REF "traversal"; exit 0 ;; esac
+    [ -d "$ref" ] || { err ERR_NO_BACKUP "no backup"; exit 0; }
+    _nt="$(printf '%s' "$_a" | "$JQ" -c '{note:((.note//"")|tostring|.[0:200]),tags:((.tags//[])|map(select(type=="string")|.[0:40])|map(select(length>0))|unique|.[0:32])}' 2>/dev/null)"
+    case "$_nt" in '') _nt='{"note":"","tags":[]}' ;; esac
+    if [ "$(printf '%s' "$_nt" | "$JQ" -r '(.note=="" and (.tags|length)==0)' 2>/dev/null)" = true ]; then
+      rm -f "$ref/note.json"
+    else
+      printf '%s\n' "$_nt" > "$ref/note.json"
+    fi
+    printf '{"ok":true}\n' ;;
 
   path-list)
     # standalone folder/file backups (kind:"path") live under .paths/ in the backups

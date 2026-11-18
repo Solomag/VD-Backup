@@ -58,7 +58,8 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (återanslut efter återanslutning) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | applista / base64-ikoner i batch |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` anger eller rensar en säkerhetskopias egna namn (`note`) och fria `tags`; lagras i en följefil som följer med säkerhetskopian, sökbar från `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` enhetens Android-användare (fleranvändare). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` underkataloger för en sökväg (mappväljare). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` fristående mapp-/filsäkerhetskopior. |
@@ -223,6 +224,7 @@ En batch (`backup` med `packages`, `restore` med `refs`) kör varje app i sitt e
 - **`batch_app_timeout`** (konfig, sekunder, standard `1800`, `0` inaktiverar): om en app tar längre tid avslutas dess processträd, den registreras som `ERR_TIMEOUT` och batchen fortsätter, så att en fastnad app aldrig fryser hela körningen.
 - **Delresultat**: den avslutande skrivningen innehåller `ok`, `n` av `of`, en `fails`-räkning `{code:count}` (t.ex. `{"ERR_NO_SPACE":24}`) och `free` (lediga byte i säkerhetskopiornas filsystem). En delvis batch är `ERR_BATCH_PARTIAL`, aldrig ett blint fel.
 - **Termisk takt** (konfig `thermal_throttle`, på som standard): mellan appar pausar worker för att svalna när enheten är varm och sänder en `cooling`-förloppsfas, så att en lång körning inte överhettar enheten.
+- **Utrymmesuppskattning före körning** (konfig `space_preflight`, på som standard): före en batch till ett lokalt mål summeras den okomprimerade storleken för de valda apparna; om den redan överstiger målets lediga utrymme stannar batchen i förväg med `ERR_NO_SPACE` (plus ett `need`-fält) i stället för att fylla disken halvvägs. Hoppas över för strömmande fjärrmål.
 
 ### `remote-add`-args
 

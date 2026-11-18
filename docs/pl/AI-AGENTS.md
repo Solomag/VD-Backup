@@ -58,7 +58,8 @@ chmurowe (`rclone`/`restic`/ssh) komunikują się z siecią.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (ponowne podłączenie po przywróceniu połączenia) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | lista aplikacji / wsadowe ikony base64 |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` ustawia lub kasuje własną nazwę kopii zapasowej (`note`) i swobodne `tags`; przechowywane w pliku towarzyszącym, który podróżuje z kopią, przeszukiwalne z `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` użytkownicy Androida na urządzeniu (wielu użytkowników). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` podkatalogi ścieżki (wybór folderu). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` samodzielne kopie folderu/pliku. |
@@ -224,6 +225,7 @@ Partia (`backup` z `packages`, `restore` z `refs`) uruchamia każdą aplikację 
 - **`batch_app_timeout`** (konfiguracja, sekundy, domyślnie `1800`, `0` wyłącza): jeśli aplikacja trwa dłużej, jej drzewo procesów zostaje zakończone, jest zapisywana jako `ERR_TIMEOUT`, a partia jest kontynuowana, aby jedna zawieszona aplikacja nigdy nie zamroziła całego przebiegu.
 - **Wynik częściowy**: zapis końcowy zawiera `ok`, `n` z `of`, zestawienie `fails` `{code:count}` (np. `{"ERR_NO_SPACE":24}`) oraz `free` (wolne bajty w systemie plików kopii). Częściowa partia to `ERR_BATCH_PARTIAL`, nigdy ślepy błąd.
 - **Regulacja termiczna** (konfiguracja `thermal_throttle`, domyślnie włączona): między aplikacjami worker wstrzymuje się, aby ostygnąć, gdy urządzenie jest gorące, emitując fazę postępu `cooling`, aby długi przebieg nie przegrzał urządzenia.
+- **Szacowanie miejsca przed uruchomieniem** (konfiguracja `space_preflight`, domyślnie włączona): przed partią do celu lokalnego sumowany jest nieskompresowany rozmiar wybranych aplikacji; jeśli już przekracza wolne miejsce w celu, partia zatrzymuje się z góry z `ERR_NO_SPACE` (oraz polem `need`) zamiast zapełniać dysk do połowy. Pomijane dla strumieniowych celów zdalnych.
 
 ### Argumenty `remote-add`
 

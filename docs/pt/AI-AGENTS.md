@@ -58,7 +58,8 @@ de nuvem (`rclone`/`restic`/ssh) falam com a rede.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (reatar após reconectar) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | lista de apps / ícones base64 em lote |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` define ou limpa o nome personalizado de um backup (`note`) e as `tags` livres; armazenado em um arquivo acompanhante que viaja com o backup, pesquisável a partir de `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` usuários Android do dispositivo (multiusuário). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` subdiretórios de um caminho (seletor de pastas). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` backups avulsos de pasta/arquivo. |
@@ -225,6 +226,7 @@ Um lote (`backup` com `packages`, `restore` com `refs`) roda cada app no seu pr�
 - **`batch_app_timeout`** (config, segundos, padrão `1800`, `0` desativa): se um app demorar mais que isso, sua árvore de processos é encerrada, ele é registrado como `ERR_TIMEOUT`, e o lote continua, para que um app travado nunca congele a execução inteira.
 - **Resultado parcial**: a escrita final traz `ok`, `n` de `of`, um balanço `fails` `{code:count}` (ex.: `{"ERR_NO_SPACE":24}`) e `free` (bytes livres no sistema de arquivos dos backups). Um lote parcial é `ERR_BATCH_PARTIAL`, nunca um erro cego.
 - **Ritmo térmico** (config `thermal_throttle`, ligado por padrão): entre os apps o worker pausa para esfriar quando o aparelho está quente, emitindo uma fase de progresso `cooling`, para que uma execução longa não superaqueça o aparelho.
+- **Estimativa de espaço antes da execução** (config `space_preflight`, ligado por padrão): antes de um lote para um destino local, o tamanho não comprimido dos apps selecionados é somado; se já exceder o espaço livre do destino, o lote para de antemão com `ERR_NO_SPACE` (mais um campo `need`) em vez de encher o disco pela metade. Ignorado para destinos remotos de streaming.
 
 ### Args de `remote-add`
 

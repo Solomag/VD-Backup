@@ -55,7 +55,7 @@ es aus.
 
 Alles, was VDBackup erzeugt, verwendet **Standardformate** (tar, gzip, zstd, age, zip,
 restic), sodass deine Backups nie an das Modul gebunden und nie an dein spezielles Gerät
-gekoppelt sind. Siehe [Abschnitt 11](#abschnitt-11).
+gekoppelt sind. Siehe [Abschnitt 11](#11-portabilität-backups-auf-einem-pc-öffnen).
 
 ## Screenshots
 
@@ -70,7 +70,7 @@ gekoppelt sind. Siehe [Abschnitt 11](#abschnitt-11).
 - **Ein gerootetes Android-Gerät**, verwaltet von **KernelSU**, **APatch** oder **Magisk**.
   VDBackup wird als Modul aus diesem Manager installiert.
 - Genügend freier Speicher für deine Backups (lokale Backups liegen unter dem
-  Zustandsverzeichnis des Moduls; siehe [Abschnitt 3](#abschnitt-3)).
+  Zustandsverzeichnis des Moduls; siehe [Abschnitt 3](#3-installation-und-erster-start)).
 - Sonst nichts. Das Modul bündelt alle benötigten Binärdateien (tar, zstd, lz4, rclone,
   rsync, ssh, restic), sodass **lokales Backup und Restore vollständig offline funktionieren**.
   Nur Cloud-Ziele sprechen mit dem Netzwerk.
@@ -84,7 +84,7 @@ sie degradieren elegant, wenn sie auf deinem Gerät nicht verfügbar sind.
 1. Lade das neueste `VD-Backup-vX.Y.zip`-Release herunter.
 2. Flashe in deinem KernelSU-/APatch-/Magisk-Manager die Modul-Zip wie jedes andere Modul.
 3. Es ist sofort nutzbar, **kein Neustart nötig**. (Ein Neustart ist nur beim Wiederherstellen
-   von SSAID jemals relevant; siehe [Abschnitt 10](#abschnitt-10).)
+   von SSAID jemals relevant; siehe [Abschnitt 10](#10-ssaid-geräte-android_id).)
 4. Öffne die **WebUI** des Moduls aus dem Manager. Das ist die gesamte Oberfläche.
 
 **Welche Edition herunterladen.** Jedes Release wird als mehrere flashbare Zip-Editionen ausgeliefert, sodass du nur herunterlädst, was du brauchst. Wähle eine:
@@ -133,7 +133,7 @@ Die WebUI ist in einige wenige Tabs gegliedert:
   es stammt). Hier stellst du auch wieder her, führst einen Restore-Test aus, löschst ein
   Backup oder importierst Backups aus Neo-Backup oder Android-DataBackup.
 - **Ziele**: verwalte, wohin Backups gehen: lokaler Speicher plus beliebige Remote-Ziele, die
-  du hinzufügst (siehe [Abschnitt 7](#abschnitt-7)). Du kannst ein Ziel
+  du hinzufügst (siehe [Abschnitt 7](#7-ziele-lokal-und-remote)). Du kannst ein Ziel
   hier testen, bevor du dich darauf verlässt.
 - **Einstellungen**: ein Hell-/Dunkel-Themenumschalter, eine Akzentfarbauswahl
   (Voreinstellungen, eine eigene Farbe oder Zurücksetzen) und eine Sprachauswahl (die Oberfläche wird für Arabisch und Persisch von rechts nach links dargestellt), einen Schieberegler für die Oberflächenskalierung, mit dem Sie die
@@ -141,7 +141,7 @@ Die WebUI ist in einige wenige Tabs gegliedert:
   Bildschirme unterschiedlicher Pixeldichte, Standardwerte
   für neue Aufträge (Standardkomprimierung, Verify an/aus, Standardverschlüsselung), die
   Netzwerkrichtlinie für Cloud-Transfers (siehe
-  [Abschnitt 7](#abschnitt-7)), Auto-Backup und die Liste ausgeschlossener Apps, die
+  [Abschnitt 7](#7-ziele-lokal-und-remote)), Auto-Backup und die Liste ausgeschlossener Apps, die
   Installationsquellen-Option, der Verschlüsselungsschlüssel und die Planung.
   Ein/Aus-Einstellungen verwenden Umschalter im Android-Stil.
 - **Über**: Version, Links, die Schwesterprojekte (Siehe auch), das Audit-Manifest der
@@ -298,7 +298,7 @@ geschrieben, sodass du eine geräteübergreifende Kopie hast, die du auf einem P
 kannst.
 
 **Systemeinstellungen sind Opt-in und überschreiben bei der Wiederherstellung deine Geräteeinstellungen.**
-Genau wie SSAID (siehe [Abschnitt 10](#abschnitt-10)) ist die Kategorie **Systemeinstellungen** die
+Genau wie SSAID (siehe [Abschnitt 10](#10-ssaid-geräte-android_id)) ist die Kategorie **Systemeinstellungen** die
 sensibelste: ihre Wiederherstellung überschreibt deine geräteweiten Einstellungen, daher ist sie aus,
 es sei denn, du wählst sie bewusst, bittet dich zuerst um Bestätigung und wird in das
 Aktivitätsprotokoll geschrieben.
@@ -629,7 +629,7 @@ geholt. Nur Cloud-Ziele (rclone/restic/ssh) sprechen mit dem Netzwerk, und nur, 
 
 **Wird mein Backup auf einem anderen Telefon wiederhergestellt?** Ja, Backups sind portabel
 und nicht an die Gerätehardware gebunden. (SSAID ist die eine gerätespezifische Ausnahme, und
-es ist Opt-in und wird per Neustart angewendet; siehe [Abschnitt 10](#abschnitt-10).)
+es ist Opt-in und wird per Neustart angewendet; siehe [Abschnitt 10](#10-ssaid-geräte-android_id).)
 
 **Mein verschlüsseltes Backup lässt sich nicht öffnen, ich habe die Passphrase verloren.** Es
 gibt bauartbedingt keine Wiederherstellungs-Hintertür; die Passphrase ist das, was das Backup

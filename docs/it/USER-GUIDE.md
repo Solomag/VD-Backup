@@ -53,7 +53,7 @@ Apri la WebUI, scegli cosa salvare, ed esegui.
 
 Tutto ciò che VDBackup produce usa **formati standard** (tar, gzip, zstd, age, zip,
 restic), quindi i tuoi backup non sono mai bloccati nel modulo e non sono mai legati al tuo
-dispositivo specifico. Vedi la [sezione 11](#sezione-11).
+dispositivo specifico. Vedi la [sezione 11](#11-portabilità--aprire-i-backup-su-un-pc).
 
 ## Screenshot
 
@@ -68,7 +68,7 @@ dispositivo specifico. Vedi la [sezione 11](#sezione-11).
 - **Un dispositivo Android con root** gestito da **KernelSU**, **APatch** o **Magisk**.
   VDBackup si installa come modulo da quel gestore.
 - Spazio di archiviazione libero sufficiente per i tuoi backup (i backup locali risiedono sotto la directory
-  di stato del modulo ; vedi la [sezione 3](#sezione-3)).
+  di stato del modulo ; vedi la [sezione 3](#3-installazione-e-primo-avvio)).
 - Nient'altro. Il modulo include tutti i binari di cui ha bisogno (tar, zstd, lz4, rclone,
   rsync, ssh, restic), quindi **il backup e il ripristino locali funzionano completamente offline**. Solo le
   destinazioni cloud comunicano con la rete.
@@ -83,7 +83,7 @@ e degradano in modo elegante quando non sono disponibili sul tuo dispositivo.
 2. Nel tuo gestore KernelSU / APatch / Magisk, flasha lo zip del modulo come qualsiasi altro
    modulo.
 3. È utilizzabile immediatamente, **nessun riavvio necessario**. (Un riavvio è rilevante solo
-   quando si ripristina il SSAID ; vedi la [sezione 10](#sezione-10).)
+   quando si ripristina il SSAID ; vedi la [sezione 10](#10-ssaid-android_id-del-dispositivo).)
 4. Apri la **WebUI** del modulo dal gestore. Quella è l'intera interfaccia.
 
 **Quale edizione scaricare.** Ogni release è distribuita come diverse edizioni zip flashabili, così scarichi solo ciò che ti serve. Scegline una:
@@ -131,14 +131,14 @@ La WebUI è organizzata in alcune schede :
   ripristini, esegui un test di ripristino, elimini un backup, o importi backup da Neo-Backup o
   Android-DataBackup.
 - **Destinations**: gestisci dove vanno i backup : l'archiviazione locale più qualsiasi destinazione
-  remota che aggiungi (vedi la [sezione 7](#sezione-7)). Puoi
+  remota che aggiungi (vedi la [sezione 7](#7-destinazioni--locale-e-remota)). Puoi
   testare una destinazione qui prima di affidartici.
 - **Settings**: un interruttore di tema chiaro/scuro, un selettore del colore d'accento (preset, un colore
   personalizzato, o ripristino) e un selettore di lingua (l'interfaccia viene visualizzata da destra a sinistra per l'arabo e il persiano), un cursore di scala dell'interfaccia che trascini
   per ridimensionare l'intera interfaccia (intestazione, contenuto e navigazione inferiore insieme) da 85% a 120% (100% è il valore predefinito), per schermi di diverse densità di pixel,
   i valori predefiniti per i nuovi
   lavori (compressione predefinita, verify attivo/disattivo, cifratura predefinita), la politica di rete per i
-  trasferimenti cloud (vedi la [sezione 7](#sezione-7)), il backup automatico e l'elenco delle app escluse,
+  trasferimenti cloud (vedi la [sezione 7](#7-destinazioni--locale-e-remota)), il backup automatico e l'elenco delle app escluse,
   l'opzione dell'origine di installazione, la chiave di cifratura,
   e la pianificazione. Le impostazioni on/off usano interruttori in stile Android.
 - **About**: versione, link, i progetti fratelli (Vedi anche), il manifesto di audit dei binari impacchettati, e un'azione **Check for updates** che segnala se è stata pubblicata una versione più recente (con le sue note di rilascio). Installi qualsiasi aggiornamento tramite il tuo gestore root, allo stesso modo in cui hai flashato il modulo.
@@ -282,7 +282,7 @@ Per i messaggi, il registro chiamate e i contatti viene scritta anche una **copi
 apribile), così hai una copia multi-dispositivo che puoi leggere su un PC senza il modulo.
 
 **Le impostazioni di sistema sono opt-in e sovrascrivono le impostazioni del dispositivo al ripristino.**
-Proprio come SSAID (vedi la [sezione 10](#sezione-10)), la categoria **Impostazioni di sistema** è la più
+Proprio come SSAID (vedi la [sezione 10](#10-ssaid-android_id-del-dispositivo)), la categoria **Impostazioni di sistema** è la più
 sensibile : ripristinarla sovrascrive le impostazioni a livello di dispositivo, quindi è disattivata a
 meno che tu non la selezioni deliberatamente, ti chiede prima di riconoscere, ed è scritta nel log di
 attività.
@@ -601,7 +601,7 @@ cloud (rclone/restic/ssh) comunicano con la rete, e solo quando le usi.
 
 **Il mio backup si ripristinerà su un telefono diverso ?** Sì, i backup sono portabili e non
 legati all'hardware del dispositivo. (Il SSAID è l'unica eccezione specifica del dispositivo, ed è opt-in
-e applicato al riavvio ; vedi la [sezione 10](#sezione-10).)
+e applicato al riavvio ; vedi la [sezione 10](#10-ssaid-android_id-del-dispositivo).)
 
 **Il mio backup cifrato non si apre, ho perso la passphrase.** Non c'è backdoor di recupero
 per progettazione ; la passphrase è ciò che protegge il backup. Tienila al sicuro.

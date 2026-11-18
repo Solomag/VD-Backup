@@ -58,7 +58,8 @@ Backup/Restore benötigt; nur Cloud-Ziele (`rclone`/`restic`/ssh) sprechen mit d
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (nach dem Wiederverbinden erneut anhängen) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | App-Liste / base64-Icons im Batch |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` setzt oder löscht den eigenen Namen einer Sicherung (`note`) und freie `tags`; gespeichert in einer Begleitdatei, die mit der Sicherung mitwandert, durchsuchbar über `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` Android-Benutzer des Geräts (Mehrbenutzer). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` Unterverzeichnisse eines Pfads (Ordnerauswahl). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` eigenständige Ordner-/Datei-Backups. |
@@ -226,6 +227,7 @@ Ein Stapel (`backup` mit `packages`, `restore` mit `refs`) führt jede App in ih
 - **`batch_app_timeout`** (Konfig, Sekunden, Standard `1800`, `0` deaktiviert): dauert eine App länger, wird ihr Prozessbaum beendet, sie wird als `ERR_TIMEOUT` vermerkt und der Stapel läuft weiter, sodass eine hängende App nie den gesamten Lauf einfriert.
 - **Teilergebnis**: der Abschluss-Schreibvorgang enthält `ok`, `n` von `of`, eine `fails`-Zählung `{code:count}` (z. B. `{"ERR_NO_SPACE":24}`) und `free` (freie Bytes im Dateisystem der Sicherungen). Ein Teilstapel ist `ERR_BATCH_PARTIAL`, nie ein blinder Fehler.
 - **Thermisches Takten** (Konfig `thermal_throttle`, standardmäßig an): zwischen Apps pausiert der Worker zum Abkühlen, wenn das Gerät heiß ist, und gibt eine `cooling`-Fortschrittsphase aus, sodass ein langer Lauf das Gerät nicht überhitzt.
+- **Speicherschätzung vor dem Lauf** (Konfig `space_preflight`, standardmäßig an): vor einem Stapel an ein lokales Ziel wird der unkomprimierte Umfang der ausgewählten Apps summiert; übersteigt er bereits den freien Speicher des Ziels, stoppt der Stapel vorab mit `ERR_NO_SPACE` (plus einem `need`-Feld), statt den Datenträger nur halb zu füllen. Bei gestreamten entfernten Zielen übersprungen.
 
 ### `remote-add`-Args
 

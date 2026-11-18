@@ -53,7 +53,7 @@ Otevřete WebUI, vyberete, co zálohovat, a spustíte to.
 
 Vše, co VDBackup produkuje, používá **standardní formáty** (tar, gzip, zstd, age, zip,
 restic), takže vaše zálohy nikdy nejsou uzamčené do modulu a nikdy nejsou vázané na vaše
-konkrétní zařízení. Viz [sekce 11](#sekce-11).
+konkrétní zařízení. Viz [sekce 11](#11-přenositelnost-otevírání-záloh-na-pc).
 
 ## Snímky obrazovky
 
@@ -68,7 +68,7 @@ konkrétní zařízení. Viz [sekce 11](#sekce-11).
 - **Rootnuté Android zařízení** spravované pomocí **KernelSU**, **APatch** nebo **Magisk**.
   VDBackup se instaluje jako modul z toho manažera.
 - Dostatek volného úložiště pro vaše zálohy (lokální zálohy žijí pod stavovým adresářem
-  modulu; viz [sekce 3](#sekce-3)).
+  modulu; viz [sekce 3](#3-instalace-a-první-spuštění)).
 - Nic dalšího. Modul přibaluje všechny binárky, které potřebuje (tar, zstd, lz4, rclone,
   rsync, ssh, restic), takže **lokální záloha a obnova fungují plně offline**. Pouze cloudové
   cíle komunikují se sítí.
@@ -83,7 +83,7 @@ a degradují elegantně, když nejsou na vašem zařízení dostupné.
 2. Ve svém manažeru KernelSU / APatch / Magisk flashněte zip modulu jako jakýkoli jiný
    modul.
 3. Je použitelný okamžitě, **není potřeba restart**. (Restart je relevantní pouze
-   při obnově SSAID; viz [sekce 10](#sekce-10).)
+   při obnově SSAID; viz [sekce 10](#10-ssaid-android_id-zařízení).)
 4. Otevřete **WebUI** modulu z manažera. To je celé rozhraní.
 
 **Kterou edici stáhnout.** Každé vydání je dodáváno jako několik flashovatelných zip edic, takže si stáhnete jen to, co potřebujete. Vyberte jednu:
@@ -131,14 +131,14 @@ WebUI je uspořádáno do několika záložek:
   obnovujete, spouštíte restore-test, mažete zálohu, nebo importujete zálohy z Neo-Backup nebo
   Android-DataBackup.
 - **Destinations**: spravujte, kam zálohy jdou: lokální úložiště plus jakékoli vzdálené
-  cíle, které přidáte (viz [sekce 7](#sekce-7)). Cíl zde můžete
+  cíle, které přidáte (viz [sekce 7](#7-cíle-lokální-a-vzdálené)). Cíl zde můžete
   otestovat, než se na něj spolehnete.
 - **Settings**: přepínač světlého/tmavého motivu, selektor barvy zvýraznění (předvolby, vlastní
   barva nebo reset), selektor jazyka (rozhraní se vykresluje zprava doleva pro arabštinu a perštinu), posuvník měřítka rozhraní, kterým táhnutím přeškálujete celé rozhraní
   (záhlaví, obsah a spodní navigace společně) od 85% do 120% (100% je výchozí), pro obrazovky s různou hustotou pixelů,
   výchozí hodnoty pro nové
   úlohy (výchozí komprese, verify zapnuto/vypnuto, výchozí šifrování), síťová politika pro
-  cloudové přenosy (viz [sekce 7](#sekce-7)), automatická záloha a seznam vyloučených
+  cloudové přenosy (viz [sekce 7](#7-cíle-lokální-a-vzdálené)), automatická záloha a seznam vyloučených
   aplikací, volba zdroje instalace, šifrovací
   klíč, a plánování. Nastavení zapnuto/vypnuto používají přepínače ve stylu Androidu.
 - **About**: verze, odkazy, příbuzné projekty (See also), auditní manifest přibalených binárních souborů a akce **Check for updates**, která hlásí, zda byla zveřejněna novější verze (s jejími poznámkami k vydání). Jakoukoli aktualizaci nainstalujete přes svého root manažera, stejně jako jste flashovali modul.
@@ -281,7 +281,7 @@ Pro zprávy, seznam hovorů a kontakty se zapíše také **přenosná kopie** (o
 takže máte kopii napříč zařízeními, kterou si přečtete na PC bez modulu.
 
 **Systémová nastavení jsou opt-in a při obnově přepisují nastavení vašeho zařízení.** Stejně jako
-SSAID (viz [sekce 10](#sekce-10)) je kategorie **Systémová nastavení** tou nejcitlivější: její obnova
+SSAID (viz [sekce 10](#10-ssaid-android_id-zařízení)) je kategorie **Systémová nastavení** tou nejcitlivější: její obnova
 přepíše celosystémová nastavení vašeho zařízení, takže je vypnutá, dokud ji záměrně nevyberete,
 nejprve vás požádá o potvrzení a je zapsána do protokolu aktivity.
 
@@ -593,7 +593,7 @@ cíle (rclone/restic/ssh) komunikují se sítí, a pouze když je použijete.
 
 **Obnoví se moje záloha na jiném telefonu?** Ano, zálohy jsou přenosné a nejsou
 vázané na hardware zařízení. (SSAID je jediná výjimka specifická pro zařízení, a je opt-in
-a uplatní se po restartu; viz [sekce 10](#sekce-10).)
+a uplatní se po restartu; viz [sekce 10](#10-ssaid-android_id-zařízení).)
 
 **Moje šifrovaná záloha se neotevře, ztratil jsem passphrase.** Není žádná zadní vrátka
 pro obnovu, záměrně; passphrase je to, co chrání zálohu. Uchovejte ji v bezpečí.

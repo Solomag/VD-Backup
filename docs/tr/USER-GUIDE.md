@@ -53,7 +53,7 @@ kurulacak eşlik eden bir uygulama, onaylanacak bir "su ver" istemi ve açılaca
 
 VDBackup'ın ürettiği her şey **standart formatlar** kullanır (tar, gzip, zstd, age, zip,
 restic), bu nedenle yedekleriniz asla modüle kilitlenmez ve asla belirli cihazınıza
-bağlı değildir. Bkz. [bölüm 11](#bölüm-11).
+bağlı değildir. Bkz. [bölüm 11](#11-taşınabilirlik-yedekleri-bir-pcde-açma).
 
 ## Ekran görüntüleri
 
@@ -68,7 +68,7 @@ bağlı değildir. Bkz. [bölüm 11](#bölüm-11).
 - **KernelSU**, **APatch** veya **Magisk** tarafından yönetilen **root'lanmış bir
   Android cihaz**. VDBackup, o yöneticiden bir modül olarak kurulur.
 - Yedekleriniz için yeterli boş depolama (yerel yedekler modülün durum dizini altında
-  yaşar; bkz. [bölüm 3](#bölüm-3)).
+  yaşar; bkz. [bölüm 3](#3-kurulum-ve-ilk-çalıştırma)).
 - Başka hiçbir şey. Modül, ihtiyaç duyduğu tüm ikili dosyaları paketler (tar, zstd, lz4,
   rclone, rsync, ssh, restic), bu nedenle **yerel yedekleme ve geri yükleme tamamen
   çevrimdışı çalışır**. Yalnızca bulut hedefleri ağla konuşur.
@@ -83,7 +83,7 @@ cihazınızda kullanılamadıklarında zarif bir şekilde devre dışı kalırla
 2. KernelSU / APatch / Magisk yöneticinizde, modül zip'ini başka herhangi bir modül
    gibi flaşlayın.
 3. Hemen kullanılabilir, **yeniden başlatma gerekmez**. (Yeniden başlatma yalnızca
-   SSAID geri yüklenirken geçerlidir; bkz. [bölüm 10](#bölüm-10).)
+   SSAID geri yüklenirken geçerlidir; bkz. [bölüm 10](#10-ssaid-cihaz-android_id).)
 4. Yöneticiden modülün **WebUI**'sini açın. Bu, tüm arayüzdür.
 
 **Hangi sürümü indirmeli.** Her sürüm, yalnızca ihtiyacınız olanı indirmeniz için birkaç
@@ -152,14 +152,14 @@ WebUI birkaç sekmeye düzenlenmiştir:
   sildiğiniz veya Neo-Backup ya da Android-DataBackup'tan yedekleri içe aktardığınız
   yerdir.
 - **Destinations**: yedeklerin nereye gittiğini yönetin: yerel depolama artı eklediğiniz
-  herhangi bir uzak hedef (bkz. [bölüm 7](#bölüm-7)). Bir hedefe
+  herhangi bir uzak hedef (bkz. [bölüm 7](#7-hedefler-yerel-ve-uzak)). Bir hedefe
   güvenmeden önce burada test edebilirsiniz.
 - **Settings**: açık/koyu tema geçişi, bir vurgu rengi seçici (hazır ayarlar, özel bir
   renk veya sıfırlama) ve bir dil seçici (arayüz Arapça ve Farsça için sağdan sola görüntülenir), sürükleyerek tüm arayüzü (üstbilgi, içerik ve alt gezinme birlikte) %85 ile %120 arasında yeniden
   ölçeklendirdiğiniz bir arayüz ölçek kaydırıcısı (%100 varsayılandır), farklı piksel yoğunluklu ekranlar için,
   yeni işler için varsayılanlar
   (varsayılan sıkıştırma, doğrulama açık/kapalı, varsayılan şifreleme), bulut aktarımları
-  için ağ politikası (bkz. [bölüm 7](#bölüm-7)), otomatik yedekleme ve hariç tutulan
+  için ağ politikası (bkz. [bölüm 7](#7-hedefler-yerel-ve-uzak)), otomatik yedekleme ve hariç tutulan
   uygulamalar listesi, kurulum kaynağı seçeneği, şifreleme anahtarı ve zamanlama. Açık/kapalı ayarları Android tarzı aç/kapat anahtarları kullanır.
 - **About**: sürüm, bağlantılar, kardeş projeler (See also), paketlenmiş ikili dosya
   denetim manifestosu ve daha yeni bir sürümün yayınlanıp yayınlanmadığını (sürüm notlarıyla
@@ -308,7 +308,7 @@ Mesajlar, arama günlüğü ve kişiler için ayrıca bir **taşınabilir kopya*
 yazılır, böylece modül olmadan bir PC'de okuyabileceğiniz, cihazlar arası bir kopyanız olur.
 
 **Sistem ayarları katılımlıdır ve geri yüklemede cihaz ayarlarınızın üzerine yazar.** Tıpkı SSAID
-gibi (bkz. [bölüm 10](#bölüm-10)), **Sistem ayarları** kategorisi en hassas olanıdır: onu geri
+gibi (bkz. [bölüm 10](#10-ssaid-cihaz-android_id)), **Sistem ayarları** kategorisi en hassas olanıdır: onu geri
 yüklemek cihaz genelindeki ayarlarınızın üzerine yazar, bu yüzden onu kasıtlı olarak seçmediğiniz
 sürece kapalıdır, önce onaylamanızı ister ve etkinlik günlüğüne yazılır.
 
@@ -635,7 +635,7 @@ onları kullandığınızda.
 
 **Yedeğim farklı bir telefonda geri yüklenir mi?** Evet, yedekler taşınabilirdir ve
 cihaz donanımına bağlı değildir. (SSAID, tek cihaza özgü istisnadır ve katılımlı ve
-yeniden başlatmada uygulanır; bkz. [bölüm 10](#bölüm-10).)
+yeniden başlatmada uygulanır; bkz. [bölüm 10](#10-ssaid-cihaz-android_id).)
 
 **Şifrelenmiş yedeğim açılmıyor, parolayı kaybettim.** Tasarım gereği kurtarma arka
 kapısı yoktur; yedeği koruyan şey paroladır. Onu güvende tutun.

@@ -58,7 +58,8 @@ destinazioni cloud (`rclone`/`restic`/ssh) comunicano con la rete.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (si riaggancia dopo la riconnessione) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | elenco app / icone base64 in batch |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` imposta o cancella il nome personalizzato di un backup (`note`) e le `tags` libere; memorizzato in un file affiancato che viaggia con il backup, ricercabile da `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` utenti Android del dispositivo (multi-utente). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` sottocartelle di un percorso (selettore cartelle). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` backup autonomi di cartella/file. |
@@ -224,6 +225,7 @@ Un lotto (`backup` con `packages`, `restore` con `refs`) esegue ogni app nella p
 - **`batch_app_timeout`** (config, secondi, predefinito `1800`, `0` disattiva): se un'app impiega più tempo, il suo albero di processi viene terminato, viene registrata come `ERR_TIMEOUT` e il lotto continua, così un'app bloccata non congela mai l'intera esecuzione.
 - **Risultato parziale**: la scrittura finale riporta `ok`, `n` di `of`, un conteggio `fails` `{code:count}` (es. `{"ERR_NO_SPACE":24}`) e `free` (byte liberi nel filesystem dei backup). Un lotto parziale è `ERR_BATCH_PARTIAL`, mai un errore cieco.
 - **Ritmo termico** (config `thermal_throttle`, attivo per impostazione predefinita): tra le app il worker si mette in pausa per raffreddarsi quando il dispositivo è caldo, emettendo una fase di avanzamento `cooling`, così un'esecuzione lunga non surriscalda il dispositivo.
+- **Stima dello spazio prima dell'esecuzione** (config `space_preflight`, attivo per impostazione predefinita): prima di un lotto verso una destinazione locale, viene sommata la dimensione non compressa delle app selezionate; se supera già lo spazio libero della destinazione, il lotto si ferma subito con `ERR_NO_SPACE` (più un campo `need`) invece di riempire il disco a metà. Saltato per le destinazioni remote in streaming.
 
 ### Args di `remote-add`
 

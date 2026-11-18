@@ -103,7 +103,7 @@
         </div>
       </div>
       <div class="toolbar">
-        <span class="grow"></span>
+        <input id="bk-search" type="search" class="picker-search grow" data-i18n-ph="ui_bk_search" placeholder="Search backups by name, tag or app" autocomplete="off">
         <button id="bk-select" class="btn" data-i18n="ui_select">Select</button>
       </div>
       <div id="bk-batchbar" class="toolbar batchbar" hidden>
@@ -352,6 +352,10 @@
           <input type="checkbox" class="switch" id="set-thermal"><span data-i18n="settings_thermal">Pause to cool down when the device gets hot</span>
         </div>
         <div class="muted" data-i18n="settings_thermal_hint">During a long backup, VDBackup waits a moment between apps if the device is running hot, so a big batch cannot overheat it. On by default.</div>
+        <div class="field check">
+          <input type="checkbox" class="switch" id="set-space-preflight"><span data-i18n="settings_space_preflight">Check free space before a batch backup</span>
+        </div>
+        <div class="muted" data-i18n="settings_space_preflight_hint">Before backing up many apps to local storage, VDBackup estimates whether they fit and stops up front with a clear message if not, instead of filling the disk partway through. On by default.</div>
       </div>
 
       <div class="card">
@@ -681,6 +685,12 @@
     <div class="modal-card">
       <div class="modal-title" id="info-title"></div>
       <div id="info-body" class="info-body"></div>
+      <div class="info-note">
+        <input id="info-note" type="text" data-i18n-ph="ui_bk_name_ph" placeholder="Name this backup (optional)" maxlength="200" autocomplete="off">
+        <input id="info-tags" type="text" data-i18n-ph="ui_bk_tags_ph" placeholder="Tags, comma-separated" autocomplete="off">
+        <button class="btn small block" id="info-note-save" data-i18n="save">Save</button>
+        <div id="info-note-status" class="muted"></div>
+      </div>
       <div class="modal-actions">
         <button class="btn" id="info-close" data-i18n="ui_close">Close</button>
         <button class="btn danger" id="info-delete" data-i18n="delete">Delete</button>

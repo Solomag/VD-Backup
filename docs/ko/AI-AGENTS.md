@@ -58,7 +58,8 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (재연결 후 다시 붙기) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | 앱 목록 / 일괄 base64 아이콘 |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` 백업의 사용자 지정 이름(`note`)과 자유 `tags`를 설정하거나 지웁니다. 백업과 함께 이동하는 사이드카에 저장되며 `list-backups`에서 검색할 수 있습니다. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` 기기의 Android 사용자(멀티 유저). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` 경로의 하위 디렉터리(폴더 선택기). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` 독립 폴더/파일 백업. |
@@ -221,6 +222,7 @@ config에서, 설치 시점에 installer를 Play Store로 설정)와 `"deep_spoo
 - **`batch_app_timeout`**(설정, 초, 기본값 `1800`, `0`이면 비활성화): 앱이 이보다 오래 걸리면 해당 프로세스 트리가 종료되고 `ERR_TIMEOUT`으로 기록되며 배치가 계속되므로, 멈춘 앱 하나가 전체 실행을 절대 멈추지 않습니다.
 - **부분 결과**: 종료 기록에는 `ok`, `of` 중 `n`, 실패 이유를 나타내는 `fails` 집계 `{code:count}`(예: `{"ERR_NO_SPACE":24}`), 그리고 `free`(백업 파일 시스템의 남은 바이트)가 포함됩니다. 부분 배치는 `ERR_BATCH_PARTIAL`이며, 원인 불명의 오류가 아닙니다.
 - **열 페이싱**(설정 `thermal_throttle`, 기본 켜짐): 앱 사이에 기기가 뜨거우면 워커가 식히기 위해 일시정지하고 `cooling` 진행 단계를 내보내므로, 긴 실행이 기기를 과열시키지 않습니다.
+- **실행 전 공간 추정**(설정 `space_preflight`, 기본 켜짐): 로컬 대상으로의 배치 전에 선택한 앱의 비압축 크기가 합산됩니다. 이미 대상의 여유 공간을 초과하면 배치는 디스크를 절반만 채우는 대신 `ERR_NO_SPACE`(그리고 `need` 필드)로 미리 멈춥니다. 스트리밍 원격 대상에서는 건너뜁니다.
 
 ### `remote-add` 인자
 

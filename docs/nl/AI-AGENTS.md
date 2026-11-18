@@ -58,7 +58,8 @@ backup/restore; alleen cloudbestemmingen (`rclone`/`restic`/ssh) praten met het 
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (opnieuw aanhaken na herverbinden) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | app-lijst / batch base64-pictogrammen |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` stelt de eigen naam van een back-up (`note`) en vrije `tags` in of wist ze; opgeslagen in een begeleidend bestand dat met de back-up meereist, doorzoekbaar vanuit `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` Android-gebruikers van het apparaat (multi-user). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` submappen van een pad (mapkiezer). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` losse map-/bestandsback-ups. |
@@ -226,6 +227,7 @@ Een batch (`backup` met `packages`, `restore` met `refs`) voert elke app in zijn
 - **`batch_app_timeout`** (config, seconden, standaard `1800`, `0` schakelt uit): duurt een app langer, dan wordt zijn procesboom beëindigd, wordt hij als `ERR_TIMEOUT` geregistreerd en gaat de batch door, zodat één vastgelopen app nooit de hele run bevriest.
 - **Gedeeltelijk resultaat**: de afsluitende schrijfactie bevat `ok`, `n` van `of`, een `fails`-telling `{code:count}` (bijv. `{"ERR_NO_SPACE":24}`) en `free` (resterende bytes op het back-upbestandssysteem). Een gedeeltelijke batch is `ERR_BATCH_PARTIAL`, nooit een blinde fout.
 - **Thermische tempering** (config `thermal_throttle`, standaard aan): tussen apps pauzeert de worker om af te koelen wanneer het apparaat heet is, met een `cooling`-voortgangsfase, zodat een lange run het apparaat niet oververhit.
+- **Ruimteschatting vooraf** (config `space_preflight`, standaard aan): vóór een batch naar een lokale bestemming wordt de ongecomprimeerde omvang van de geselecteerde apps opgeteld; overschrijdt die al de vrije ruimte van de bestemming, dan stopt de batch vooraf met `ERR_NO_SPACE` (plus een `need`-veld) in plaats van de schijf halverwege te vullen. Overgeslagen voor streamende externe bestemmingen.
 
 ### `remote-add`-args
 

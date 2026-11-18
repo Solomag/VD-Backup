@@ -58,7 +58,8 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (znovupřipojení po opětovném připojení) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | seznam aplikací / dávkové base64 ikony |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` nastaví nebo zruší vlastní název zálohy (`note`) a volné `tags`; uloženo v průvodním souboru, který cestuje se zálohou, prohledatelné z `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` uživatelé Androidu v zařízení (více uživatelů). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` podadresáře cesty (výběr složky). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` samostatné zálohy složky/souboru. |
@@ -223,6 +224,7 @@ Dávka (`backup` s `packages`, `restore` s `refs`) spouští každou aplikaci ve
 - **`batch_app_timeout`** (konfigurace, sekundy, výchozí `1800`, `0` vypíná): pokud aplikace trvá déle, její strom procesů je ukončen, zaznamená se jako `ERR_TIMEOUT` a dávka pokračuje, takže jedna zaseknutá aplikace nikdy nezmrazí celý běh.
 - **Částečný výsledek**: závěrečný zápis obsahuje `ok`, `n` z `of`, přehled `fails` `{code:count}` (např. `{"ERR_NO_SPACE":24}`) a `free` (volné bajty v souborovém systému záloh). Částečná dávka je `ERR_BATCH_PARTIAL`, nikdy slepá chyba.
 - **Tepelné tempo** (konfigurace `thermal_throttle`, ve výchozím stavu zapnuto): mezi aplikacemi se worker pozastaví, aby vychladl, když je zařízení horké, a vydá fázi průběhu `cooling`, takže dlouhý běh zařízení nepřehřeje.
+- **Odhad místa před během** (konfigurace `space_preflight`, ve výchozím stavu zapnuto): před dávkou do místního cíle se sečte nekomprimovaná velikost vybraných aplikací; pokud už překračuje volné místo v cíli, dávka se předem zastaví s `ERR_NO_SPACE` (plus pole `need`) místo toho, aby disk zaplnila jen zpola. Přeskočeno u streamovaných vzdálených cílů.
 
 ### Argumenty `remote-add`
 

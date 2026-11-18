@@ -53,7 +53,7 @@ Vous ouvrez la WebUI, choisissez ce qu'il faut sauvegarder, et vous lancez.
 
 Tout ce que VDBackup produit utilise des **formats standard** (tar, gzip, zstd, age, zip,
 restic), vos sauvegardes ne sont donc jamais enfermées dans le module et jamais liées à votre
-appareil précis. Voir la [section 11](#section-11).
+appareil précis. Voir la [section 11](#11-portabilité--ouvrir-les-sauvegardes-sur-un-pc).
 
 ## Captures d'écran
 
@@ -68,7 +68,7 @@ appareil précis. Voir la [section 11](#section-11).
 - **Un appareil Android rooté** géré par **KernelSU**, **APatch** ou **Magisk**.
   VDBackup s'installe comme un module depuis ce gestionnaire.
 - Assez d'espace de stockage libre pour vos sauvegardes (les sauvegardes locales résident sous le répertoire
-  d'état du module ; voir la [section 3](#section-3)).
+  d'état du module ; voir la [section 3](#3-installation-et-premier-lancement)).
 - Rien d'autre. Le module embarque tous les binaires dont il a besoin (tar, zstd, lz4, rclone,
   rsync, ssh, restic), donc **la sauvegarde et la restauration locales fonctionnent entièrement hors ligne**. Seules les
   destinations cloud communiquent avec le réseau.
@@ -83,7 +83,7 @@ et ils se dégradent proprement quand ils ne sont pas disponibles sur votre appa
 2. Dans votre gestionnaire KernelSU / APatch / Magisk, flashez le zip du module comme n'importe quel autre
    module.
 3. Il est utilisable immédiatement, **aucun redémarrage nécessaire**. (Un redémarrage n'est jamais pertinent
-   que lors de la restauration du SSAID ; voir la [section 10](#section-10).)
+   que lors de la restauration du SSAID ; voir la [section 10](#10-ssaid-android_id-de-lappareil).)
 4. Ouvrez la **WebUI** du module depuis le gestionnaire. C'est toute l'interface.
 
 **Quelle édition télécharger.** Chaque release est livrée en plusieurs éditions zip flashables, pour que vous ne téléchargiez que ce dont vous avez besoin. Choisissez-en une :
@@ -131,14 +131,14 @@ La WebUI est organisée en quelques onglets :
   vous restaurez, lancez un test de restauration, supprimez une sauvegarde, ou importez des sauvegardes depuis Neo-Backup ou
   Android-DataBackup.
 - **Destinations**: gérez où vont les sauvegardes : le stockage local plus toutes les destinations
-  distantes que vous ajoutez (voir la [section 7](#section-7)). Vous pouvez
+  distantes que vous ajoutez (voir la [section 7](#7-destinations--locale-et-distante)). Vous pouvez
   tester une destination ici avant de compter dessus.
 - **Settings**: un bascule de thème clair/sombre, un sélecteur de couleur d'accent (préréglages, une
   couleur personnalisée, ou réinitialisation) et un sélecteur de langue (l'interface s'affiche de droite à gauche pour l'arabe et le persan), un curseur d'échelle de l'interface que vous faites glisser
   pour redimensionner toute l'interface (en-tête, contenu et navigation du bas ensemble) de 85 % à 120 % (100 % est la valeur par défaut), pour les écrans de différentes densités de pixels,
   les valeurs par défaut pour les nouvelles
   tâches (compression par défaut, verify activé/désactivé, chiffrement par défaut), la politique réseau pour les
-  transferts cloud (voir la [section 7](#section-7)), la sauvegarde automatique et la liste des apps exclues,
+  transferts cloud (voir la [section 7](#7-destinations--locale-et-distante)), la sauvegarde automatique et la liste des apps exclues,
   l'option de source d'installation, la clé de chiffrement,
   et la planification. Les réglages activé/désactivé utilisent des interrupteurs à bascule de style Android.
 - **About**: version, liens, les projets frères (Voir aussi), le manifeste d'audit des binaires empaquetés, et une action **Check for updates** qui indique si une version plus récente a été publiée (avec ses notes de version). Vous installez toute mise à jour via votre gestionnaire root, de la même façon que vous avez flashé le module.
@@ -283,7 +283,7 @@ Pour les messages, le journal d'appels et les contacts, une **copie portable** (
 également écrite, vous disposez ainsi d'une copie multi-appareils lisible sur un PC sans le module.
 
 **Les réglages système sont opt-in et écrasent les réglages de votre appareil à la restauration.**
-Tout comme SSAID (voir la [section 10](#section-10)), la catégorie **Réglages système** est la plus
+Tout comme SSAID (voir la [section 10](#10-ssaid-android_id-de-lappareil)), la catégorie **Réglages système** est la plus
 sensible : la restaurer écrase les réglages à l'échelle de votre appareil, elle est donc désactivée à
 moins que vous ne la sélectionniez délibérément, vous demande d'abord de reconnaître, et est écrite
 dans le journal d'activité.
@@ -606,7 +606,7 @@ cloud (rclone/restic/ssh) communiquent avec le réseau, et seulement quand vous 
 
 **Ma sauvegarde se restaurera-t-elle sur un autre téléphone ?** Oui, les sauvegardes sont portables et non
 liées au matériel de l'appareil. (Le SSAID est la seule exception spécifique à l'appareil, et il est opt-in
-et appliqué au redémarrage ; voir la [section 10](#section-10).)
+et appliqué au redémarrage ; voir la [section 10](#10-ssaid-android_id-de-lappareil).)
 
 **Ma sauvegarde chiffrée ne s'ouvre pas, j'ai perdu la phrase secrète.** Il n'y a pas de porte dérobée de récupération
 par conception ; la phrase secrète est ce qui protège la sauvegarde. Gardez-la en sécurité.

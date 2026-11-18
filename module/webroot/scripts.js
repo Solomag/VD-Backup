@@ -379,18 +379,32 @@ function loadApps() {
 var BACKUPS = [];
 var SUSFS_DISMISSED = false;
 var bkSelectMode = false, bkSelected = {};   // ref -> {ref,package,items} while selecting
+var bkQuery = "";
+// a backup matches the search when the query is in its user name (note), its tags, the app
+// label or the package. Pure client-side filter over the already-loaded list.
+function bkMatch(b, q) {
+  return ((b.note || "").toLowerCase().indexOf(q) >= 0)
+    || ((b.label || "").toLowerCase().indexOf(q) >= 0)
+    || ((b.package || "").toLowerCase().indexOf(q) >= 0)
+    || ((b.tags || []).some(function (t) { return (t || "").toLowerCase().indexOf(q) >= 0; }));
+}
 function renderBackups(list) {
   var ul = $("#backuplist"); ul.innerHTML = "";
   BACKUPS = list || [];
-  $("#backups-empty").style.display = (list && list.length) ? "none" : "";
-  if (list && list.length) showSusfsNotice(); else { var sb = $("#susfs-notice"); if (sb) sb.hidden = true; }
-  (list || []).forEach(function (b) {
+  var q = (bkQuery || "").toLowerCase().trim();
+  var shown = q ? BACKUPS.filter(function (b) { return bkMatch(b, q); }) : BACKUPS;
+  // the empty message means "no backups", never "no search matches": hide it while the user has
+  // backups but the filter just hides them (the search box itself shows what is going on).
+  $("#backups-empty").style.display = BACKUPS.length ? "none" : "";
+  if (BACKUPS.length) showSusfsNotice(); else { var sb = $("#susfs-notice"); if (sb) sb.hidden = true; }
+  shown.forEach(function (b) {
     var li = el("li", "row tappable");
-    var ic = el("div", "app-ic", (b.label || b.package).charAt(0).toUpperCase());
+    var ic = el("div", "app-ic", (b.note || b.label || b.package).charAt(0).toUpperCase());
     var grow = el("div", "grow");
-    grow.appendChild(el("div", "name", b.label || b.package));
-    grow.appendChild(el("div", "pkg", b.package));
+    grow.appendChild(el("div", "name", b.note || b.label || b.package));
+    grow.appendChild(el("div", "pkg", b.note ? (b.label || b.package) : b.package));
     grow.appendChild(el("div", "sub", shortDate(b.created_at)));
+    if ((b.tags || []).length) { var tb = el("div", "tags"); b.tags.forEach(function (t) { tb.appendChild(tagChip(t)); }); grow.appendChild(tb); }
     if (bkSelectMode) {
       var cb = el("input", "selbox"); cb.type = "checkbox"; cb.checked = !!bkSelected[b.ref];
       cb.onclick = function (e) { e.stopPropagation(); toggleBkSel(b, cb.checked); li.classList.toggle("sel", cb.checked); };
@@ -459,6 +473,21 @@ function openBackupInfo(b) {
   $("#info-close").onclick = function () { m.hidden = true; };
   $("#info-restore").onclick = function () { m.hidden = true; startRestore(b.ref, b.package, b.items); };
   $("#info-delete").onclick = function () { deleteBackup(b.ref, function () { m.hidden = true; loadBackups(); }); };
+  // user name + tags editor: a custom name and free tags for this backup, stored in a sidecar
+  // that travels with it (note-set). Searchable from the backups list. Reloads so the change shows.
+  $("#info-note").value = b.note || "";
+  $("#info-tags").value = (b.tags || []).join(", ");
+  $("#info-note-status").textContent = "";
+  $("#info-note-save").onclick = function () {
+    var note = ($("#info-note").value || "").trim();
+    var tags = ($("#info-tags").value || "").split(",").map(function (t) { return t.trim(); }).filter(function (t) { return t.length; });
+    $("#info-note-save").disabled = true;
+    helper("note-set", { ref: b.ref, note: note, tags: tags }).then(function (r) {
+      $("#info-note-save").disabled = false;
+      if (r && r.ok) { $("#info-note-status").textContent = I18N.t("saved"); b.note = note; b.tags = tags; loadBackups(); }
+      else { $("#info-note-status").textContent = errMsg(r); }
+    }).catch(function () { $("#info-note-save").disabled = false; $("#info-note-status").textContent = errMsg(); });
+  };
   helper("backup-info", { ref: b.ref }).then(function (r) {
     if (!r || !r.ok) { body.textContent = errMsg(r); return; }
     var rows = [
@@ -1774,6 +1803,7 @@ function loadSettings() {
   if ($("#set-auto"))     $("#set-auto").checked = !!CFG.auto_backup;
   if ($("#set-auto-keep")) $("#set-auto-keep").value = CFG.auto_backup_keep || 5;
   if ($("#set-thermal"))  $("#set-thermal").checked = (CFG.thermal_throttle !== false);
+  if ($("#set-space-preflight")) $("#set-space-preflight").checked = (CFG.space_preflight !== false);
   if ($("#set-spoof"))    $("#set-spoof").checked = (CFG.spoof_installer !== false);
   var bs = $("#block-app-search"); if (bs) bs.value = "";
   var as = $("#ai-app-search"); if (as) as.value = "";
@@ -1801,6 +1831,7 @@ function saveSettings() {
   if ($("#set-auto")) CFG.auto_backup = $("#set-auto").checked;
   if ($("#set-auto-keep")) CFG.auto_backup_keep = parseInt($("#set-auto-keep").value, 10) || 5;
   if ($("#set-thermal")) CFG.thermal_throttle = $("#set-thermal").checked;
+  if ($("#set-space-preflight")) CFG.space_preflight = $("#set-space-preflight").checked;
   if ($("#set-spoof")) CFG.spoof_installer = $("#set-spoof").checked;
   CFG.language = $("#set-lang").value;
   helper("config-set", CFG).then(function (r) {
@@ -2734,6 +2765,7 @@ function boot() {
   $("#app-selnone").onclick = function () { selected = {}; updateSelCount(); renderApps($("#search").value); };
   $("#app-backupsel").onclick = startBatchBackup;
   $("#bk-select").onclick = function () { setBkSelectMode(!bkSelectMode); };
+  if ($("#bk-search")) $("#bk-search").oninput = function () { bkQuery = this.value; renderBackups(BACKUPS); };
   $("#bk-selall").onclick = function () { (BACKUPS || []).forEach(function (b) { bkSelected[b.ref] = { ref: b.ref, package: b.package, items: b.items }; }); updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-selnone").onclick = function () { bkSelected = {}; updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-restoresel").onclick = startBatchRestore;

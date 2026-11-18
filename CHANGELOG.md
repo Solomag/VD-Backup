@@ -6,6 +6,20 @@
 
 All notable changes to VDBackup are documented here. English only.
 
+## v1.12
+
+Reliability:
+
+- A batch saved to this device now makes sure there is room for everything before it starts. If there is not, it stops right away and tells you how much space it needs and how much is free, instead of failing partway through a long run. A new switch in Settings turns this pre-check off.
+
+Fixes:
+
+- The free-space safeguards now work on every device. The checks that stop a backup before it fills the disk relied on a size measurement that stock Android quietly ignored, so on many devices they never triggered and a long backup could fill internal storage. They now measure space reliably everywhere. (#5)
+
+New:
+
+- You can now name and tag your backups. Give any backup a custom name and free-form tags - like "v1", "first", or "january" - then search your backups by name, tag or app. The name and tags travel with a backup when you export or import it.
+
 ## v1.11
 
 Reliability:

@@ -53,7 +53,7 @@ på. Du öppnar WebUI, väljer vad som ska säkerhetskopieras, och kör det.
 
 Allt VDBackup producerar använder **standardformat** (tar, gzip, zstd, age, zip,
 restic), så dina säkerhetskopior är aldrig inlåsta i modulen och är aldrig bundna till din
-specifika enhet. Se [avsnitt 11](#avsnitt-11).
+specifika enhet. Se [avsnitt 11](#11-portabilitet-öppna-säkerhetskopior-på-en-pc).
 
 ## Skärmbilder
 
@@ -68,7 +68,7 @@ specifika enhet. Se [avsnitt 11](#avsnitt-11).
 - **En rootad Android-enhet** hanterad av **KernelSU**, **APatch** eller **Magisk**.
   VDBackup installeras som en modul från den hanteraren.
 - Tillräckligt med fritt lagringsutrymme för dina säkerhetskopior (lokala säkerhetskopior ligger under modulens tillstånds-
-  katalog; se [avsnitt 3](#avsnitt-3)).
+  katalog; se [avsnitt 3](#3-installation-och-första-körning)).
 - Inget annat. Modulen levereras med alla binärer den behöver (tar, zstd, lz4, rclone,
   rsync, ssh, restic), så **lokal backup och återställning fungerar helt offline**. Endast moln-
   destinationer kommunicerar med nätverket.
@@ -83,7 +83,7 @@ när de inte är tillgängliga på din enhet.
 2. I din KernelSU / APatch / Magisk-hanterare, flasha modul-zip:en som vilken annan
    modul som helst.
 3. Den är användbar omedelbart, **ingen omstart behövs**. (En omstart är endast någonsin relevant
-   vid återställning av SSAID; se [avsnitt 10](#avsnitt-10).)
+   vid återställning av SSAID; se [avsnitt 10](#10-ssaid-enhetens-android_id).)
 4. Öppna modulens **WebUI** från hanteraren. Det är hela gränssnittet.
 
 **Vilken utgåva du laddar ner.** Varje release levereras som flera flashbara zip-utgåvor, så att du
@@ -148,7 +148,7 @@ WebUI är organiserat i några flikar:
   återställer, kör en återställningstest, tar bort en säkerhetskopia, eller importerar säkerhetskopior från Neo-Backup eller
   Android-DataBackup.
 - **Destinations**: hantera vart säkerhetskopior går: lokal lagring plus eventuella fjärr-
-  destinationer du lägger till (se [avsnitt 7](#avsnitt-7)). Du kan
+  destinationer du lägger till (se [avsnitt 7](#7-destinationer-lokal-och-fjärr)). Du kan
   testa en destination här innan du förlitar dig på den.
 - **Settings**: en växling för ljust/mörkt tema, en accentfärgsväljare (förinställningar, en egen
   färg eller återställning), en språkväljare (gränssnittet renderas från höger till vänster för
@@ -156,7 +156,7 @@ WebUI är organiserat i några flikar:
   skala om hela gränssnittet (sidhuvud, innehåll och nedre navigering tillsammans) från 85 % till 120 % (100 % är standard), för skärmar med olika
   pixeltäthet, standardvärden för nya
   jobb (standardkomprimering, verify på/av, standardkryptering), nätverkspolicyn för
-  molnöverföringar (se [avsnitt 7](#avsnitt-7)), automatisk säkerhetskopiering och listan över
+  molnöverföringar (se [avsnitt 7](#7-destinationer-lokal-och-fjärr)), automatisk säkerhetskopiering och listan över
   uteslutna appar, alternativet för installationskälla, krypterings-
   nyckeln, och schemaläggning. Av/på-inställningar använder växlingsbrytare i Android-stil.
 - **About**: version, länkar, systerprojekten (See also), granskningsmanifestet för de medföljande binärfilerna, och en **Check for updates**-åtgärd som rapporterar om en nyare version har publicerats (med dess versionsanteckningar). Du installerar alla uppdateringar via din root-hanterare, på samma sätt som du flashade modulen.
@@ -301,7 +301,7 @@ För meddelanden, samtalslogg och kontakter skrivs även en **portabel kopia** (
 så att du har en kopia mellan enheter som du kan läsa på en PC utan modulen.
 
 **Systeminställningar är opt-in och skriver över dina enhetsinställningar vid återställning.**
-Precis som SSAID (se [avsnitt 10](#avsnitt-10)) är kategorin **Systeminställningar** den
+Precis som SSAID (se [avsnitt 10](#10-ssaid-enhetens-android_id)) är kategorin **Systeminställningar** den
 känsligaste: att återställa den skriver över dina enhetsomfattande inställningar, så den är av om du
 inte avsiktligt väljer den, ber dig bekräfta först, och skrivs till aktivitetsloggen.
 
@@ -622,7 +622,7 @@ destinationer (rclone/restic/ssh) kommunicerar med nätverket, och endast när d
 
 **Kommer min säkerhetskopia att återställas på en annan telefon?** Ja, säkerhetskopior är portabla och inte
 bundna till enhetshårdvara. (SSAID är det enda enhetsspecifika undantaget, och det är opt-in
-och omstarts-tillämpat; se [avsnitt 10](#avsnitt-10).)
+och omstarts-tillämpat; se [avsnitt 10](#10-ssaid-enhetens-android_id).)
 
 **Min krypterade säkerhetskopia öppnas inte, jag tappade lösenfrasen.** Det finns ingen återställnings-
 bakdörr avsiktligt; lösenfrasen är det som skyddar säkerhetskopian. Håll den säker.

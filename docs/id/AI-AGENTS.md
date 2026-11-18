@@ -58,7 +58,8 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (reattach setelah tersambung kembali) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | daftar aplikasi / ikon base64 batch |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` menetapkan atau menghapus nama khusus cadangan (`note`) dan `tags` bebas; disimpan dalam berkas pendamping yang ikut bersama cadangan, dapat dicari dari `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` pengguna Android perangkat (multi-pengguna). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` subdirektori dari sebuah path (pemilih folder). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` cadangan folder/berkas mandiri. |
@@ -225,6 +226,7 @@ Sebuah batch (`backup` dengan `packages`, `restore` dengan `refs`) menjalankan s
 - **`batch_app_timeout`** (konfigurasi, detik, bawaan `1800`, `0` menonaktifkan): jika sebuah aplikasi memakan waktu lebih lama, pohon prosesnya dihentikan, dicatat sebagai `ERR_TIMEOUT`, dan batch berlanjut, sehingga satu aplikasi yang macet tidak pernah membekukan seluruh proses.
 - **Hasil sebagian**: penulisan akhir membawa `ok`, `n` dari `of`, hitungan `fails` `{code:count}` (mis. `{"ERR_NO_SPACE":24}`), dan `free` (byte tersisa di sistem berkas cadangan). Batch sebagian adalah `ERR_BATCH_PARTIAL`, tidak pernah kesalahan buta.
 - **Pengaturan laju termal** (konfigurasi `thermal_throttle`, bawaan aktif): di antara aplikasi, worker berhenti sejenak untuk mendingin saat perangkat panas, memancarkan fase kemajuan `cooling`, sehingga proses yang panjang tidak membuat perangkat terlalu panas.
+- **Perkiraan ruang pra-jalan** (konfigurasi `space_preflight`, bawaan aktif): sebelum batch ke tujuan lokal, jejak tak terkompresi dari aplikasi terpilih dijumlahkan; jika sudah melebihi ruang kosong tujuan, batch berhenti di awal dengan `ERR_NO_SPACE` (plus bidang `need`) alih-alih mengisi disk setengah jalan. Dilewati untuk tujuan jarak jauh streaming.
 
 ### Args `remote-add`
 

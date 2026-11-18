@@ -218,6 +218,32 @@ jobs:
             seed_baseline "_m_$abi"
             ( cd "_m_$abi" && zip -r9 "../VD-Backup-${VER}-$abi-full.zip" . -x 'bin/*/.gitkeep' )
           done
+          # 7. mmrl-stub: a minimal module (VDLU engine + a static curl + the install scaffolding)
+          # that fits under the MMRL ~50 MB install cap; on first boot it fetches the full module
+          # via VDLU and applies it in place. No baseline, so the engine does a from:0 fetch of the
+          # universal-full tree. See stub/README.md (and its note on a future lite/per-ABI feed).
+          rm -rf _m_stub && mkdir -p _m_stub/bin
+          cp module/module.prop _m_stub/module.prop
+          cp stub/customize.sh _m_stub/customize.sh
+          cp stub/service.sh _m_stub/service.sh
+          cp -a module/vdlu _m_stub/vdlu
+          rm -f _m_stub/vdlu/RELEASE.md
+          # from:0 baseline so the engine sees nothing installed and fetches the whole tree on
+          # first boot. WITHOUT this the engine reads the stub's module.prop (the real versionCode)
+          # as the current version, decides it is already up to date, and never fetches - validated
+          # on-device. The baseline is not signature-checked (it is copied straight to current.json).
+          printf '%s' '{"schema":1,"module":"vdbackup","version":0,"version_name":"0","channel":"stable","engine_min":3,"files":[],"delete":[]}' > _m_stub/vdlu/baseline.json
+          [ -d module/META-INF ] && cp -a module/META-INF _m_stub/META-INF
+          for abi in arm64-v8a armeabi-v7a x86 x86_64; do
+            [ -x "module/bin/$abi/curl" ] || { echo "stub: no curl for $abi"; exit 1; }
+            mkdir -p "_m_stub/bin/$abi"
+            cp "module/bin/$abi/curl" "_m_stub/bin/$abi/curl"
+            [ -d "module/bin/$abi/lib" ] && cp -a "module/bin/$abi/lib" "_m_stub/bin/$abi/lib"
+          done
+          ( cd _m_stub && zip -r9 "../VD-Backup-${VER}-mmrl-stub.zip" . )
+          _stubsz=$(stat -c%s "VD-Backup-${VER}-mmrl-stub.zip")
+          echo "mmrl-stub zip: $_stubsz bytes ($((_stubsz/1048576)) MiB)"
+          [ "$_stubsz" -lt 52428800 ] || { echo "ERROR: mmrl-stub exceeds the 50 MiB MMRL cap ($_stubsz bytes)"; exit 1; }
 
       # Fill update.json size/sha256 from the built universal-full zip + the release
       # notes, so the in-app update-check verb can show download size and what is new.
@@ -328,6 +354,7 @@ jobs:
             "VD-Backup-${VER}-armeabi-v7a-full.zip" \
             "VD-Backup-${VER}-x86-full.zip" \
             "VD-Backup-${VER}-x86_64-full.zip" \
+            "VD-Backup-${VER}-mmrl-stub.zip" \
             assets-${VER}-*.tar.zst \
             --title "VDBackup ${VER}" \
             --notes-file release-notes.md

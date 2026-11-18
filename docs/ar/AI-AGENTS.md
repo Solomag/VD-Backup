@@ -58,7 +58,8 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (إعادة الارتباط بعد إعادة الاتصال) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | قائمة التطبيقات / أيقونات base64 بالدفعة |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` يضبط أو يمسح الاسم المخصّص لنسخة احتياطية (`note`) و`tags` الحرة؛ مُخزَّنة في ملف جانبي يرافق النسخة الاحتياطية، وقابلة للبحث من `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` مستخدمو أندرويد في الجهاز (متعدد المستخدمين). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` المجلدات الفرعية لمسار (منتقي المجلدات). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` نسخ احتياطية مستقلة لمجلد/ملف. |
@@ -221,6 +222,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 - **`batch_app_timeout`** (إعداد، ثوانٍ، الافتراضي `1800`، و`0` يعطّله): إذا استغرق تطبيق وقتًا أطول، تُنهى شجرة عملياته، ويُسجَّل بوصفه `ERR_TIMEOUT`، وتستمر الدُفعة، بحيث لا يُجمّد تطبيق عالق قطّ التشغيل بأكمله.
 - **نتيجة جزئية**: تحمل الكتابة النهائية `ok`، و`n` من `of`، وإحصاء `fails` بصيغة `{code:count}` (مثل `{"ERR_NO_SPACE":24}`)، و`free` (البايتات المتبقية في نظام ملفات النسخ الاحتياطية). الدُفعة الجزئية هي `ERR_BATCH_PARTIAL`، وليست خطأً أعمى أبدًا.
 - **التنظيم الحراري** (إعداد `thermal_throttle`، مُفعّل افتراضيًا): بين التطبيقات يتوقف العامل مؤقتًا للتبريد عندما يكون الجهاز ساخنًا، باعثًا مرحلة تقدّم `cooling`، بحيث لا يُفرِط تشغيل طويل في تسخين الجهاز.
+- **تقدير المساحة قبل التشغيل** (إعداد `space_preflight`، مُفعّل افتراضيًا): قبل دفعة إلى وجهة محلية، يُجمع الحجم غير المضغوط للتطبيقات المحدّدة؛ وإن كان يتجاوز بالفعل المساحة الحرة في الوجهة، تتوقّف الدفعة مسبقًا بـ `ERR_NO_SPACE` (مع حقل `need`) بدلاً من ملء القرص في منتصف الطريق. يُتخطّى للوجهات البعيدة المتدفّقة.
 
 ### وسائط `remote-add`
 

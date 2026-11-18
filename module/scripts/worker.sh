@@ -748,6 +748,10 @@ fs_free() {
   echo $(( _fa * _fs ))
 }
 
+# bytes used by <path>. toybox du has no GNU -B1 (it returns nothing, silently zeroing every
+# space/quota check), so use -k (1 KiB blocks, universal) and scale. 0 when the path is unreadable.
+du_bytes() { _dk="$(du -sk "$1" 2>/dev/null | cut -f1)"; case "$_dk" in ''|*[!0-9]*) _dk=0 ;; esac; echo $(( _dk * 1024 )); }
+
 # Offline edition omits the cloud transport binaries (rclone/restic/rsync/ssh/sftp)
 # from bin/<abi>/. A cloud/remote destination needs one of them; abort clearly so the
 # WebUI can tell the user to flash the full edition instead of failing obscurely.
@@ -833,7 +837,7 @@ transfer_full() {
   case "$DTYPE" in rclone|gdrive|telegram) net_guard || return 1 ;; esac
   case "$DTYPE" in
     rclone) [ -n "$DREMOTE" ] || { audit "rclone dest without remote $PKG"; finish false ERR_NO_DEST; return 1; }
-            _tneed="$(du -s -B1 "$DEST" 2>/dev/null | cut -f1)"; _tneed="${_tneed:-0}"
+            _tneed="$(du_bytes "$DEST")"
             rclone_quota_guard "$DREMOTE:" "$_tneed" || return 1
             _tdst="$DREMOTE:$(remote_pfx)/$PKG/${TS}_${VC}"
             rclone_live transfer 95 copy "$DEST" "$_tdst" \
@@ -878,7 +882,7 @@ transfer_full() {
             rm -rf "$_tstg" ;;
     local)  if [ -n "$DPATH" ] && [ "$DPATH" != "$BACKUPS" ]; then
               safe_local_dest "$DPATH" || { audit "refused unsafe local dest $DPATH $PKG"; finish false ERR_DEST_UNSAFE; return 1; }
-              _lsz="$(du -s -B1 "$DEST" 2>/dev/null | cut -f1)"; _lfree="$(fs_free "$DPATH")"
+              _lsz="$(du_bytes "$DEST")"; _lfree="$(fs_free "$DPATH")"
               [ "$_lfree" -gt 0 ] && [ "${_lsz:-0}" -gt 0 ] && [ "$_lfree" -lt $(( _lsz + 10485760 )) ] \
                 && { audit "no space at dest $DPATH $PKG"; finish false ERR_NO_SPACE; return 1; }
               mkdir -p "$(remote_pfx)/$PKG" && cp -a "$DEST" "$(remote_pfx)/$PKG/" \
@@ -1007,7 +1011,7 @@ backup() {
     prog 10 planning "$PKG"; audit "dry-run $PKG"
     PLAN='[]'
     add_plan() { [ -e "$2" ] || return 0
-      sz="$(du -s -B1 "$2" 2>/dev/null | cut -f1)"; sz="${sz:-0}"
+      sz="$(du_bytes "$2")"
       PLAN="$(printf '%s' "$PLAN" | "$JQ" --arg t "$1" --arg p "$2" --argjson b "$sz" '. + [{type:$t,path:$p,bytes:$b}]')"; }
     if echo " $ITEMS " | grep -q ' apk '; then
       asz=0; for p in $(fw pm path --all "$PKG" 2>/dev/null | sed 's/^package://'); do
@@ -1072,7 +1076,7 @@ backup() {
   # free-space guard: the live footprint is an upper bound (the backup is compressed), so
   # if it fits uncompressed it surely fits. Refuse up front instead of filling the disk.
   _spneed=0
-  for _sp in $(item_paths); do [ -e "$_sp" ] && { _spz="$(du -s -B1 "$_sp" 2>/dev/null | cut -f1)"; _spneed=$(( _spneed + ${_spz:-0} )); }; done
+  for _sp in $(item_paths); do [ -e "$_sp" ] && { _spneed=$(( _spneed + $(du_bytes "$_sp") )); }; done
   if echo " $ITEMS " | grep -q ' apk '; then
     for _sp in $(fw pm path --all "$PKG" 2>/dev/null | sed 's/^package://'); do _spz="$(stat -c %s "$_sp" 2>/dev/null || echo 0)"; _spneed=$(( _spneed + _spz )); done
   fi
@@ -1098,7 +1102,7 @@ backup() {
     parent="$(dirname "$src")"; base="$(basename "$src")"
     ctx="$(ls -Zd "$src" 2>/dev/null | cut -d' ' -f1)"
     uid="$(stat -c %u "$src" 2>/dev/null || echo 0)"; gid="$(stat -c %g "$src" 2>/dev/null || echo 0)"
-    orig="$(du -s -B1 "$src" 2>/dev/null | cut -f1)"; orig="${orig:-0}"
+    orig="$(du_bytes "$src")"
     ext="$(comp_ext "$COMP")"; out="$DEST/${typ}.${ext}"; enc=none
     # internal app data holds regenerable/unsafe dirs: cache & code_cache are
     # throwaway, no_backup is the app's "do not back this up" marker, and lib is a
@@ -2489,6 +2493,33 @@ backup_batch() {
   _base="$ARGS"; IN_BATCH=1; BATCH_I=0; _bok=0; _bfail=0; _bcodes=""
   _bu="$(jget "$_base" '.user // 0')"; case "$_bu" in ''|*[!0-9]*) _bu=0 ;; esac
   _BTO="$(cfg .batch_app_timeout)"; case "$_BTO" in ''|null|*[!0-9]*) _BTO=1800 ;; esac
+  # Pre-run space check (issue #5): a batch to LOCAL storage keeps every app's archive, so a big
+  # run can fill the disk partway and end with a bare partial deep in. For a local destination,
+  # sum the uncompressed app data (data + data_de, the always-present core footprint) up front;
+  # if that alone already exceeds the destination's free space it cannot fit even before
+  # compression, so stop here with a clear message instead of failing app-by-app. The message
+  # points at streaming destinations and the toggle, since compression may still fit a borderline
+  # case (the per-app guard still refuses apps that truly do not fit). Toggle .space_preflight
+  # (default on). Skipped for streaming remotes (each app is sent out, one app's temp space only).
+  resolve_dest
+  if [ "$DTYPE" = local ] && [ "$(cfg .space_preflight)" != false ]; then
+    _pfneed=0
+    while IFS= read -r _pfp; do
+      [ -n "$_pfp" ] || continue
+      for _pfd in "/data/data/$_pfp" "/data/user_de/$_bu/$_pfp"; do
+        [ -d "$_pfd" ] && { _pfneed=$(( _pfneed + $(du_bytes "$_pfd") )); }
+      done
+    done < "$_lst"
+    _pfdir="$DPATH"; [ -n "$_pfdir" ] || _pfdir="$(backups_dir "$_bu")"
+    _pffree="$(fs_free "$_pfdir")"
+    if [ "$_pffree" -gt 0 ] && [ "$_pfneed" -gt "$_pffree" ]; then
+      rm -f "$_lst" "$_rcf"
+      audit "space preflight abort: estimate=$_pfneed free=$_pffree at $_pfdir (batch of $BATCH_N)"
+      printf '{"opid":"%s","percent":0,"phase":"finished","done":true,"ok":false,"code":"ERR_NO_SPACE","n":0,"of":%s,"fails":{},"free":%s,"need":%s}\n' \
+        "$OPID" "$BATCH_N" "$_pffree" "$_pfneed" > "$PROG"
+      return
+    fi
+  fi
   # read the list on FD 3: backup() (am/pm/app_process) must not consume the loop's stdin,
   # which would swallow the remaining packages and stop the batch after the first app.
   # Each app runs in a SUBSHELL so its fds / shell state are reclaimed per app (the batch

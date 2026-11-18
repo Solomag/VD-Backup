@@ -56,7 +56,8 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}`（重新连接后再挂接） |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | 应用列表 / 批量 base64 图标 |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` 设置或清除备份的自定义名称（`note`）和自由 `tags`；存储在随备份一起移动的附属文件中，可从 `list-backups` 搜索。 |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` 设备的 Android 用户（多用户）. |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` 某路径的子目录（文件夹选择器）. |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` 独立的文件夹/文件备份. |
@@ -206,6 +207,7 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 - **`batch_app_timeout`**（配置，秒，默认 `1800`，`0` 表示禁用）：如果某个应用耗时超过此值，其进程树会被终止，记录为 `ERR_TIMEOUT`，然后批处理继续，这样一个卡住的应用永远不会冻结整个运行。
 - **部分结果**：结束写入包含 `ok`、`of` 中的 `n`、说明失败原因的 `fails` 统计 `{code:count}`（例如 `{"ERR_NO_SPACE":24}`），以及 `free`（备份文件系统的剩余字节）。部分批处理为 `ERR_BATCH_PARTIAL`，绝不是无缘由的错误。
 - **热调度**（配置 `thermal_throttle`，默认开启）：在应用之间，当设备发热时 worker 会暂停以降温，并发出 `cooling` 进度阶段，这样长时间运行不会使设备过热。
+- **运行前空间估算**（配置 `space_preflight`，默认开启）：在批量操作发送到本地目标之前，会汇总所选应用的未压缩大小；如果它已经超过目标的可用空间，批量操作会预先以 `ERR_NO_SPACE`（以及一个 `need` 字段）停止，而不是把磁盘填到一半。对于流式远程目标则跳过。
 
 ### `remote-add` 参数
 

@@ -53,7 +53,7 @@ Otwierasz WebUI, wybierasz, co skopiować, i uruchamiasz.
 
 Wszystko, co produkuje VDBackup, używa **standardowych formatów** (tar, gzip, zstd, age, zip,
 restic), więc twoje kopie nigdy nie są zamknięte w module i nigdy nie są związane z twoim
-konkretnym urządzeniem. Zobacz [sekcja 11](#sekcja-11).
+konkretnym urządzeniem. Zobacz [sekcja 11](#11-przenośność-otwieranie-kopii-na-pc).
 
 ## Zrzuty ekranu
 
@@ -68,7 +68,7 @@ konkretnym urządzeniem. Zobacz [sekcja 11](#sekcja-11).
 - **Urządzenie z Androidem z rootem** zarządzane przez **KernelSU**, **APatch** lub **Magisk**.
   VDBackup instaluje się jako moduł z tego menedżera.
 - Wystarczająco wolnego miejsca na twoje kopie (kopie lokalne żyją pod katalogiem stanu
-  modułu; zobacz [sekcja 3](#sekcja-3)).
+  modułu; zobacz [sekcja 3](#3-instalacja-i-pierwsze-uruchomienie)).
 - Nic więcej. Moduł dołącza wszystkie binaria, których potrzebuje (tar, zstd, lz4, rclone,
   rsync, ssh, restic), więc **lokalna kopia i przywracanie działają w pełni offline**. Tylko cele
   chmurowe komunikują się z siecią.
@@ -83,7 +83,7 @@ i degradują się elegancko, gdy nie są dostępne na twoim urządzeniu.
 2. W swoim menedżerze KernelSU / APatch / Magisk flashnij zip modułu jak każdy inny
    moduł.
 3. Jest używalny natychmiast, **restart nie jest potrzebny**. (Restart jest istotny tylko
-   przy przywracaniu SSAID; zobacz [sekcja 10](#sekcja-10).)
+   przy przywracaniu SSAID; zobacz [sekcja 10](#10-ssaid-android_id-urządzenia).)
 4. Otwórz **WebUI** modułu z menedżera. To jest cały interfejs.
 
 **Którą edycję pobrać.** Każde wydanie jest dostarczane jako kilka flashowalnych edycji zip, więc
@@ -148,7 +148,7 @@ WebUI jest zorganizowane w kilka zakładek:
   przywracasz, uruchamiasz restore-test, usuwasz kopię lub importujesz kopie z Neo-Backup lub
   Android-DataBackup.
 - **Destinations**: zarządzaj, dokąd trafiają kopie: magazyn lokalny plus dowolne zdalne
-  cele, które dodasz (zobacz [sekcja 7](#sekcja-7)). Możesz tu
+  cele, które dodasz (zobacz [sekcja 7](#7-cele-lokalne-i-zdalne)). Możesz tu
   przetestować cel, zanim na nim polegniesz.
 - **Settings**: przełącznik motywu jasny/ciemny, selektor koloru akcentu (gotowe ustawienia,
   własny kolor lub reset), selektor języka (interfejs jest renderowany od prawej do lewej dla
@@ -156,7 +156,7 @@ WebUI jest zorganizowane w kilka zakładek:
   cały interfejs (nagłówek, treść i dolna nawigacja razem) od 85% do 120% (100% jest domyślne), do ekranów o różnej
   gęstości pikseli, domyślne wartości dla nowych
   zadań (domyślna kompresja, verify wł/wył, domyślne szyfrowanie), polityka sieciowa dla
-  przesyłów chmurowych (zobacz [sekcja 7](#sekcja-7)), automatyczna kopia i lista wykluczonych
+  przesyłów chmurowych (zobacz [sekcja 7](#7-cele-lokalne-i-zdalne)), automatyczna kopia i lista wykluczonych
   aplikacji, opcja źródła instalacji, klucz
   szyfrowania oraz planowanie. Ustawienia wł/wył używają przełączników w stylu Androida.
 - **About**: wersja, linki, projekty siostrzane (See also), manifest audytu dołączonych plików binarnych oraz akcja **Check for updates**, która zgłasza, czy opublikowano nowszą wersję (wraz z jej informacjami o wydaniu). Każdą aktualizację instalujesz przez swojego menedżera roota, tak samo jak flashowałeś moduł.
@@ -300,7 +300,7 @@ Dla wiadomości, rejestru połączeń i kontaktów zapisywana jest też **przeno
 JSON), więc masz kopię międzyurządzeniową, którą możesz odczytać na komputerze bez modułu.
 
 **Ustawienia systemowe są opt-in i nadpisują ustawienia twojego urządzenia przy przywracaniu.**
-Tak jak SSAID (zobacz [sekcja 10](#sekcja-10)), kategoria **Ustawienia systemowe** jest
+Tak jak SSAID (zobacz [sekcja 10](#10-ssaid-android_id-urządzenia)), kategoria **Ustawienia systemowe** jest
 najwrażliwsza: jej przywrócenie nadpisuje ustawienia całego urządzenia, więc jest wyłączona,
 chyba że wybierzesz ją celowo, najpierw prosi cię o potwierdzenie i jest zapisywana w dzienniku
 aktywności.
@@ -623,7 +623,7 @@ chmurowe (rclone/restic/ssh) komunikują się z siecią, i tylko gdy ich używas
 
 **Czy moja kopia przywróci się na innym telefonie?** Tak, kopie są przenośne i nie są
 związane ze sprzętem urządzenia. (SSAID to jedyny wyjątek specyficzny dla urządzenia, i jest opt-in
-oraz stosowany po restarcie; zobacz [sekcja 10](#sekcja-10).)
+oraz stosowany po restarcie; zobacz [sekcja 10](#10-ssaid-android_id-urządzenia).)
 
 **Moja zaszyfrowana kopia się nie otworzy, zgubiłem passphrase.** Nie ma tylnej furtki
 do odzyskiwania z założenia; passphrase jest tym, co chroni kopię. Trzymaj ją bezpiecznie.

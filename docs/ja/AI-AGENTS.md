@@ -60,7 +60,8 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (再接続後に再アタッチ) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | アプリ一覧 / バッチの base64 アイコン |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` バックアップのカスタム名（`note`）と自由な `tags` を設定またはクリアします。バックアップと一緒に移動するサイドカーに保存され、`list-backups` から検索できます。 |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` デバイスの Android ユーザー（マルチユーザー）. |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` パスのサブディレクトリ（フォルダ選択）. |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` 単体のフォルダ/ファイルのバックアップ. |
@@ -225,6 +226,7 @@ backup (または明示的な `ref`) を復元し、**実行ごとにアプリ�
 - **`batch_app_timeout`**（設定、秒、既定 `1800`、`0` で無効）: アプリがこれより長くかかると、そのプロセスツリーが終了され、`ERR_TIMEOUT` として記録され、バッチは続行されます。これにより、1つの動かなくなったアプリが実行全体を止めることは決してありません。
 - **部分的な結果**: 終了時の書き込みには `ok`、`of` 中の `n`、失敗理由を示す `fails` 集計 `{code:count}`（例: `{"ERR_NO_SPACE":24}`）、`free`（バックアップ用ファイルシステムの残りバイト数）が含まれます。部分的なバッチは `ERR_BATCH_PARTIAL` であり、原因不明のエラーではありません。
 - **サーマルペーシング**（設定 `thermal_throttle`、既定オン）: アプリの合間に、端末が熱いとワーカーは冷却のため一時停止し、`cooling` の進捗フェーズを出力します。これにより、長い実行で端末が過熱しません。
+- **実行前の容量見積もり**（設定 `space_preflight`、既定オン）: ローカルの宛先へのバッチの前に、選択したアプリの非圧縮サイズが合計されます。それが宛先の空き容量をすでに超える場合、バッチはディスクを途中まで埋める代わりに `ERR_NO_SPACE`（および `need` フィールド）で事前に停止します。ストリーミングのリモート宛先ではスキップされます。
 
 ### `remote-add` の引数
 

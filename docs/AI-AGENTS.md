@@ -59,7 +59,8 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `cancel` | base64(opid) | `{ok,cancelled}` |
 | `list-ops` | `{}` | `{ok,ops:[...]}` (reattach after reconnecting) |
 | `list-apps`/`icons` | `{user?}` / `{user?,items:[{package,vc}]}` | app list / batch base64 icons |
-| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,items}]}` |
+| `list-backups` | `{package?}` | `{ok,backups:[{ref,package,label,versionName,versionCode,created_at,mode,note,tags,items}]}` |
+| `note-set` | `{ref,note?,tags?}` | `{ok}` set or clear a backup's custom name (`note`) and free `tags`; stored in a sidecar that travels with the backup, searchable from `list-backups`. |
 | `list-users` | `{}` | `{ok,users:[{id,name}]}` the device's Android users (multi-user). |
 | `list-dirs` | `{path}` | `{ok,path,parent,dirs:[...]}` sub-directories of a path (the folder picker). |
 | `path-list` | `{user?}` | `{ok,backups:[...]}` standalone folder/file backups. |
@@ -232,6 +233,10 @@ so one app cannot break the rest:
 - **Thermal pacing** (config `thermal_throttle`, default on): between apps the worker pauses
   to cool when the device is hot, emitting a `cooling` progress phase, so a long run cannot
   overheat the device.
+- **Pre-run space estimate** (config `space_preflight`, default on): before a batch to a local
+  destination, the uncompressed footprint of the selected apps is summed; if it already exceeds
+  the destination's free space, the batch stops up front with `ERR_NO_SPACE` (plus a `need`
+  field) instead of filling the disk partway. Skipped for streaming remotes.
 
 ### `remote-add` args
 
