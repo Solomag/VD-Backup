@@ -3,7 +3,7 @@
   "versionCode": 11100,
   "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.11/VD-Backup-v1.11-universal-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "",
-  "size": 0,
-  "sha256": ""
+  "notes": "VDBackup v1.11\n\nNew\n- Back up /data/adb itself - the root environment (modules, their data and configs), all of it or a subtree you pick from a file tree, and restore it the same way. Each file keeps its original owner and SELinux context, so root keeps working. Advanced; only what you choose is included.\n\nReliability\n- A long batch no longer stalls on one slow app - VDBackup records why and moves on.\n- A partial batch now says why it stopped: how many apps succeeded, the reason the rest failed, and how much room is left.\n- An app running an active VPN is backed up while it keeps running, instead of being force-stopped.\n- Long backups pace themselves to avoid overheating, and resume on their own (a new switch in Settings turns it off).\n\nFixes\n- A blocked app comes back blocked after a restore, even on ROMs that keep the block only in memory. (#9)\n- A backup saved to a local destination no longer also keeps a copy in internal storage.\n- Updating from your root manager keeps the edition you installed (lite, full, or your device's architecture).\n- The \"Updates\" panel is readable in the light theme; notifications appear in Indonesian and Ukrainian.\n\nInterface\n- The heaviest sections across Settings, Destinations, Backups and Schedule are now collapsible cards you open only when you need them.\n- Settings save the moment you change them - no separate Save step.\n- \"Check for updates\" and the update notice moved to the Updates tab.",
+  "size": 257546447,
+  "sha256": "b671969fcf61e91807e3af85c74ae0ac642e5d9a05d734a61dd8dd28b1887f5c"
 }
