@@ -91,6 +91,9 @@ de nuvem (`rclone`/`restic`/ssh) falam com a rede.
 | `telegram-list` | `{}` | backups no canal Telegram (nomes `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` baixa um backup do Telegram pro armazenamento local (detached); depois restaura pelo fluxo normal de `restore` |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` apaga um backup do canal Telegram pelo `message_id` (lote: separado por vírgula) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` backups Full armazenados somente-remoto num destino rclone (`dest` é o id do destino, `rref` é `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` baixa um backup rclone armazenado somente-remoto pro armazenamento local (detached); depois restaura pelo fluxo normal de `restore` |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` apaga um backup de um remoto rclone; `rref` deve ser exatamente `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | gerenciamento de destinos |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | gerenciamento de remotos rclone (cria a entrada `rclone.conf` para a qual um dest `type:"rclone"` aponta); `backend` pode ser qualquer backend rclone, sem lista de permissões |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (o motor já abriu o navegador do telefone nessa URL de consentimento via uma intent VIEW do Android) ou `{ok:false,code:"ERR_AUTHORIZE"}`. Roda `rclone authorize <backend>` num servidor de callback local (`127.0.0.1:53682`) para OAuth no dispositivo. |
@@ -110,6 +113,7 @@ de nuvem (`rclone`/`restic`/ssh) falam com a rede.
 | `wipe-credentials` | `{}` | `{ok,wiped}` remove senhas remotas salvas e a chave de criptografia do aparelho; destinos, jobs e backups permanecem. |
 | `log-prune` | `{}` | `{ok}` poda logs de ops há muito concluídas, limita a trilha de auditoria e remove ícones obsoletos (o serviço de boot chama isto). |
 | `sanitize` | `{}` | `{ok}` reafirma a visibilidade (0755) das pastas de backup em todos os usuários do Android, para que um gerenciador de arquivos consiga abrir pastas que uma cópia root crua ou um backup anterior ao v1.03.2 deixaram acessíveis apenas ao dono. |
+| `boot-sweep` | `{}` | `{ok,reaped}` limpa restos de um backup que foi interrompido ou morto à força (o serviço de boot chama isto); um backup que falha ou é cancelado já é limpo pelo seu próprio worker. |
 
 ### Campos de `progress`
 

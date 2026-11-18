@@ -166,6 +166,8 @@ notifica ti dice quando è finito.
 
 Nella finestra di backup puoi anche scegliere la **destinazione** di questo backup, archiviazione locale o qualsiasi destinazione cloud/remota aggiunta, senza prima cambiare la destinazione predefinita nelle Impostazioni.
 
+VDBackup esegue due salvaguardie automatiche durante un backup, entrambe attive per impostazione predefinita nelle Impostazioni. **"Metti in pausa per raffreddare quando il dispositivo si surriscalda"** lascia respirare un lavoro lungo, e aspetta che il dispositivo si raffreddi se è davvero caldo, così un backup grande non surriscalda mai il telefono; cambia solo il ritmo, mai la fedeltà. **"Controlla lo spazio libero prima di un backup in lotto"** stima ciò di cui avrà bisogno un backup di più app e si ferma all'inizio, invece che a metà, se l'archiviazione non lo conterrebbe.
+
 ### 5.1 Scegliere cosa salvare
 
 Per ogni app puoi includere qualsiasi combinazione di questi items :
@@ -418,6 +420,8 @@ valore predefinito), **Solo Wi-Fi**, o **Solo dati mobili**. Quando lo limiti, o
 cloud, manuale o pianificato, caricamento o ripristino, verifica prima la connessione attiva
 e rifiuta di eseguirsi su quella sbagliata, così una politica solo-Wi-Fi non spende mai dati mobili.
 I backup locali non sono mai interessati.
+
+**Tieni una copia locale, o vai solo-remoto.** Quando un backup va verso un remoto che VDBackup può elencare e riscaricare da solo (Telegram o un remoto rclone), è **solo-remoto per impostazione predefinita**: il backup viene caricato e sul dispositivo non resta nulla, il che fa risparmiare spazio e non lascia alcuna traccia locale. Attiva **"Conserva una copia locale quando un backup va a una destinazione"** in Settings per tenere la copia anche sul dispositivo per un ripristino locale istantaneo. In entrambi i casi puoi recuperare un backup remoto con **Ripristina dal remoto cloud** nella scheda Backups, che elenca i tuoi backup remoti e scarica quello che scegli.
 
 **Google Drive.** Hai due modi per raggiungere Google Drive :
 

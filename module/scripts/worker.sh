@@ -67,6 +67,29 @@ LOGS="$STATE/logs"
 # per Android user), NOT in /data/adb (device-encrypted, readable before first
 # unlock). BACKUPS is resolved per operation from the target user $U (see backup()).
 backups_dir() { printf '/data/media/%s/VDBackup' "${1:-0}"; }
+# Root-only staging for a backup that will not keep an internal copy (Telegram / non-internal local
+# dest): built here, cleaned after transfer, so data is never left world-readable on /sdcard (stealth).
+# Configurable via .staging_dir (default /data/local/tmp); absolute, no traversal, else the default.
+staging_root() {
+  _sr="$(cfg .staging_dir)"; case "$_sr" in /*) : ;; *) _sr=/data/local/tmp ;; esac
+  case "$_sr" in *..*) _sr=/data/local/tmp ;; esac
+  printf '%s/.vdstage' "$_sr"
+}
+# Whether this backup keeps NO local copy (its data lives only at the destination). The user's
+# .local_copy toggle governs it: true keeps a local copy always; otherwise a backup is remote-only on
+# destinations that can be listed and restored on their own - Telegram (the channel is the index), an
+# rclone remote (listed/pulled/deleted via rclone-list/-pull/-delete) and a non-default local dir (the
+# dir is the store). gdrive has rclone-style remote ops (gdrive-list/-pull/-delete) but they are NOT
+# yet verified on-device, so gdrive deliberately stays keep-local (absent from the case) until proven;
+# to enable gdrive remote-only after a real end-to-end test, add `gdrive` to the telegram|rclone case.
+remote_only() {
+  [ "$(cfg .local_copy)" = true ] && return 1
+  case "$DTYPE" in
+    telegram|rclone) return 0 ;;
+    local) [ -n "$DPATH" ] && [ "$DPATH" != "$BACKUPS" ] && return 0 ;;
+  esac
+  return 1
+}
 
 abi="$(getprop ro.product.cpu.abi)"
 case "$abi" in
@@ -97,45 +120,76 @@ abx_to_xml() {
 xml_to_abx() {
   if [ -x /system/bin/xml2abx ] && LD_LIBRARY_PATH= /system/bin/xml2abx "$1" "$2" 2>/dev/null && [ -s "$2" ]; then return 0; fi
   [ -x "$BIN/xml2abx" ] && "$BIN/xml2abx" "$1" "$2" 2>/dev/null && [ -s "$2" ]; }
+# Centralised ABX-aware in-place edit of a system XML file (SSAID, netpolicy, packages.xml). Decodes
+# (ABX or plain), runs <editor> on the plaintext (args: <in-xml> <out-xml>), re-encodes, round-trip
+# decodes and checks <count-pat> is still present the same number of times (catches a lossy encode),
+# runs optional <verify> on the re-decoded result (args: <chk-xml>), then backs up the live file under
+# <bakdir> and atomically swaps the new file in, preserving owner/mode/SELinux context. The live file
+# is NEVER touched unless every step passed. Returns 0 only on a real swap; sets XMLEDIT_BAK to the
+# backup path. POSIX sh, no bashisms. <verify> or <bakdir> may be empty.
+xml_edit() {  # <file> <editor> <count-pat> <verify> <bakdir>
+  _xf="$1"; _xe="$2"; _xcp="$3"; _xvf="$4"; _xbd="$5"; XMLEDIT_BAK=""
+  [ -f "$_xf" ] || return 1
+  _xabx=no; is_abx "$_xf" && _xabx=yes
+  if [ "$_xabx" = yes ]; then { [ -x /system/bin/abx2xml ] && [ -x /system/bin/xml2abx ]; } || { [ -x "$BIN/abx2xml" ] && [ -x "$BIN/xml2abx" ]; } || return 1; fi
+  _xi="$STATE/staging/xe.$OPID.in"; _xo="$STATE/staging/xe.$OPID.out"
+  _xn="$STATE/staging/xe.$OPID.enc"; _xc="$STATE/staging/xe.$OPID.chk"
+  rm -f "$_xi" "$_xo" "$_xn" "$_xc"
+  if [ "$_xabx" = yes ]; then abx_to_xml "$_xf" "$_xi" || { rm -f "$_xi"; return 1; }
+  else cp "$_xf" "$_xi" || return 1; fi
+  [ -s "$_xi" ] || { rm -f "$_xi"; return 1; }
+  "$_xe" "$_xi" "$_xo" || { rm -f "$_xi" "$_xo"; return 1; }
+  [ -s "$_xo" ] || { rm -f "$_xi" "$_xo"; return 1; }
+  _xcb="$(grep -c "$_xcp" "$_xo" 2>/dev/null)"
+  if [ "$_xabx" = yes ]; then xml_to_abx "$_xo" "$_xn" || { rm -f "$_xi" "$_xo" "$_xn"; return 1; }
+  else cp "$_xo" "$_xn" || { rm -f "$_xi" "$_xo" "$_xn"; return 1; }; fi
+  if [ "$_xabx" = yes ]; then abx_to_xml "$_xn" "$_xc" || { rm -f "$_xi" "$_xo" "$_xn" "$_xc"; return 1; }
+  else cp "$_xn" "$_xc" || { rm -f "$_xi" "$_xo" "$_xn" "$_xc"; return 1; }; fi
+  _xca="$(grep -c "$_xcp" "$_xc" 2>/dev/null)"
+  [ "$_xcb" = "$_xca" ] || { rm -f "$_xi" "$_xo" "$_xn" "$_xc"; return 1; }
+  if [ -n "$_xvf" ]; then "$_xvf" "$_xc" || { rm -f "$_xi" "$_xo" "$_xn" "$_xc"; return 1; }; fi
+  if [ -n "$_xbd" ]; then
+    mkdir -p "$_xbd"; chmod 700 "$_xbd" 2>/dev/null
+    XMLEDIT_BAK="$_xbd/$(basename "$_xf")_$(date -u +%Y%m%dT%H%M%SZ)_$OPID.bak"
+    cp "$_xf" "$XMLEDIT_BAK" 2>/dev/null || { XMLEDIT_BAK=""; rm -f "$_xi" "$_xo" "$_xn" "$_xc"; return 1; }
+  fi
+  _xown="$(stat -c '%u:%g' "$_xf" 2>/dev/null)"; _xmode="$(stat -c '%a' "$_xf" 2>/dev/null)"
+  _xtmp="$(dirname "$_xf")/.xe.$OPID"
+  cp "$_xn" "$_xtmp" 2>/dev/null || { rm -f "$_xi" "$_xo" "$_xn" "$_xc" "$_xtmp"; return 1; }
+  case "$_xown" in *[0-9]:*[0-9]) chown "$_xown" "$_xtmp" 2>/dev/null ;; esac
+  [ -n "$_xmode" ] && chmod "$_xmode" "$_xtmp" 2>/dev/null
+  mv -f "$_xtmp" "$_xf" 2>/dev/null || { rm -f "$_xi" "$_xo" "$_xn" "$_xc" "$_xtmp"; return 1; }
+  restorecon "$_xf" 2>/dev/null
+  rm -f "$_xi" "$_xo" "$_xn" "$_xc"
+  return 0
+}
 
 ssaid_restore() {
   _p="$1"; _u="$2"; _val="$3"
   _f="/data/system/users/$_u/settings_ssaid.xml"; [ -f "$_f" ] || { audit "ssaid no file $_p"; return 0; }
-  _abx=no; is_abx "$_f" && _abx=yes
-  if [ "$_abx" = yes ]; then { [ -x /system/bin/abx2xml ] || [ -x "$BIN/abx2xml" ]; } || { audit "ssaid no abx tool $_p"; return 0; }; fi
-  _x="$STATE/staging/ssaid.$OPID.xml"; _o="$STATE/staging/ssaid.$OPID.out"
-  _c="$STATE/staging/ssaid.$OPID.chk"; _bd="$STATE/staging/ssaid.$OPID.body"
-  if [ "$_abx" = yes ]; then abx_to_xml "$_f" "$_x" || { audit "ssaid decode failed $_p"; return 0; }
-  else cp "$_f" "$_x"; fi
-  [ -s "$_x" ] || { rm -f "$_x"; audit "ssaid empty decode $_p"; return 0; }
-  # normalize to one <setting/> per line (the standalone converter may emit a single line),
-  # so the per-package edit can never touch a neighbouring entry's value.
-  _stag="$(grep -o '<settings[^>]*>' "$_x" | head -1)"; [ -n "$_stag" ] || _stag='<settings version="-1">'
-  grep -o '<setting [^>]*>' "$_x" | sed -E 's@ */?>$@ />@' > "$_bd"
-  _old="$(grep "package=\"$_p\"" "$_bd" | grep -o 'value="[0-9a-fA-F]*"' | head -1 | sed 's/value="//;s/"//')"
-  if grep -q "package=\"$_p\"" "$_bd"; then
-    sed -i -E "/package=\"$_p\"/ s/value=\"[0-9a-fA-F]+\"/value=\"$_val\"/" "$_bd"
-  else
-    _uid="$(stat -c %u "/data/user/$_u/$_p" 2>/dev/null)"; case "$_uid" in ''|*[!0-9]*) rm -f "$_x" "$_bd"; audit "ssaid no uid $_p"; return 0 ;; esac
-    _nid="$(grep -o 'id="[0-9]*"' "$_bd" | grep -o '[0-9]*' | sort -n | tail -1)"; _nid=$(( ${_nid:-0} + 1 ))
-    printf '<setting id="%s" name="%s" value="%s" package="%s" defaultValue="%s" defaultSysSet="true" tag="null" />\n' \
-      "$_nid" "$_uid" "$_val" "$_p" "$_val" >> "$_bd"
-  fi
-  { printf "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>\n%s\n" "$_stag"; cat "$_bd"; printf '</settings>\n'; } > "$_x"
-  rm -f "$_bd"
-  if [ "$_abx" = yes ]; then xml_to_abx "$_x" "$_o" || { rm -f "$_x" "$_o"; audit "ssaid encode failed $_p"; return 0; }
-  else cp "$_x" "$_o"; fi
-  if [ "$_abx" = yes ]; then abx_to_xml "$_o" "$_c" 2>/dev/null; else cp "$_o" "$_c"; fi
-  if ! grep -o '<setting [^>]*>' "$_c" 2>/dev/null | grep "package=\"$_p\"" | grep -q "value=\"$_val\""; then
-    rm -f "$_x" "$_o" "$_c"; audit "ssaid verify failed live untouched $_p"; return 0; fi
-  # ALWAYS back up the live file byte-exact before overwriting, so a mistaken or
-  # accidental change can be rolled back (cp the .bak back over the file + reboot).
-  _bk="$STATE/ssaid_backups"; mkdir -p "$_bk"; chmod 700 "$_bk" 2>/dev/null
-  _ts="$(date -u +%Y%m%dT%H%M%SZ)"; _bkf="$_bk/user${_u}_${_ts}.bak"
-  cp "$_f" "$_bkf" 2>/dev/null || { rm -f "$_x" "$_o" "$_c"; audit "ssaid backup failed, live untouched $_p"; return 0; }
-  cat "$_o" > "$_f"
-  rm -f "$_x" "$_o" "$_c"
-  audit "ssaid restored $_p old=${_old:-none} new=$_val backup=$_bkf (applies after reboot)"
+  _sse() {  # <in-xml> <out-xml>: normalize to one <setting/> per line (the standalone converter may
+    # emit one long line), then update-or-insert this package's value so the per-package edit can
+    # never touch a neighbour's value.
+    _stag="$(grep -o '<settings[^>]*>' "$1" | head -1)"; [ -n "$_stag" ] || _stag='<settings version="-1">'
+    grep -o '<setting [^>]*>' "$1" | sed -E 's@ */?>$@ />@' > "$1.body"
+    _old="$(grep "package=\"$_p\"" "$1.body" | grep -o 'value="[0-9a-fA-F]*"' | head -1 | sed 's/value="//;s/"//')"
+    if grep -q "package=\"$_p\"" "$1.body"; then
+      sed -i -E "/package=\"$_p\"/ s/value=\"[0-9a-fA-F]+\"/value=\"$_val\"/" "$1.body"
+    else
+      _uid="$(stat -c %u "/data/user/$_u/$_p" 2>/dev/null)"; case "$_uid" in ''|*[!0-9]*) rm -f "$1.body"; return 1 ;; esac
+      _nid="$(grep -o 'id="[0-9]*"' "$1.body" | grep -o '[0-9]*' | sort -n | tail -1)"; _nid=$(( ${_nid:-0} + 1 ))
+      printf '<setting id="%s" name="%s" value="%s" package="%s" defaultValue="%s" defaultSysSet="true" tag="null" />\n' \
+        "$_nid" "$_uid" "$_val" "$_p" "$_val" >> "$1.body"
+    fi
+    { printf "<?xml version='1.0' encoding='UTF-8' standalone='yes' ?>\n%s\n" "$_stag"; cat "$1.body"; printf '</settings>\n'; } > "$2"
+    rm -f "$1.body"
+  }
+  _ssv() {  # <chk-xml>: the target package must carry the new value after the ABX round trip
+    grep -o '<setting [^>]*>' "$1" 2>/dev/null | grep "package=\"$_p\"" | grep -q "value=\"$_val\""
+  }
+  if xml_edit "$_f" _sse '<setting ' _ssv "$STATE/ssaid_backups"; then
+    audit "ssaid restored $_p old=${_old:-none} new=$_val backup=$XMLEDIT_BAK (applies after reboot)"
+  else audit "ssaid restore skipped or failed, live untouched $_p"; fi
 }
 
 # Per-app network policy (opt-in). Some ROMs (LineageOS and derivatives) store a per-app
@@ -159,32 +213,20 @@ netpolicy_restore() {   # <pkg> <user> <policy-int>
     audit "netpolicy framework did not stick ($_hr), falling back to xml $_p"
   fi
   _f=/data/system/netpolicy.xml; [ -f "$_f" ] || { audit "netpolicy no file $_p"; return 0; }
-  _abx=no; is_abx "$_f" && _abx=yes
-  if [ "$_abx" = yes ]; then { [ -x /system/bin/abx2xml ] || [ -x "$BIN/abx2xml" ]; } || { audit "netpolicy no abx tool $_p"; return 0; }; fi
-  _x="$STATE/staging/np.$OPID.xml"; _o="$STATE/staging/np.$OPID.out"; _c="$STATE/staging/np.$OPID.chk"
-  if [ "$_abx" = yes ]; then abx_to_xml "$_f" "$_x" || { audit "netpolicy decode failed $_p"; return 0; }
-  else cp "$_f" "$_x"; fi
-  [ -s "$_x" ] || { rm -f "$_x"; audit "netpolicy empty decode $_p"; return 0; }
-  if grep -q "<uid-policy uid=\"$_nuid\"" "$_x"; then
-    sed -i -E "s@(<uid-policy uid=\"$_nuid\" policy=)\"[0-9]+\"@\1\"$_pol\"@" "$_x"   # update in place
-  elif grep -q '</policy-list>' "$_x"; then
-    sed -i "s@</policy-list>@<uid-policy uid=\"$_nuid\" policy=\"$_pol\" />\n</policy-list>@" "$_x"   # nested style: before the close tag
-  elif grep -q '<policy-list' "$_x"; then
-    # flat style (some ROMs, e.g. A17/Infinity-X): <policy-list .../> is self-closed and the
-    # <uid-policy> entries are siblings after it; add a new sibling right after that tag.
-    sed -i "s@\(<policy-list[^>]*>\)@\1\n<uid-policy uid=\"$_nuid\" policy=\"$_pol\" />@" "$_x"
-  else rm -f "$_x"; audit "netpolicy no policy-list $_p"; return 0; fi
-  if [ "$_abx" = yes ]; then xml_to_abx "$_x" "$_o" || { rm -f "$_x" "$_o"; audit "netpolicy encode failed $_p"; return 0; }
-  else cp "$_x" "$_o"; fi
-  if [ "$_abx" = yes ]; then abx_to_xml "$_o" "$_c" 2>/dev/null; else cp "$_o" "$_c"; fi
-  if ! grep -q "<uid-policy uid=\"$_nuid\" policy=\"$_pol\"" "$_c" 2>/dev/null; then
-    rm -f "$_x" "$_o" "$_c"; audit "netpolicy verify failed live untouched $_p"; return 0; fi
-  _bk="$STATE/netpolicy_backups"; mkdir -p "$_bk"; chmod 700 "$_bk" 2>/dev/null
-  _ts="$(date -u +%Y%m%dT%H%M%SZ)"; _bkf="$_bk/netpolicy_${_ts}.bak"
-  cp "$_f" "$_bkf" 2>/dev/null || { rm -f "$_x" "$_o" "$_c"; audit "netpolicy backup failed, live untouched $_p"; return 0; }
-  cat "$_o" > "$_f"
-  rm -f "$_x" "$_o" "$_c"
-  audit "netpolicy restored $_p uid=$_nuid policy=$_pol backup=$_bkf (applies after reboot)"
+  _npe() {  # <in-xml> <out-xml>: update the uid-policy in place, or insert it (nested </policy-list>
+    # style, or flat self-closed <policy-list/> as on A17/Infinity-X where entries are siblings).
+    if grep -q "<uid-policy uid=\"$_nuid\"" "$1"; then
+      sed -E "s@(<uid-policy uid=\"$_nuid\" policy=)\"[0-9]+\"@\1\"$_pol\"@" "$1" > "$2"
+    elif grep -q '</policy-list>' "$1"; then
+      sed "s@</policy-list>@<uid-policy uid=\"$_nuid\" policy=\"$_pol\" />\n</policy-list>@" "$1" > "$2"
+    elif grep -q '<policy-list' "$1"; then
+      sed "s@\(<policy-list[^>]*>\)@\1\n<uid-policy uid=\"$_nuid\" policy=\"$_pol\" />@" "$1" > "$2"
+    else return 1; fi
+  }
+  _npv() { grep -q "<uid-policy uid=\"$_nuid\" policy=\"$_pol\"" "$1"; }
+  if xml_edit "$_f" _npe '<uid-policy ' _npv "$STATE/netpolicy_backups"; then
+    audit "netpolicy restored $_p uid=$_nuid policy=$_pol backup=$XMLEDIT_BAK (applies after reboot)"
+  else audit "netpolicy fallback skipped or failed, live untouched $_p"; fi
 }
 
 # enter the init mount namespace (correct view under Magisk)
@@ -242,7 +284,9 @@ _release_wakelock() { echo "vdbackup_$OPID" > /sys/power/wake_unlock 2>/dev/null
 # `trap cleanup EXIT` that followed (a second trap on a signal REPLACES the first), so a
 # cleanly-finished worker never released its wakelock and kept the device awake. Folding the
 # release into cleanup, and routing the signals into the same trap, fixes it for good.
-cleanup() { _release_wakelock; verifier_restore; rm -f "$LOGS/$OPID.pid"; }
+# also reap this op's staging transients (dump/xe/ic/batch/restore/...): a kill anywhere,
+# even during preparing (before the per-op DEST trap in do_backup arms), leaves no scratch.
+cleanup() { _release_wakelock; verifier_restore; rm -f "$LOGS/$OPID.pid"; [ -n "$OPID" ] && rm -rf "$STATE/staging/"*"$OPID"* 2>/dev/null; }
 trap cleanup EXIT
 trap 'exit 143' TERM
 trap 'exit 130' INT
@@ -273,12 +317,27 @@ audit() { printf '{"ts":"%s","op":"%s","opid":"%s","detail":"%s"}\n' \
 
 # localized notification strings (21 languages); English is the fallback.
 [ -f "$MODDIR/etc/notify.sh" ] && . "$MODDIR/etc/notify.sh"
+[ -f "$MODDIR/etc/curl-ca.sh" ] && . "$MODDIR/etc/curl-ca.sh"
+
+# Resolve a package name to its localized app label (dex helper, same call as
+# do_backup); memoized per process so the start/done pair spawns app_process once.
+# Empty when unresolved or the dex is absent, so the caller keeps the package name.
+notify_label() {
+  case "$_NOTIFY_LBL_PKG" in "$1") printf '%s' "$_NOTIFY_LBL_VAL"; return 0 ;; esac
+  _nlv=""
+  [ -f "$MODDIR/etc/vdbackup_helper.dex" ] && _nlv="$(LD_LIBRARY_PATH= app_process \
+      -Djava.class.path="$MODDIR/etc/vdbackup_helper.dex" /system/bin \
+      ru.vd171.vdbackup.Helper label "$1" "${U:-0}" 2>/dev/null | "$JQ" -r '.label // empty' 2>/dev/null)"
+  _NOTIFY_LBL_PKG="$1"; _NOTIFY_LBL_VAL="$_nlv"; printf '%s' "$_nlv"
+}
 
 # Android notification from root (no companion). notify <key> <name>; key is one of
 # backup_start|backup_done|restore_start|restore_done. Language from cfg .language.
+# A package-like name (special/path/adb have no dot) is shown as its real app label.
 notify() {
   _nl="$(cfg .language)"; case "$_nl" in ""|null|auto) _nl=en ;; esac
-  if command -v vdb_notify_msg >/dev/null 2>&1; then _nm="$(vdb_notify_msg "$_nl" "$1" "$2")"; else _nm="$2"; fi
+  _nn="$2"; case "$_nn" in *.*) _lbl="$(notify_label "$_nn")"; [ -n "$_lbl" ] && _nn="$_lbl" ;; esac
+  if command -v vdb_notify_msg >/dev/null 2>&1; then _nm="$(vdb_notify_msg "$_nl" "$1" "$_nn")"; else _nm="$_nn"; fi
   fw cmd notification post -t "VDBackup" "vdbackup_$OPID" "$_nm" >/dev/null 2>&1 && return 0
   [ -f "$MODDIR/etc/vdbackup_helper.dex" ] && LD_LIBRARY_PATH= app_process -Djava.class.path="$MODDIR/etc/vdbackup_helper.dex" \
       /system/bin ru.vd171.vdbackup.Helper notify "VDBackup" "$_nm" >/dev/null 2>&1; }
@@ -407,42 +466,20 @@ verify_install_source() {
 deep_spoof_installer() {   # <pkg> <installer-pkg>
   _p="$1"; _ip="$2"; _f=/data/system/packages.xml
   [ -f "$_f" ] || { audit "deep-spoof no packages.xml $_p"; return 1; }
-  if is_abx "$_f"; then { [ -x /system/bin/abx2xml ] && [ -x /system/bin/xml2abx ]; } || { [ -x "$BIN/abx2xml" ] && [ -x "$BIN/xml2abx" ]; } || { audit "deep-spoof no abx tool $_p"; return 1; }; fi
-  _x="$STATE/staging/pkx.$OPID.xml"; _o="$STATE/staging/pkx.$OPID.out"
-  _enc="$STATE/staging/pkx.$OPID.abx"; _c="$STATE/staging/pkx.$OPID.chk"
-  rm -f "$_x" "$_o" "$_enc" "$_c"
-  if is_abx "$_f"; then abx_to_xml "$_f" "$_x" || { audit "deep-spoof decode failed $_p"; return 1; }
-  else cp "$_f" "$_x"; fi
-  [ -s "$_x" ] || { rm -f "$_x"; audit "deep-spoof empty decode $_p"; return 1; }
-  grep -q "<package name=\"$_p\" " "$_x" || { rm -f "$_x"; audit "deep-spoof pkg not in packages.xml $_p"; return 1; }
-  _cb="$(grep -c '<package name=' "$_x")"
-  sed "/<package name=\"$_p\" /{s/ installInitiator=\"[^\"]*\"/ installInitiator=\"$_ip\"/; s/ packageSource=\"[^\"]*\"/ packageSource=\"0\"/;}" "$_x" > "$_o" 2>/dev/null
-  [ -s "$_o" ] || { rm -f "$_x" "$_o"; audit "deep-spoof edit failed $_p"; return 1; }
-  if is_abx "$_f"; then xml_to_abx "$_o" "$_enc" || { rm -f "$_x" "$_o" "$_enc"; audit "deep-spoof encode failed $_p"; return 1; }
-  else cp "$_o" "$_enc"; fi
-  if is_abx "$_f"; then abx_to_xml "$_enc" "$_c" || { rm -f "$_x" "$_o" "$_enc" "$_c"; audit "deep-spoof verify-decode failed $_p"; return 1; }
-  else cp "$_enc" "$_c"; fi
-  _ca="$(grep -c '<package name=' "$_c" 2>/dev/null)"
-  if [ "$_cb" != "$_ca" ] \
-     || ! grep "<package name=\"$_p\" " "$_c" | grep -q "installInitiator=\"$_ip\"" \
-     || ! grep "<package name=\"$_p\" " "$_c" | grep -q 'packageSource="0"'; then
-    rm -f "$_x" "$_o" "$_enc" "$_c"; audit "deep-spoof validation failed, live untouched $_p"; return 1; fi
-  _bk="$STATE/pkgxml_backups"; mkdir -p "$_bk"; chmod 700 "$_bk" 2>/dev/null
-  _bkf="$_bk/packages_$(date -u +%Y%m%dT%H%M%SZ)_$OPID.bak"
-  cp "$_f" "$_bkf" 2>/dev/null || { rm -f "$_x" "$_o" "$_enc" "$_c"; audit "deep-spoof backup failed, live untouched $_p"; return 1; }
-  _own="$(stat -c '%u:%g' "$_f" 2>/dev/null)"; _mode="$(stat -c '%a' "$_f" 2>/dev/null)"
-  _tmp="/data/system/.pkx.$OPID"
-  cp "$_enc" "$_tmp" 2>/dev/null || { rm -f "$_x" "$_o" "$_enc" "$_c" "$_tmp"; audit "deep-spoof stage failed $_p"; return 1; }
-  case "$_own" in *[0-9]:*[0-9]) chown "$_own" "$_tmp" 2>/dev/null ;; esac
-  [ -n "$_mode" ] && chmod "$_mode" "$_tmp" 2>/dev/null
-  if mv -f "$_tmp" "$_f" 2>/dev/null; then
-    restorecon "$_f" 2>/dev/null
-    rm -f "$_x" "$_o" "$_enc" "$_c"
+  _dse() {  # <in-xml> <out-xml>: require the target package, spoof its install source
+    grep -q "<package name=\"$_p\" " "$1" || return 1
+    sed "/<package name=\"$_p\" /{s/ installInitiator=\"[^\"]*\"/ installInitiator=\"$_ip\"/; s/ packageSource=\"[^\"]*\"/ packageSource=\"0\"/;}" "$1" > "$2" 2>/dev/null
+  }
+  _dsv() {  # <chk-xml>: the spoof must survive the ABX round trip
+    grep "<package name=\"$_p\" " "$1" | grep -q "installInitiator=\"$_ip\"" \
+      && grep "<package name=\"$_p\" " "$1" | grep -q 'packageSource="0"'
+  }
+  if xml_edit "$_f" _dse '<package name=' _dsv "$STATE/pkgxml_backups"; then
     printf '{"ts":"%s","op":"deep-spoof","opid":"%s","detail":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$OPID" \
-      "$(jstr "$_p installInitiator=$_ip packageSource=0 backup=$_bkf (applies after reboot)")" >> "$LOGS/audit.jsonl"
+      "$(jstr "$_p installInitiator=$_ip packageSource=0 backup=$XMLEDIT_BAK (applies after reboot)")" >> "$LOGS/audit.jsonl"
     return 0
   fi
-  rm -f "$_x" "$_o" "$_enc" "$_c" "$_tmp"; audit "deep-spoof swap failed, live untouched $_p"; return 1
+  audit "deep-spoof failed, live untouched $_p"; return 1
 }
 # the APK install verifier can hang or prompt on pm install-commit; disable it for
 # the restore and put the previous value back afterwards (both upstreams do this).
@@ -605,6 +642,12 @@ dec_age() { # <infile> ; writes the decrypted plaintext of an age scrypt file to
 crypto_available() {
   { [ -x "$AGE" ] || command -v age >/dev/null 2>&1; } || return 1
   "$SCRIPT" -qec true /dev/null >/dev/null 2>&1   # script present AND a pty can be allocated
+}
+# #17: stored default passphrase for a backup - the app's own if set, else the global one; empty if
+# neither. Root-only under SECRETS/creds (0600, CE), set write-only from the UI and never read back.
+default_pass() {
+  [ -f "$SECRETS/creds/pass.app.$1" ] && { cat "$SECRETS/creds/pass.app.$1"; return; }
+  [ -f "$SECRETS/creds/pass.global" ] && cat "$SECRETS/creds/pass.global"
 }
 
 # compression (write): none | zstd[:N] | gzip | lz4. gzip is the universal
@@ -979,6 +1022,9 @@ backup() {
   ENCDATA="$(jget "$ARGS" '.encrypt_data')"; [ "$ENCDATA" = "null" ] && ENCDATA="$(cfg .encrypt_data)"
   ENCAPK="$(jget "$ARGS" '.encrypt_apk')";  [ "$ENCAPK"  = "null" ] && ENCAPK="$(cfg .encrypt_apk)"
   PW="$(jget "$ARGS" '.password')"; [ "$PW" = null ] && PW=""
+  # #17: no per-backup passphrase + encryption on -> fall back to the app's stored passphrase, else
+  # the global default, so a master password need not be retyped every backup.
+  if [ -z "$PW" ] && { [ "$ENCDATA" = true ] || [ "$ENCAPK" = true ]; }; then PW="$(default_pass "$PKG")"; fi
   # encryption requested but no passphrase would silently yield a PLAINTEXT backup;
   # refuse instead so the user never thinks data is encrypted when it is not.
   if { [ "$ENCDATA" = true ] || [ "$ENCAPK" = true ]; } && [ -z "$PW" ]; then
@@ -1086,9 +1132,20 @@ backup() {
   fi
 
   TS="$(date -u +%Y%m%dT%H%M%SZ)"
-  DEST="$BACKUPS/$PKG/${TS}_${VC}"
-  media_own "$BACKUPS"; media_own "$BACKUPS/$PKG"
+  # Build root: a remote-only backup (no local copy kept - see remote_only) is assembled in a
+  # root-only staging dir and cleaned on exit (stealth); otherwise it builds in BACKUPS, where it
+  # lives and is listed.
+  if remote_only; then
+    DEST="$(staging_root)/$PKG/${TS}_${VC}"
+  else
+    DEST="$BACKUPS/$PKG/${TS}_${VC}"; media_own "$BACKUPS"; media_own "$BACKUPS/$PKG"
+  fi
   mkdir -p "$DEST"
+  # issue #5: a failed/cancelled backup left a partial DEST (and dump scratch) piling up under
+  # /data - keep-local had no cleanup, remote_only cleaned only its staging. One EXIT trap drops
+  # both and still runs cleanup (a batch subshell leaves cleanup to the parent); cleared on success.
+  BK_FAIL="$DEST"
+  trap 'rm -rf "$BK_FAIL" "$STATE/staging/dump.$OPID" 2>/dev/null; [ "${IN_BATCH:-0}" = 1 ] || cleanup' EXIT
   IFILE="$DEST/.items.jsonl"; : > "$IFILE"
 
   emit_item() { # type archive comp enc orig stored sha ctx uid gid
@@ -1337,12 +1394,16 @@ backup() {
   # transfer_full already calls finish false + returns non-zero on failure;
   # do not overwrite that with success.
   prog 95 transfer "$PKG"; transfer_full || return
-  # destination-authoritative for a local dest (issue #15): an APP backup lives at the dest only -
-  # list/restore/delete/info are dest-aware via backup_roots - so drop the internal copy the user
-  # chose to keep off internal storage. Done HERE, not in transfer_full: path/special backups share
-  # transfer_full but their list/restore are internal-only, so they must keep the internal copy.
-  if [ "$DTYPE" = local ] && [ -n "$DPATH" ] && [ "$DPATH" != "$BACKUPS" ]; then rm -rf "$DEST"; fi
+  # destination-authoritative: an APP backup lives at the dest only, so drop the internal copy
+  # (issue #15 for a local dest, #16 for Telegram). local: list/restore/delete/info are dest-aware
+  # via backup_roots. telegram: the channel is the index (list-remote), restore pulls by message-id,
+  # delete removes the message - so the internal copy is pure duplication (and double-lists). rclone
+  # and gdrive have no remote list/pull yet, so remote_only() excludes them (they keep the internal
+  # copy). Done HERE, not in transfer_full: path/special backups share transfer_full but their
+  # list/restore are internal-only.
+  if remote_only; then rm -rf "$DEST"; fi
   audit "backup done $PKG -> $DEST"; notify backup_done "$PKG"
+  BK_FAIL=""   # success: keep the completed backup (the EXIT trap's rm -rf "" is a no-op)
   finish true ERR_NONE
 }
 
@@ -1717,21 +1778,21 @@ do_import_databackup() {
   fi
   wait_datadir "/data/user/$U/$PKG"
   LIVEU="$(stat -c %u "/data/user/$U/$PKG" 2>/dev/null || echo 0)"; LIVEG="$(stat -c %g "/data/user/$U/$PKG" 2>/dev/null || echo 0)"
+  LIVECTX="$(exec_ns ls -Zd "/data/user/$U/$PKG" 2>/dev/null | cut -d' ' -f1)"
   prog 60 extracting "$PKG"
-  db_item() { # <archive> <parent> <target>
+  db_item() { # <archive> <parent> <target> <type>
     f="$REF/$1"; [ -f "$f" ] || return 0
     archive_safe "$f" none || { audit "import-db unsafe archive $1 $PKG"; finish false ERR_UNSAFE_ARCHIVE; return 1; }
     exec_ns rm -rf "$3" 2>/dev/null                   # faithful: wipe then extract (migration)
     mkdir -p "$2"; decomp "$f" | exec_ns "$TAR" $TARX -x -C "$2" 2>/dev/null
     [ $? -eq 0 ] || { audit "import-db extract failed $1 $PKG"; finish false ERR_RESTORE; return 1; }
-    [ "$LIVEU" != 0 ] && exec_ns chown -hR "$LIVEU:$LIVEG" "$3" 2>/dev/null
-    exec_ns restorecon -R "$3" 2>/dev/null
+    remap_restored "$4" "$3"
   }
-  db_item user.tar.zst    "/data/user/$U"                 "/data/user/$U/$PKG"              || return
-  db_item user_de.tar.zst "/data/user_de/$U"            "/data/user_de/$U/$PKG"        || return
-  db_item data.tar.zst    "/data/media/$U/Android/data" "/data/media/$U/Android/data/$PKG" || return
-  db_item obb.tar.zst     "/data/media/$U/Android/obb"  "/data/media/$U/Android/obb/$PKG"  || return
-  db_item media.tar.zst   "/data/media/$U/Android/media" "/data/media/$U/Android/media/$PKG" || return
+  db_item user.tar.zst    "/data/user/$U"                 "/data/user/$U/$PKG"              data     || return
+  db_item user_de.tar.zst "/data/user_de/$U"            "/data/user_de/$U/$PKG"        data_de  || return
+  db_item data.tar.zst    "/data/media/$U/Android/data" "/data/media/$U/Android/data/$PKG" external || return
+  db_item obb.tar.zst     "/data/media/$U/Android/obb"  "/data/media/$U/Android/obb/$PKG"  obb      || return
+  db_item media.tar.zst   "/data/media/$U/Android/media" "/data/media/$U/Android/media/$PKG" media    || return
   # runtime permissions + appops from package_restore_config.json
   prog 90 framework "$PKG"
   CFG="$REF/package_restore_config.json"
@@ -1801,8 +1862,9 @@ do_import_neo() {
   rm -rf "$APKTMP"
   wait_datadir "/data/user/$U/$PKG"
   LIVEU="$(stat -c %u "/data/user/$U/$PKG" 2>/dev/null || echo 0)"; LIVEG="$(stat -c %g "/data/user/$U/$PKG" 2>/dev/null || echo 0)"
+  LIVECTX="$(exec_ns ls -Zd "/data/user/$U/$PKG" 2>/dev/null | cut -d' ' -f1)"
   prog 60 extracting "$PKG"
-  neo_item() { # <neo-archive-base> <dest-data-dir>
+  neo_item() { # <neo-archive-base> <dest-data-dir> <type>
     for ext in "tar.$COMP" tar.zst tar.gz tar; do
       f="$REF/$1.$ext"; src="$f"
       if [ -f "$f.enc" ]; then                       # encrypted archive: decrypt via dex
@@ -1822,16 +1884,15 @@ do_import_neo() {
       _erc=$?
       [ "$src" != "$f" ] && rm -f "$src"
       [ "$_erc" -eq 0 ] || { audit "import-neo extract failed $1 $PKG"; finish false ERR_RESTORE; return 1; }
-      [ "$LIVEU" != 0 ] && exec_ns chown -hR "$LIVEU:$LIVEG" "$2" 2>/dev/null
-      exec_ns restorecon -R "$2" 2>/dev/null
+      remap_restored "$3" "$2"
       return 0
     done
   }
-  neo_item data                   "/data/user/$U/$PKG"                   || return
-  neo_item device_protected_files "/data/user_de/$U/$PKG"             || return
-  neo_item external_files         "/data/media/$U/Android/data/$PKG"  || return
-  neo_item obb_files              "/data/media/$U/Android/obb/$PKG"   || return
-  neo_item media_files            "/data/media/$U/Android/media/$PKG" || return
+  neo_item data                   "/data/user/$U/$PKG"                   data     || return
+  neo_item device_protected_files "/data/user_de/$U/$PKG"             data_de  || return
+  neo_item external_files         "/data/media/$U/Android/data/$PKG"  external || return
+  neo_item obb_files              "/data/media/$U/Android/obb/$PKG"   obb      || return
+  neo_item media_files            "/data/media/$U/Android/media/$PKG" media    || return
   # runtime permissions from Neo's properties (array of permission name strings)
   prog 90 framework "$PKG"
   "$JQ" -r '(.permissions // [])[]' "$PROP" 2>/dev/null | while IFS= read -r perm; do
@@ -2656,7 +2717,72 @@ do_telegram_pull() {   # download a backup from Telegram into local storage; it 
   prog 97 done "$PKG"; audit "telegram-pull done $PKG -> $_ddir"
   finish true ERR_NONE
 }
-case "$VERB" in backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import|telegram-pull) prog 2 preparing "" ;; esac
+do_rclone_pull() {   # download an rclone remote-only backup into local storage; it then restores via the normal flow
+  _rref="$(jget "$ARGS" '.rref')"
+  U="$(jget "$ARGS" '.user // 0')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac
+  case "$_rref" in ''|/*|*..*) finish false ERR_INVALID_REF; return ;; esac
+  PKG="${_rref%%/*}"; _tsvc="${_rref#*/}"
+  case "$PKG" in ''|null|*/*|*' '*) finish false ERR_NO_PACKAGE; return ;; esac
+  case "$_tsvc" in ''|*/*|*' '*) finish false ERR_INVALID_REF; return ;; esac
+  resolve_dest
+  { [ "$DTYPE" = rclone ] && [ -n "$DREMOTE" ]; } || { finish false ERR_INVALID_REF; return; }
+  net_guard || return
+  need_cloud_bin rclone || return
+  BACKUPS="$(backups_dir "$U")"; _ddir="$BACKUPS/$PKG/$_tsvc"
+  prog 10 fetching "$PKG"; audit "rclone-pull start $PKG from $DESTID:$_rref"
+  media_own "$BACKUPS"; media_own "$BACKUPS/$PKG"; rm -rf "$_ddir"; mkdir -p "$_ddir"
+  rclone_live fetching 90 copy "$DREMOTE:$(remote_pfx)/$PKG/$_tsvc" "$_ddir" \
+    || { rm -rf "$_ddir"; audit "rclone-pull download failed $PKG"; finish false ERR_DOWNLOAD; return; }
+  [ -f "$_ddir/manifest.json" ] || { rm -rf "$_ddir"; audit "rclone-pull no manifest $PKG"; finish false ERR_NO_BACKUP; return; }
+  media_own -R "$_ddir"
+  prog 97 done "$PKG"; audit "rclone-pull done $PKG -> $_ddir"
+  finish true ERR_NONE
+}
+do_gdrive_pull() {   # download a gdrive remote-only backup (its Drive folder) into local storage; then restores via the normal flow
+  _rref="$(jget "$ARGS" '.rref')"; _gfolder="$(jget "$ARGS" '.folder')"
+  U="$(jget "$ARGS" '.user // 0')"; case "$U" in ""|*[!0-9]*) U=0 ;; esac
+  case "$_rref" in ''|/*|*..*) finish false ERR_INVALID_REF; return ;; esac
+  PKG="${_rref%%/*}"; _tsvc="${_rref#*/}"
+  case "$PKG" in ''|null|*/*|*' '*) finish false ERR_NO_PACKAGE; return ;; esac
+  case "$_tsvc" in ''|*/*|*' '*) finish false ERR_INVALID_REF; return ;; esac
+  case "$_gfolder" in ''|*[!A-Za-z0-9_-]*) finish false ERR_INVALID_REF; return ;; esac   # Drive file-id charset
+  resolve_dest
+  [ "$DTYPE" = gdrive ] || { finish false ERR_INVALID_REF; return; }
+  net_guard || return
+  companion_ensure || { finish false ERR_COMPANION; return; }
+  drive_ok "$(drive_cmd check)" || { finish false ERR_DRIVE_CONSENT; return; }
+  prog 10 fetching "$PKG"; audit "gdrive-pull start $PKG from $DESTID:$_rref"
+  _lf="$(drive_cmd list-folder -e id "$_gfolder")"
+  drive_ok "$_lf" || { audit "gdrive-pull list failed $PKG"; finish false ERR_DOWNLOAD; return; }
+  _n="$(printf '%s' "$_lf" | "$JQ" -r '.data.files | length' 2>/dev/null)"; case "$_n" in ''|*[!0-9]*) _n=0 ;; esac
+  [ "$_n" -gt 0 ] || { audit "gdrive-pull empty folder $PKG"; finish false ERR_NO_BACKUP; return; }
+  BACKUPS="$(backups_dir "$U")"; _ddir="$BACKUPS/$PKG/$_tsvc"
+  media_own "$BACKUPS"; media_own "$BACKUPS/$PKG"; rm -rf "$_ddir"; mkdir -p "$_ddir"
+  _cau="$(stat -c %u "/data/data/$COMPANION_PKG" 2>/dev/null)"
+  _dl="$(companion_resdir)/dl.$OPID"; exec_ns rm -rf "$_dl"; exec_ns mkdir -p "$_dl"
+  case "$_cau" in ''|*[!0-9]*) : ;; *) exec_ns chown "$_cau:$_cau" "$_dl" 2>/dev/null ;; esac
+  exec_ns restorecon "$_dl" 2>/dev/null
+  _k=0
+  while [ "$_k" -lt "$_n" ]; do
+    _fid="$(printf '%s' "$_lf" | "$JQ" -r ".data.files[$_k].id // empty" 2>/dev/null)"
+    _fnm="$(printf '%s' "$_lf" | "$JQ" -r ".data.files[$_k].name // empty" 2>/dev/null)"
+    _k=$((_k+1))
+    case "$_fnm" in ''|*/*|*..*|.) continue ;; esac   # the file name feeds the local backup path
+    case "$_fid" in ''|*[!A-Za-z0-9_-]*) continue ;; esac
+    exec_ns rm -f "$_dl/$_fnm"
+    drive_ok "$(drive_cmd download -e id "$_fid" -e dst "$_dl/$_fnm")" \
+      || { exec_ns rm -rf "$_dl"; rm -rf "$_ddir"; audit "gdrive-pull download failed $_fnm"; finish false ERR_DOWNLOAD; return; }
+    exec_ns cp "$_dl/$_fnm" "$_ddir/$_fnm" \
+      || { exec_ns rm -rf "$_dl"; rm -rf "$_ddir"; audit "gdrive-pull stage failed $_fnm"; finish false ERR_DOWNLOAD; return; }
+    exec_ns rm -f "$_dl/$_fnm"
+  done
+  exec_ns rm -rf "$_dl"
+  [ -f "$_ddir/manifest.json" ] || { rm -rf "$_ddir"; audit "gdrive-pull no manifest $PKG"; finish false ERR_NO_BACKUP; return; }
+  media_own -R "$_ddir"
+  prog 97 done "$PKG"; audit "gdrive-pull done $PKG -> $_ddir"
+  finish true ERR_NONE
+}
+case "$VERB" in backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|config-export|config-import|telegram-pull|rclone-pull|gdrive-pull) prog 2 preparing "" ;; esac
 case "$VERB" in
   backup)          backup ;;
   backup-batch)    backup_batch ;;
@@ -2673,5 +2799,7 @@ case "$VERB" in
   adb-backup)      do_adb_backup ;;
   adb-restore)     do_adb_restore ;;
   telegram-pull)   do_telegram_pull ;;
+  rclone-pull)     do_rclone_pull ;;
+  gdrive-pull)     do_gdrive_pull ;;
   *)               finish false ERR_UNKNOWN_VERB ;;
 esac

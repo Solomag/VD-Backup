@@ -105,6 +105,7 @@ esac
 BIN="$MODDIR/bin/$BINABI"
 export PATH="$BIN:$PATH"
 export LD_LIBRARY_PATH="$BIN/lib:${LD_LIBRARY_PATH:-}"
+[ -f "$MODDIR/etc/curl-ca.sh" ] && . "$MODDIR/etc/curl-ca.sh"
 
 # pm/dumpsys are app_process based: run them with a CLEAN env, or the bundled Termux
 # libs on LD_LIBRARY_PATH shadow ART's and binder marshalling fails on some ROMs
@@ -134,6 +135,25 @@ detach() {               # detach <opid> <worker-verb> <b64args>
   setsid nohup "$MODDIR/scripts/worker.sh" "$wverb" "$opid" "$wargs" \
       >"$LOGS/$opid.out" 2>&1 </dev/null &
   echo "$!" > "$LOGS/$opid.pid"
+}
+
+# call the Drive companion synchronously (list/delete/check are quick): drive_hcmd <op> [-e k v...]
+# -> prints the companion's result JSON, or a failure JSON on timeout/missing companion. The companion
+# runs as its own app uid and writes the result into its own sandbox, which root reads back.
+drive_hcmd() {
+  _dop="$1"; shift
+  _dcp="ru.vd171.vdbackup"
+  pm path "$_dcp" >/dev/null 2>&1 || { printf '{"ok":false,"code":"ERR_COMPANION"}\n'; return 1; }
+  _ddrv="/data/data/$_dcp/files"; _dau="$(stat -c %u "/data/data/$_dcp" 2>/dev/null)"
+  mkdir -p "$_ddrv" 2>/dev/null
+  case "$_dau" in ''|*[!0-9]*) : ;; *) chown "$_dau:$_dau" "$_ddrv" 2>/dev/null ;; esac
+  restorecon "$_ddrv" 2>/dev/null
+  _dres="$_ddrv/h.$$.$_dop"; rm -f "$_dres" "$_dres.done"
+  env -u LD_LIBRARY_PATH -u LD_PRELOAD /system/bin/am start-foreground-service \
+    -n "$_dcp/.DriveCommandService" -e op "$_dop" "$@" -e result "$_dres" >/dev/null 2>&1
+  _di=0; while [ ! -f "$_dres.done" ] && [ "$_di" -lt 120 ]; do sleep 1; _di=$((_di+1)); done
+  if [ -f "$_dres.done" ]; then cat "$_dres"; rm -f "$_dres" "$_dres.done"
+  else rm -f "$_dres" "$_dres.done"; printf '{"ok":false,"code":"ERR_DRIVE_TIMEOUT"}\n'; fi
 }
 
 # Keep the state dir from growing without bound: drop long-finished per-op files, cap the
@@ -326,6 +346,7 @@ sched_too_hot() {
 }
 
 verb="$1"; ARGS_B64="$2"
+JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"   # global default; some verbs still redefine it locally
 
 case "$verb" in
 
@@ -358,6 +379,23 @@ case "$verb" in
       _n=$(( _n + 1 ))
     done
     ok "\"sanitized\":$_n" ;;
+
+  boot-sweep)
+    # issue #5: reap backup leftovers from an UNCATCHABLE kill (watchdog kill -9 / LMK / OOM),
+    # which no in-process EXIT trap can clean. BOOT-ONLY (called from service.sh), so it never
+    # races a detached backup in progress - unlike sanitize, which also runs on WebUI load. Drops
+    # the remote-only build staging wholesale, then reaps partial op dirs: a completed backup
+    # always has manifest.json, and the op-dir name is VDBackup's own <TS>_<VC> (never a user dir).
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _sd="$("$JQ" -r '.staging_dir // empty' "$STATE/config.json" 2>/dev/null)"; case "$_sd" in /*) : ;; *) _sd=/data/local/tmp ;; esac
+    rm -rf "$_sd/.vdstage" /data/local/tmp/.vdstage 2>/dev/null
+    _r=0
+    for _d in /data/media/*/VDBackup/*/[0-9]*Z_[0-9]*; do
+      [ -d "$_d" ] || continue
+      [ -f "$_d/manifest.json" ] && continue
+      rm -rf "$_d" 2>/dev/null && _r=$(( _r + 1 ))
+    done
+    ok "\"reaped\":$_r" ;;
 
   update-check)
     # fetch the published update manifest (module.prop updateJson) and compare its
@@ -518,7 +556,7 @@ case "$verb" in
     done
     printf '}}\n' ;;
 
-  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|adb-backup|adb-restore|config-export|config-import|telegram-pull)
+  backup|backup-batch|restore|restore-batch|import|special-backup|special-restore|cloud-fetch|path-backup|path-restore|adb-backup|adb-restore|config-export|config-import|telegram-pull|rclone-pull|gdrive-pull)
     opid="$(new_opid)"
     detach "$opid" "$verb" "$ARGS_B64"
     ok "\"opid\":\"$opid\"" ;;
@@ -529,6 +567,41 @@ case "$verb" in
     _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
     _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" list-remote 2>/dev/null)"
     [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_TG_LIST "could not list the Telegram channel" ;;
+
+  rclone-list)
+    # list Full backups stored remote-only on an rclone destination: walk <remote>:<pfx>/<pkg>/<ts_vc>/
+    # and emit one entry per manifest.json. The WebUI merges these (tagged by dest id), like telegram.
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    id="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.dest // empty' 2>/dev/null)"
+    f="$STATE/dests/$id.json"
+    { [ -n "$id" ] && [ -f "$f" ] && [ "$("$JQ" -r '.type // empty' "$f")" = rclone ]; } || { err ERR_DEST_NONE "no such rclone destination"; exit 0; }
+    rem="$("$JQ" -r '.remote // empty' "$f")"; dp="$("$JQ" -r '.path // empty' "$f")"; pfx="${dp:+$dp/}vdbackup"
+    _rc="$(command -v "$BIN/rclone" 2>/dev/null || command -v "$STATE/bin/rclone" 2>/dev/null || echo rclone)"
+    _mf="$("$_rc" --config "$SECRETS/rclone.conf" lsf -R --files-only --include manifest.json "$rem:$pfx/" 2>/dev/null)"
+    printf '{"ok":true,"dest":"%s","backups":[' "$(jstr "$id")"
+    printf '%s\n' "$_mf" | { _first=1; while IFS= read -r _p; do
+      case "$_p" in */*/manifest.json) : ;; *) continue ;; esac
+      _rref="${_p%/manifest.json}"; _pkg="${_rref%%/*}"; _tsvc="${_rref#*/}"
+      case "$_tsvc" in */*) continue ;; esac
+      [ "$_first" = 1 ] || printf ','; _first=0
+      printf '{"dest":"%s","rref":"%s","package":"%s","tsvc":"%s"}' "$(jstr "$id")" "$(jstr "$_rref")" "$(jstr "$_pkg")" "$(jstr "$_tsvc")"
+    done; }
+    printf ']}\n' ;;
+
+  gdrive-list)
+    # list Full backups stored on a Google Drive destination (via the companion, which walks the
+    # vdbackup/<pkg>/<ts_vc>/ Drive folders). Same entry shape as rclone-list plus a Drive `folder` id
+    # that gdrive-pull/-delete use. The WebUI merges these with the rclone ones.
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    id="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.dest // empty' 2>/dev/null)"
+    f="$STATE/dests/$id.json"
+    { [ -n "$id" ] && [ -f "$f" ] && [ "$("$JQ" -r '.type // empty' "$f")" = gdrive ]; } || { err ERR_DEST_NONE "no such gdrive destination"; exit 0; }
+    dp="$("$JQ" -r '.path // empty' "$f")"; pfx="${dp:+$dp/}vdbackup"
+    _o="$(drive_hcmd backups -e name "$pfx")"
+    printf '%s' "$_o" | "$JQ" --arg d "$id" '
+      if .ok==true then {ok:true,dest:$d,backups:[(.data.backups[]? | {dest:$d,rref:(.package+"/"+.tsvc),package:.package,tsvc:.tsvc,folder:.folder})]}
+      else {ok:false,code:(.code//"ERR_DRIVE"),message:"could not list the Drive backups"} end' 2>/dev/null \
+      || err ERR_DRIVE "could not list the Drive backups" ;;
 
   # ---- Telegram login flow (the session lands in CE $SECRETS/telegram) ----
   # Each passes the engine's JSON straight through so the WebUI can read user/channel/code.
@@ -573,6 +646,37 @@ case "$verb" in
     case "$_mid" in ''|*[!0-9,]*) err ERR_INVALID_REF "invalid message_id"; exit 0 ;; esac   # digits (+ comma for batch); it feeds --ref
     _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" delete --ref "$_mid" 2>/dev/null)"
     [ -n "$_o" ] && printf '%s\n' "$_o" || err ERR_TG_DELETE "delete failed" ;;
+
+  rclone-delete)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    id="$(printf '%s' "$_a" | "$JQ" -r '.dest // empty' 2>/dev/null)"
+    rref="$(printf '%s' "$_a" | "$JQ" -r '.rref // empty' 2>/dev/null)"
+    f="$STATE/dests/$id.json"
+    { [ -n "$id" ] && [ -f "$f" ] && [ "$("$JQ" -r '.type // empty' "$f")" = rclone ]; } || { err ERR_DEST_NONE "no such rclone destination"; exit 0; }
+    case "$rref" in ''|/*|*..*) err ERR_INVALID_REF "invalid rref"; exit 0 ;; esac
+    case "$rref" in */*) : ;; *) err ERR_INVALID_REF "invalid rref"; exit 0 ;; esac   # must be <pkg>/<ts_vc>
+    case "${rref#*/}" in */*) err ERR_INVALID_REF "invalid rref"; exit 0 ;; esac      # exactly two components, never a whole-package or root purge
+    rem="$("$JQ" -r '.remote // empty' "$f")"; dp="$("$JQ" -r '.path // empty' "$f")"; pfx="${dp:+$dp/}vdbackup"
+    _rc="$(command -v "$BIN/rclone" 2>/dev/null || command -v "$STATE/bin/rclone" 2>/dev/null || echo rclone)"
+    if "$_rc" --config "$SECRETS/rclone.conf" purge "$rem:$pfx/$rref" >/dev/null 2>&1; then
+      printf '{"ts":"%s","op":"rclone-delete","dest":"%s","rref":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$id")" "$(jstr "$rref")" >> "$LOGS/audit.jsonl"
+      ok "\"deleted\":\"$(jstr "$rref")\""
+    else err ERR_DELETE "could not delete the remote backup"; fi ;;
+
+  gdrive-delete)
+    JQ="$(command -v "$BIN/jq" 2>/dev/null || echo jq)"
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    id="$(printf '%s' "$_a" | "$JQ" -r '.dest // empty' 2>/dev/null)"
+    fld="$(printf '%s' "$_a" | "$JQ" -r '.folder // empty' 2>/dev/null)"
+    f="$STATE/dests/$id.json"
+    { [ -n "$id" ] && [ -f "$f" ] && [ "$("$JQ" -r '.type // empty' "$f")" = gdrive ]; } || { err ERR_DEST_NONE "no such gdrive destination"; exit 0; }
+    case "$fld" in ''|*[!A-Za-z0-9_-]*) err ERR_INVALID_REF "invalid folder id"; exit 0 ;; esac
+    _o="$(drive_hcmd delete -e id "$fld")"
+    if printf '%s' "$_o" | "$JQ" -e '.ok==true' >/dev/null 2>&1; then
+      printf '{"ts":"%s","op":"gdrive-delete","dest":"%s","folder":"%s"}\n' "$(date -u +%Y-%m-%dT%H:%M:%SZ)" "$(jstr "$id")" "$(jstr "$fld")" >> "$LOGS/audit.jsonl"
+      ok "\"deleted\":\"$(jstr "$fld")\""
+    else err ERR_DELETE "could not delete the Drive backup"; fi ;;
 
   config-exports)
     # list the encrypted config bundles available to import (newest first).
@@ -819,6 +923,28 @@ EOF
       printf '%s\n' "$_nt" > "$ref/note.json"
     fi
     printf '{"ok":true}\n' ;;
+
+  pass-set-global)
+    # #17: store or clear the global default passphrase (root-only, CE, 0600). Write-only - the value
+    # is never returned; the UI only learns whether one is set.
+    _pw="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.password // ""' 2>/dev/null)"
+    secrets_init 2>/dev/null; mkdir -p "$SECRETS/creds" 2>/dev/null
+    if [ -z "$_pw" ]; then rm -f "$SECRETS/creds/pass.global"
+    else ( umask 077; printf '%s' "$_pw" > "$SECRETS/creds/pass.global" ); chmod 600 "$SECRETS/creds/pass.global" 2>/dev/null; fi
+    ok "\"set\":$([ -f "$SECRETS/creds/pass.global" ] && echo true || echo false)" ;;
+  pass-set-app)
+    _a="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null)"
+    _pk="$(printf '%s' "$_a" | "$JQ" -r '.package // ""' 2>/dev/null)"
+    case "$_pk" in ''|*/*|*' '*|*..*) err ERR_NO_PACKAGE "bad package"; exit 0 ;; esac
+    _pw="$(printf '%s' "$_a" | "$JQ" -r '.password // ""' 2>/dev/null)"
+    secrets_init 2>/dev/null; mkdir -p "$SECRETS/creds" 2>/dev/null
+    if [ -z "$_pw" ]; then rm -f "$SECRETS/creds/pass.app.$_pk"
+    else ( umask 077; printf '%s' "$_pw" > "$SECRETS/creds/pass.app.$_pk" ); chmod 600 "$SECRETS/creds/pass.app.$_pk" 2>/dev/null; fi
+    ok "\"set\":$([ -f "$SECRETS/creds/pass.app.$_pk" ] && echo true || echo false)" ;;
+  pass-status)
+    _pk="$(printf '%s' "$ARGS_B64" | base64 -d 2>/dev/null | "$JQ" -r '.package // ""' 2>/dev/null)"
+    _ap=false; case "$_pk" in ''|*/*|*' '*|*..*) : ;; *) [ -f "$SECRETS/creds/pass.app.$_pk" ] && _ap=true ;; esac
+    ok "\"global\":$([ -f "$SECRETS/creds/pass.global" ] && echo true || echo false),\"app\":$_ap" ;;
 
   path-list)
     # standalone folder/file backups (kind:"path") live under .paths/ in the backups
@@ -1317,6 +1443,10 @@ EOF
     chmod 0755 "$MM" "$MM/system" "$MM/system/$sub" "$dir" 2>/dev/null
     chmod 0644 "$dir"/*.apk 2>/dev/null
     find "$MM" -exec chown 0:0 {} + 2>/dev/null; restorecon -R "$MM" 2>/dev/null
+    # system-app content must present system_file to PMS: the mounter preserves the
+    # source context, and adb_data_file makes system_server avc-deny the scan (app
+    # never installs). Relabel the mounted tree so it reads as a real system partition.
+    chcon -R u:object_r:system_file:s0 "$MM/system" 2>/dev/null
     # live inject via NoMount on KSU (no reboot); otherwise next boot by the mounter
     live=false
     if command -v nm >/dev/null 2>&1 && { [ -e /data/adb/ksud ] || [ -d /data/adb/ksu ]; }; then

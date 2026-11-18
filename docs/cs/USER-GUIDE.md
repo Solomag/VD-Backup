@@ -165,6 +165,8 @@ notifikace vám řekne, až je hotovo.
 
 V dialogu zálohy můžeš také zvolit **cíl** této zálohy, místní úložiště nebo libovolný přidaný cloudový/vzdálený cíl, bez předchozí změny výchozího cíle v Nastavení.
 
+VDBackup během zálohy spouští dvě automatické pojistky, obě ve výchozím stavu zapnuté v Settings. **"Pozastavit kvůli ochlazení, když se zařízení zahřeje"** nechá dlouhou úlohu nadechnout a počká, až zařízení vychladne, pokud je opravdu horké, takže velká záloha telefon nikdy nepřehřeje; mění se jen tempo, nikdy ne věrnost. **"Před dávkovou zálohou zkontrolovat volné místo"** odhadne, co bude záloha více aplikací potřebovat, a zastaví se na začátku místo v půlce, pokud by se do úložiště nevešla.
+
 ### 5.1 Výběr toho, co zálohovat
 
 Pro každou aplikaci můžete zahrnout libovolnou kombinaci těchto položek:
@@ -411,6 +413,8 @@ výchozí), **pouze Wi-Fi**, nebo **pouze mobilní data**. Když to omezíte, ka
 přenos, manuální nebo naplánovaný, upload nebo obnova, nejprve zkontroluje aktivní připojení
 a odmítne běžet na nesprávném, takže politika pouze-Wi-Fi nikdy neutratí mobilní data.
 Lokální zálohy nejsou nikdy ovlivněny.
+
+**Ponechte si místní kopii, nebo jděte jen-vzdáleně.** Když záloha jde na vzdálený cíl, který si VDBackup umí sám vylistovat a stáhnout zpět (Telegram nebo rclone remote), je **ve výchozím stavu jen-vzdálená**: záloha se nahraje a na tomto zařízení nezůstane nic, což šetří místo a nezanechává žádnou místní stopu. Zapněte v Settings **"Ponechat místní kopii, když záloha míří do cíle"**, abyste kopii navíc ponechali i v zařízení pro okamžitou místní obnovu. Tak či tak můžete vzdálenou zálohu dostat zpět pomocí **Obnovit z cloudového úložiště** v záložce Backups, která vylistuje vaše vzdálené zálohy a stáhne tu, kterou zvolíte.
 
 **Google Drive.** Máte dva způsoby, jak se dostat ke Google Drive:
 

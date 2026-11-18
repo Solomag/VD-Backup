@@ -184,6 +184,8 @@ notis talar om när det är klart.
 
 I säkerhetskopieringsdialogen kan du även välja **mål** för denna kopia, lokal lagring eller valfritt tillagt moln-/fjärrmål, utan att först ändra standardmålet i Inställningar.
 
+VDBackup kör två automatiska skyddsåtgärder under en säkerhetskopiering, båda på som standard i Inställningar. **"Pausa för att svalna när enheten blir varm"** låter ett långt jobb andas och väntar på att enheten ska svalna om den verkligen är het, så att en stor säkerhetskopiering aldrig överhettar telefonen; bara takten ändras, aldrig troheten. **"Kontrollera ledigt utrymme före en batch-säkerhetskopiering"** uppskattar vad en säkerhetskopiering av flera appar behöver och stoppar vid starten, i stället för halvvägs, om lagringen inte skulle rymma den.
+
 ### 5.1 Välja vad som ska säkerhetskopieras
 
 För varje app kan du inkludera valfri kombination av dessa objekt:
@@ -438,6 +440,8 @@ standarden), **Wi-Fi only** eller **Mobile data only**. När du begränsar det k
 överföring, manuell eller schemalagd, uppladdning eller återställning, den aktiva anslutningen först
 och vägrar köra på fel, så att en Wi-Fi-only-policy aldrig spenderar mobildata.
 Lokala säkerhetskopior påverkas aldrig.
+
+**Behåll en lokal kopia, eller kör enbart fjärr.** När en säkerhetskopia går till en fjärr som VDBackup själv kan lista och hämta tillbaka (Telegram eller en rclone-fjärr) är den **enbart fjärr som standard**: säkerhetskopian laddas upp och inget behålls på denna enhet, vilket sparar utrymme och lämnar inget lokalt spår. Slå på **"Behåll en lokal kopia när en säkerhetskopia går till ett mål"** i Settings för att även behålla kopian på enheten för en omedelbar lokal återställning. Hur som helst kan du få tillbaka en fjärrsäkerhetskopia med **Återställ från molnfjärr** på fliken Backups, som listar dina fjärrsäkerhetskopior och hämtar den du väljer.
 
 **Google Drive.** Du har två sätt att nå Google Drive:
 

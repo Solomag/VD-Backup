@@ -93,6 +93,9 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `telegram-list` | `{}` | Telegram チャンネル内のバックアップ（名前は `<pkg>__<ts>_<vc>.vdb.tar`） |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` Telegram のバックアップをローカルストレージにダウンロード（detached）。その後は通常の `restore` フローで復元 |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id` で Telegram チャンネルからバックアップを削除（一括: カンマ区切り） |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` rclone 宛先に remote のみで保存された Full バックアップ（`dest` は宛先 id、`rref` は `<pkg>/<ts_vc>`） |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` remote のみで保存された rclone バックアップをローカルストレージにダウンロード（detached）。その後は通常の `restore` フローで復元 |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` rclone remote からバックアップを1つ削除。`rref` は厳密に `<pkg>/<ts_vc>` でなければならない |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 宛先の管理 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote の管理 (`type:"rclone"` の宛先が指す `rclone.conf` エントリを作成する); `backend` は任意の rclone backend でよく、ホワイトリストはない |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (エンジンは Android の VIEW intent 経由で、その同意 URL を電話のブラウザですでに開いている) または `{ok:false,code:"ERR_AUTHORIZE"}`。端末上の OAuth のため、ローカルのコールバックサーバー (`127.0.0.1:53682`) で `rclone authorize <backend>` を実行する。 |
@@ -112,6 +115,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `wipe-credentials` | `{}` | `{ok,wiped}` 保存済みのリモートパスワードと端末の暗号化キーを削除します。保存先・ジョブ・バックアップは残ります。 |
 | `log-prune` | `{}` | `{ok}` 完了して久しいオペレーションログを整理し、監査証跡を上限で切り、古いアイコンを削除します（起動サービスが呼び出します）。 |
 | `sanitize` | `{}` | `{ok}` すべての Android ユーザーでバックアップフォルダーの可視性 (0755) を再設定し、生の root コピーや v1.03.2 より前のバックアップが所有者のみに制限したフォルダーをファイルマネージャーで開けるようにします。 |
+| `boot-sweep` | `{}` | `{ok,reaped}` 中断された、または強制終了されたバックアップの残骸を回収します（起動サービスが呼び出します）。失敗またはキャンセルされたバックアップは、そのワーカー自身によってすでにクリーンアップされています。 |
 
 ### `progress` のフィールド
 

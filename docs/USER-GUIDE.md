@@ -187,6 +187,8 @@ notification tells you when it is done.
 
 In the backup dialog you can also choose the **destination** for this backup, local storage or any cloud/remote destination you have added, without changing the default destination in Settings first.
 
+VDBackup runs two automatic safeguards during a backup, both on by default in Settings. **"Pause to cool down when the device gets hot"** lets a long job breathe, and waits for the device to cool if it is truly hot, so a big backup never overheats the phone; only the pace changes, never the fidelity. **"Check free space before a batch backup"** estimates what a multi-app backup will need and stops at the start, instead of part-way, if the storage would not hold it.
+
 ### 5.1 Choosing what to back up
 
 For each app you can include any combination of these items:
@@ -446,6 +448,14 @@ default), **Wi-Fi only**, or **Mobile data only**. When you restrict it, every c
 transfer, manual or scheduled, upload or restore, checks the active connection first
 and refuses to run on the wrong one, so a Wi-Fi-only policy never spends mobile data.
 Local backups are never affected.
+
+**Keep a local copy, or go remote-only.** When a backup goes to a remote that VDBackup
+can list and pull back on its own (Telegram or an rclone remote), it is **remote-only by
+default**: the backup is uploaded and nothing is kept on this device, which saves space
+and leaves no local trace. Turn on **"Keep a local copy when a backup goes to a
+destination"** in Settings to also keep the copy on-device for an instant local restore.
+Either way you can get a remote backup back with **Restore from cloud remote** on the
+Backups tab, which lists your remote backups and pulls the one you choose.
 
 **Google Drive.** You have two ways to reach Google Drive:
 

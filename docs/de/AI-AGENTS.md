@@ -91,6 +91,9 @@ Backup/Restore benötigt; nur Cloud-Ziele (`rclone`/`restic`/ssh) sprechen mit d
 | `telegram-list` | `{}` | Sicherungen im Telegram-Kanal (Namen `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` lädt eine Telegram-Sicherung in den lokalen Speicher (detached); sie wird dann über den normalen `restore`-Ablauf wiederhergestellt |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` löscht eine Sicherung aus dem Telegram-Kanal per `message_id` (Batch: kommagetrennt) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` Full-Sicherungen, die nur-remote auf einem rclone-Ziel gespeichert sind (`dest` ist die Ziel-id, `rref` ist `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` lädt eine nur-remote gespeicherte rclone-Sicherung in den lokalen Speicher (detached); sie wird dann über den normalen `restore`-Ablauf wiederhergestellt |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` löscht eine Sicherung von einem rclone-Remote; `rref` muss genau `<pkg>/<ts_vc>` sein |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | Zielverwaltung |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone-Remote-Verwaltung (erstellt den `rclone.conf`-Eintrag, auf den ein `type:"rclone"`-Ziel zeigt); `backend` kann jedes rclone-Backend sein, keine Whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (die Engine hat den Telefon-Browser bereits über einen Android-VIEW-Intent auf dieser Zustimmungs-URL geöffnet) oder `{ok:false,code:"ERR_AUTHORIZE"}`. Führt `rclone authorize <backend>` auf einem lokalen Callback-Server (`127.0.0.1:53682`) für On-Device-OAuth aus. |
@@ -110,6 +113,7 @@ Backup/Restore benötigt; nur Cloud-Ziele (`rclone`/`restic`/ssh) sprechen mit d
 | `wipe-credentials` | `{}` | `{ok,wiped}` entfernt gespeicherte Remote-Passwörter und den Geräteverschlüsselungsschlüssel; Ziele, Jobs und Backups bleiben. |
 | `log-prune` | `{}` | `{ok}` beschneidet längst beendete Vorgangsprotokolle, begrenzt das Audit-Protokoll und entfernt veraltete Icons (der Boot-Dienst ruft dies auf). |
 | `sanitize` | `{}` | `{ok}` stellt die Sichtbarkeit (0755) der Backup-Ordner für jeden Android-Benutzer wieder her, damit ein Dateimanager Ordner öffnen kann, die eine rohe Root-Kopie oder ein Backup vor v1.03.2 nur für den Eigentümer zugänglich gelassen hat. |
+| `boot-sweep` | `{}` | `{ok,reaped}` räumt Überreste eines Backups auf, das unterbrochen oder zwangsweise beendet wurde (der Boot-Dienst ruft dies auf); ein Backup, das fehlschlägt oder abgebrochen wird, wird bereits von seinem eigenen Worker aufgeräumt. |
 
 ### `progress`-Felder
 

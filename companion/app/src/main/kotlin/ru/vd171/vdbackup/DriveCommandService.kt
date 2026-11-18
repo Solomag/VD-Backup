@@ -66,6 +66,8 @@ class DriveCommandService : Service() {
                     emit(result, ok, op, if (ok) "ERR_NONE" else "ERR_NO_CONSENT", null, "consent status")
                 }
                 "list" -> emit(result, true, op, "ERR_NONE", client.list(name), "list ok")
+                "backups" -> emit(result, true, op, "ERR_NONE", client.listBackups(name), "backups ok")
+                "list-folder" -> emit(result, true, op, "ERR_NONE", client.listFolderFiles(id ?: ""), "list-folder ok")
                 "upload" -> {
                     val source = src ?: ""
                     val remote = if (!name.isNullOrEmpty()) name else source.substringAfterLast('/')

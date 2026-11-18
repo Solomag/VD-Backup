@@ -89,6 +89,9 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `telegram-list` | `{}` | Telegram 频道中的备份（名称 `<pkg>__<ts>_<vc>.vdb.tar`） |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` 将 Telegram 备份下载到本地存储（detached）；随后通过正常的 `restore` 流程还原 |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` 按 `message_id` 从 Telegram 频道删除备份（批量：逗号分隔） |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` 在某个 rclone 目标上仅存于远端的 Full 备份（`dest` 是目标 id，`rref` 是 `<pkg>/<ts_vc>`） |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` 将仅存于远端的 rclone 备份下载到本地存储（detached）；随后通过正常的 `restore` 流程还原 |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` 从 rclone 远端删除一个备份；`rref` 必须正好是 `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 目标管理 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone 远端管理（创建 `type:"rclone"` 目标所指向的 `rclone.conf` 条目）；`backend` 可以是任意 rclone 后端，无白名单 |
 | `remote-authorize` | `{backend}` | `{ok:true,url}`（引擎已通过 Android VIEW intent 将手机浏览器打开到该同意 URL）或 `{ok:false,code:"ERR_AUTHORIZE"}`。在本地回调服务器（`127.0.0.1:53682`）上运行 `rclone authorize <backend>` 以进行设备端 OAuth。 |
@@ -108,6 +111,7 @@ SSH-to-root 配置）来执行该命令。模块附带捆绑的二进制文件�
 | `wipe-credentials` | `{}` | `{ok,wiped}` 删除已保存的远程密码和设备加密密钥；目标位置、任务和备份保留。 |
 | `log-prune` | `{}` | `{ok}` 修剪早已完成的操作日志，限制审计记录，并清除过时图标（由启动服务调用）。 |
 | `sanitize` | `{}` | `{ok}` 在每个 Android 用户下重新确立备份文件夹的可见性 (0755)，使文件管理器能够打开那些被原始 root 副本或 v1.03.2 之前的备份遗留为仅所有者可访问的文件夹。 |
+| `boot-sweep` | `{}` | `{ok,reaped}` 回收被中断或被强制终止的备份所遗留的残余（由启动服务调用）；失败或被取消的备份已由其自身的 worker 清理。 |
 
 ### `progress` 字段
 

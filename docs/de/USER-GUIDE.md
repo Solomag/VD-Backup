@@ -173,6 +173,8 @@ Fortschritt erscheint live, und eine Benachrichtigung sagt dir, wann er fertig i
 
 Im Backup-Dialog kannst du auch das **Ziel** dieses Backups wählen, lokaler Speicher oder ein von dir hinzugefügtes Cloud-/Remote-Ziel, ohne vorher das Standardziel in den Einstellungen zu ändern.
 
+VDBackup führt während eines Backups zwei automatische Schutzmaßnahmen aus, beide in den Einstellungen standardmäßig an. **"Zum Abkühlen pausieren, wenn das Gerät heiß wird"** lässt einen langen Vorgang durchatmen und wartet, bis das Gerät abkühlt, wenn es wirklich heiß ist, sodass ein großes Backup das Telefon nie überhitzt; nur das Tempo ändert sich, nie die Originaltreue. **"Freien Speicher vor einer Stapelsicherung prüfen"** schätzt, was eine Mehr-App-Sicherung benötigt, und stoppt am Anfang statt auf halbem Weg, falls der Speicher nicht ausreicht.
+
 ### 5.1 Auswählen, was gesichert werden soll
 
 Für jede App kannst du eine beliebige Kombination dieser Elemente einbeziehen:
@@ -438,6 +440,8 @@ Zwei Regeln halten die Remote-Nutzung sicher:
 Cloud-Transfer, manuell oder geplant, Upload oder Restore, zuerst die aktive Verbindung und
 weigert sich, auf der falschen zu laufen, sodass eine Nur-WLAN-Richtlinie nie mobile Daten
 verbraucht. Lokale Backups sind nie betroffen.
+
+**Eine lokale Kopie behalten oder nur-remote arbeiten.** Wenn ein Backup an ein Remote geht, das VDBackup selbst auflisten und zurückholen kann (Telegram oder ein rclone-Remote), ist es **standardmäßig nur-remote**: das Backup wird hochgeladen und nichts bleibt auf diesem Gerät, was Platz spart und keine lokale Spur hinterlässt. Schalte in den Einstellungen **"Lokale Kopie behalten, wenn eine Sicherung an ein Ziel geht"** ein, um die Kopie zusätzlich für ein sofortiges lokales Restore auf dem Gerät zu behalten. So oder so kannst du ein Remote-Backup mit **Aus Cloud-Remote wiederherstellen** im Backups-Tab zurückholen, der deine Remote-Backups auflistet und das von dir gewählte herunterlädt.
 
 **Google Drive.** Du hast zwei Wege, Google Drive zu erreichen:
 

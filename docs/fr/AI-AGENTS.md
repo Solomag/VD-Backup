@@ -91,6 +91,9 @@ destinations cloud (`rclone`/`restic`/ssh) communiquent avec le réseau.
 | `telegram-list` | `{}` | sauvegardes dans le canal Telegram (noms `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` télécharge une sauvegarde Telegram vers le stockage local (détaché) ; elle se restaure ensuite par le flux `restore` normal |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` supprime une sauvegarde du canal Telegram par `message_id` (lot : séparés par des virgules) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` sauvegardes Full stockées uniquement en remote sur une destination rclone (`dest` est l'id de la destination, `rref` est `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` télécharge une sauvegarde rclone stockée uniquement en remote vers le stockage local (détaché) ; elle se restaure ensuite par le flux `restore` normal |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` supprime une sauvegarde d'un remote rclone ; `rref` doit être exactement `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | gestion des destinations |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | gestion des remotes rclone (crée l'entrée `rclone.conf` que pointe une destination `type:"rclone"`) ; `backend` peut être n'importe quel backend rclone, sans liste blanche |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (le moteur a déjà ouvert le navigateur du téléphone sur cette URL de consentement via un intent VIEW Android) ou `{ok:false,code:"ERR_AUTHORIZE"}`. Lance `rclone authorize <backend>` sur un serveur de rappel local (`127.0.0.1:53682`) pour l'OAuth sur l'appareil. |
@@ -110,6 +113,7 @@ destinations cloud (`rclone`/`restic`/ssh) communiquent avec le réseau.
 | `wipe-credentials` | `{}` | `{ok,wiped}` supprime les mots de passe distants enregistrés et la clé de chiffrement de l'appareil ; destinations, tâches et sauvegardes restent. |
 | `log-prune` | `{}` | `{ok}` élague les journaux d'ops terminées depuis longtemps, limite le journal d'audit et supprime les icônes obsolètes (le service de démarrage l'appelle). |
 | `sanitize` | `{}` | `{ok}` réaffirme la visibilité (0755) des dossiers de sauvegarde pour chaque utilisateur Android, afin qu'un gestionnaire de fichiers puisse ouvrir des dossiers qu'une copie root brute ou une sauvegarde antérieure à v1.03.2 ont laissés accessibles au seul propriétaire. |
+| `boot-sweep` | `{}` | `{ok,reaped}` récupère les restes d'une sauvegarde interrompue ou tuée de force (le service de démarrage l'appelle) ; une sauvegarde qui échoue ou est annulée est déjà nettoyée par son propre worker. |
 
 ### Champs de `progress`
 

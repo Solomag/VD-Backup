@@ -29,6 +29,7 @@
 
 vdb_notify_msg() {
   _l="$1"; _k="$2"; _n="$3"; _p=""
+  [ "$_l" = in ] && _l=id
   case "$_l" in
     ar|cs|de|en|es|fa|fr|hi|id|it|ja|ko|nl|pl|pt|ru|sv|th|tr|uk|vi|zh) ;;
     *) _l=en ;;

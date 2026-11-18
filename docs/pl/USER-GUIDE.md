@@ -183,6 +183,8 @@ powiadomienie mówi ci, kiedy jest gotowe.
 
 W oknie kopii zapasowej możesz też wybrać **miejsce docelowe** tej kopii, pamięć lokalną lub dowolne dodane miejsce w chmurze/zdalne, bez wcześniejszej zmiany domyślnego miejsca w Ustawieniach.
 
+VDBackup uruchamia podczas kopii dwa automatyczne zabezpieczenia, oba domyślnie włączone w Ustawieniach. **"Wstrzymaj w celu schłodzenia, gdy urządzenie się nagrzewa"** pozwala długiemu zadaniu złapać oddech i czeka, aż urządzenie ostygnie, jeśli naprawdę jest gorące, więc duża kopia nigdy nie przegrzewa telefonu; zmienia się tylko tempo, nigdy wierność. **"Sprawdź wolne miejsce przed kopią wsadową"** szacuje, ile będzie potrzebować kopia wielu aplikacji, i zatrzymuje się na początku, a nie w połowie, jeśli pamięć by jej nie pomieściła.
+
 ### 5.1 Wybór tego, co kopiować
 
 Dla każdej aplikacji możesz dołączyć dowolną kombinację tych elementów:
@@ -438,6 +440,8 @@ domyślne), **tylko Wi-Fi**, lub **tylko dane mobilne**. Gdy to ograniczysz, ka�
 przesył, ręczny lub zaplanowany, upload lub przywracanie, najpierw sprawdza aktywne połączenie
 i odmawia działania na niewłaściwym, więc polityka tylko-Wi-Fi nigdy nie wyda danych mobilnych.
 Kopie lokalne nigdy nie są dotknięte.
+
+**Zachowaj kopię lokalną albo działaj tylko zdalnie.** Gdy kopia trafia do zdalnego miejsca, które VDBackup potrafi sam wylistować i pobrać z powrotem (Telegram lub zdalne rclone), domyślnie jest **tylko zdalna**: kopia jest wysyłana i nic nie zostaje na tym urządzeniu, co oszczędza miejsce i nie zostawia lokalnego śladu. Włącz **"Zachowaj kopię lokalną, gdy kopia trafia do celu"** w Settings, aby zachować kopię także na urządzeniu dla natychmiastowego lokalnego przywracania. Tak czy inaczej możesz odzyskać zdalną kopię za pomocą **Przywróć ze zdalnego zasobu w chmurze** na karcie Backups, która wylistuje twoje zdalne kopie i pobierze tę, którą wybierzesz.
 
 **Google Drive.** Masz dwa sposoby, by dotrzeć do Google Drive:
 

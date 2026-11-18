@@ -115,6 +115,7 @@
       <ul id="backuplist" class="list"></ul>
       <p id="backups-empty" class="muted" data-i18n="backups_empty">No backups yet.</p>
       <button id="tg-backups-open" class="btn small" type="button" data-i18n="ui_tg_backups_btn">Restore from Telegram</button>
+      <button id="rc-backups-open" class="btn small" type="button" data-i18n="ui_rc_backups_btn">Restore from cloud remote</button>
       <details class="grp">
         <summary class="section-head"><span class="sh-ic"><svg viewBox="0 0 24 24"><path d="M12 3v11"/><path d="M8 11l4 4 4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg></span><span class="sh-t" data-i18n="ui_import_title">Import from another app</span></summary>
         <div class="field">
@@ -327,6 +328,15 @@
             <option value="gzip" data-i18n="opt_comp_gzip">gzip (compatible)</option>
           </select>
         </div>
+        <div class="field">
+          <label for="set-staging" data-i18n="settings_staging">Staging folder (stealth)</label>
+          <div class="modal-msg" data-i18n="settings_staging_msg">Where a backup is temporarily built when it goes to Telegram or to storage other than internal. A root-only folder keeps backup data off shared storage. Default: /data/local/tmp.</div>
+          <input id="set-staging" type="text" inputmode="url" spellcheck="false" autocomplete="off" data-i18n-ph="settings_staging_ph" placeholder="/data/local/tmp">
+        </div>
+        <div class="field check">
+          <input type="checkbox" class="switch" id="set-local-copy"><span data-i18n="settings_local_copy">Keep a local copy when a backup goes to a destination</span>
+        </div>
+        <div class="muted" data-i18n="settings_local_copy_hint">Off by default: a backup sent to Telegram or to other storage keeps no copy on this device (nothing on shared storage, no duplication). Turn it on to also keep a local copy. Cloud destinations (rclone, Google Drive) always keep a local copy for now.</div>
         <div class="field check">
           <input type="checkbox" class="switch" id="set-enc-data"><span data-i18n="settings_encrypt_data">Encrypt data</span>
         </div>
@@ -334,6 +344,13 @@
           <input type="checkbox" class="switch" id="set-enc-apk"><span data-i18n="settings_encrypt_apk">Encrypt APKs</span>
         </div>
         <div class="muted" data-i18n="settings_encrypt_hint">Encryption uses a passphrase you enter when you back up (age scrypt). Any age tool decrypts it on a PC with that passphrase. There is no recovery if you lose it.</div>
+        <div class="field">
+          <label for="set-gpass" data-i18n="settings_gpass">Default passphrase</label>
+          <div class="modal-msg" data-i18n="settings_gpass_msg">Optional. Set a master passphrase and encrypted backups use it automatically, without retyping it. Stored encrypted on this device (root-only); a specific app can override it with its own.</div>
+          <div class="muted"><span data-i18n="settings_gpass_cur">Current:</span> <b id="set-gpass-state">-</b></div>
+          <input id="set-gpass" type="password" autocomplete="new-password" spellcheck="false" data-i18n-ph="settings_gpass_ph" placeholder="New passphrase (leave empty to keep)">
+          <button class="btn small" id="set-gpass-clear" type="button" data-i18n="settings_gpass_clear">Clear</button>
+        </div>
       </div>
 
       <div class="card">
@@ -783,6 +800,18 @@
             <button class="btn small" id="ai-tag-add" data-i18n="ui_tag_add">Add</button>
           </div>
         </div>
+        <div class="field">
+          <label for="ai-note" data-i18n="appitems_note">Note</label>
+          <div class="modal-msg" data-i18n="appitems_note_msg">A free-text note for this app - a reminder, a description, whatever helps you.</div>
+          <textarea id="ai-note" rows="2" data-i18n-ph="appitems_note_ph" placeholder="Note for this app"></textarea>
+        </div>
+        <div class="field">
+          <label for="ai-pass" data-i18n="appitems_pass">Encryption passphrase (this app)</label>
+          <div class="modal-msg" data-i18n="appitems_pass_msg">Optional. Overrides the default passphrase for this app's encrypted backups.</div>
+          <div class="muted"><span data-i18n="settings_gpass_cur">Current:</span> <b id="ai-pass-state">-</b></div>
+          <input id="ai-pass" type="password" autocomplete="new-password" spellcheck="false" data-i18n-ph="appitems_pass_ph" placeholder="New passphrase (leave empty to keep)">
+          <button class="btn small" id="ai-pass-clear" type="button" data-i18n="settings_gpass_clear">Clear</button>
+        </div>
       </div>
       <div class="modal-actions">
         <button class="btn" id="appitems-clear" data-i18n="appitems_clear">Use default (everything)</button>
@@ -911,6 +940,10 @@
       <div class="adb-selinfo muted" id="adb-selinfo"></div>
       <div id="adb-bkopts">
         <div class="field">
+          <label for="adb-dest" data-i18n="ui_backup_dest">Destination</label>
+          <select id="adb-dest"></select>
+        </div>
+        <div class="field">
           <label data-i18n="settings_compression">Compression</label>
           <select id="adb-comp">
             <option value="none" data-i18n="opt_comp_none">none</option>
@@ -960,6 +993,17 @@
       <ul id="tg-backups-list" class="list"></ul>
       <div class="modal-actions">
         <button class="btn" id="tg-backups-close" data-i18n="ui_import_cancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rc-backups" class="modal" hidden role="dialog" aria-modal="true">
+    <div class="modal-card">
+      <div class="modal-title" data-i18n="ui_rc_backups_title">Backups on a cloud remote</div>
+      <div class="modal-msg" data-i18n="ui_rc_backups_msg">Pull a backup from an rclone remote back to this device, then restore it like any local backup.</div>
+      <ul id="rc-backups-list" class="list"></ul>
+      <div class="modal-actions">
+        <button class="btn" id="rc-backups-close" data-i18n="ui_import_cancel">Cancel</button>
       </div>
     </div>
   </div>

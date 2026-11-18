@@ -91,6 +91,9 @@ chmurowe (`rclone`/`restic`/ssh) komunikują się z siecią.
 | `telegram-list` | `{}` | kopie w kanale Telegram (nazwy `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` pobiera kopię z Telegrama do pamięci lokalnej (detached); potem przywraca ją normalnym przepływem `restore` |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` usuwa kopię z kanału Telegram wg `message_id` (wsadowo: po przecinku) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` kopie Full przechowywane tylko zdalnie w celu rclone (`dest` to id celu, `rref` to `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` pobiera kopię rclone przechowywaną tylko zdalnie do pamięci lokalnej (detached); potem przywraca ją normalnym przepływem `restore` |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` usuwa jedną kopię ze zdalnego rclone; `rref` musi być dokładnie `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | zarządzanie celami |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | zarządzanie zdalnymi rclone (tworzy wpis `rclone.conf`, na który wskazuje cel `type:"rclone"`); `backend` może być dowolnym backendem rclone, bez listy dozwolonych |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (silnik już otworzył przeglądarkę telefonu na tym URL zgody przez intencję VIEW systemu Android) lub `{ok:false,code:"ERR_AUTHORIZE"}`. Uruchamia `rclone authorize <backend>` na lokalnym serwerze zwrotnym (`127.0.0.1:53682`) dla OAuth na urządzeniu. |
@@ -110,6 +113,7 @@ chmurowe (`rclone`/`restic`/ssh) komunikują się z siecią.
 | `wipe-credentials` | `{}` | `{ok,wiped}` usuwa zapisane hasła zdalne i klucz szyfrowania urządzenia; miejsca docelowe, zadania i kopie pozostają. |
 | `log-prune` | `{}` | `{ok}` przycina dawno zakończone logi operacji, ogranicza dziennik audytu i usuwa nieaktualne ikony (wywołuje to usługa rozruchu). |
 | `sanitize` | `{}` | `{ok}` ponownie wymusza widoczność (0755) folderów kopii zapasowych dla każdego użytkownika Androida, aby menedżer plików mógł otworzyć foldery, które surowa kopia root lub kopia zapasowa sprzed v1.03.2 pozostawiły dostępne tylko dla właściciela. |
+| `boot-sweep` | `{}` | `{ok,reaped}` sprząta pozostałości po kopii zapasowej, która została przerwana lub wymuszenie zakończona (wywołuje to usługa rozruchu); kopia zapasowa, która zawiedzie lub zostanie anulowana, jest już sprzątana przez własny worker. |
 
 ### Pola `progress`
 

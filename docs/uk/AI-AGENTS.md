@@ -92,6 +92,9 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `telegram-list` | `{}` | копії в каналі Telegram (імена `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` завантажує копію з Telegram у локальне сховище (detached); потім відновлюється звичайним потоком `restore` |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` видаляє копію з каналу Telegram за `message_id` (пакетно: через кому) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` копії Full, що зберігаються лише віддалено в призначенні rclone (`dest` - це id призначення, `rref` - це `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` завантажує копію rclone, що зберігається лише віддалено, у локальне сховище (detached); потім відновлюється звичайним потоком `restore` |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` видаляє одну копію з віддаленого rclone; `rref` має бути точно `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | керування призначеннями |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | керування віддаленими rclone (створює запис `rclone.conf`, на який вказує призначення `type:"rclone"`); `backend` може бути будь-яким бекендом rclone, без білого списку |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (рушій уже відкрив браузер телефона на цій URL згоди через Android VIEW intent) або `{ok:false,code:"ERR_AUTHORIZE"}`. Запускає `rclone authorize <backend>` на локальному сервері зворотного виклику (`127.0.0.1:53682`) для OAuth на пристрої. |
@@ -111,6 +114,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `wipe-credentials` | `{}` | `{ok,wiped}` видаляє збережені віддалені паролі та ключ шифрування пристрою; призначення, завдання й резервні копії лишаються. |
 | `log-prune` | `{}` | `{ok}` обрізає журнали давно завершених операцій, обмежує слід аудиту й виселяє застарілі піктограми (це викликає служба завантаження). |
 | `sanitize` | `{}` | `{ok}` знову застосовує видимість (0755) папок резервних копій для кожного користувача Android, щоб файловий менеджер міг відкрити папки, які необроблена копія від root або резервна копія до v1.03.2 залишили доступними лише власнику. |
+| `boot-sweep` | `{}` | `{ok,reaped}` прибирає рештки резервної копії, яку перервали або примусово завершили (це викликає служба завантаження); резервна копія, яка завершується помилкою або скасовується, уже прибирається власним робочим процесом. |
 
 ### Поля `progress`
 

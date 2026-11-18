@@ -91,6 +91,9 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `telegram-list` | `{}` | säkerhetskopior i Telegram-kanalen (namn `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` hämtar en Telegram-kopia till lokal lagring (detached); den återställs sedan via det vanliga `restore`-flödet |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` tar bort en säkerhetskopia från Telegram-kanalen via `message_id` (batch: kommaseparerat) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` Full-säkerhetskopior som lagras enbart på fjärrplats på en rclone-destination (`dest` är destinations-id, `rref` är `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` hämtar en rclone-säkerhetskopia som lagras enbart på fjärrplats till lokal lagring (detached); den återställs sedan via det vanliga `restore`-flödet |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` tar bort en säkerhetskopia från en rclone-fjärrplats; `rref` måste vara exakt `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | destinationshantering |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | hantering av rclone-fjärrplatser (skapar `rclone.conf`-posten som en `type:"rclone"`-destination pekar på); `backend` kan vara vilken rclone-backend som helst, ingen vitlista |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (motorn har redan öppnat telefonens webbläsare på den samtyckes-URL:en via en Android VIEW-intent) eller `{ok:false,code:"ERR_AUTHORIZE"}`. Kör `rclone authorize <backend>` på en lokal callback-server (`127.0.0.1:53682`) för OAuth på enheten. |
@@ -110,6 +113,7 @@ destinationer (`rclone`/`restic`/ssh) kommunicerar med nätverket.
 | `wipe-credentials` | `{}` | `{ok,wiped}` tar bort sparade fjärrlösenord och enhetens krypteringsnyckel; destinationer, jobb och säkerhetskopior blir kvar. |
 | `log-prune` | `{}` | `{ok}` beskär sedan länge avslutade op-loggar, begränsar granskningsspåret och rensar inaktuella ikoner (startservicen anropar detta). |
 | `sanitize` | `{}` | `{ok}` återställer synligheten (0755) för backup-mappar för varje Android-användare, så att en filhanterare kan öppna mappar som en rå root-kopia eller en backup före v1.03.2 lämnade åtkomliga endast för ägaren. |
+| `boot-sweep` | `{}` | `{ok,reaped}` rensar rester från en backup som avbröts eller tvångsavslutades (startservicen anropar detta); en backup som misslyckas eller avbryts rensas redan av sin egen worker. |
 
 ### `progress`-fält
 

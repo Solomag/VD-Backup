@@ -91,6 +91,9 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `telegram-list` | `{}` | zálohy v kanálu Telegram (názvy `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` stáhne zálohu z Telegramu do místního úložiště (detached); pak se obnoví normálním tokem `restore` |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` smaže zálohu z kanálu Telegram podle `message_id` (dávka: oddělené čárkou) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` zálohy Full uložené pouze vzdáleně v cíli rclone (`dest` je id cíle, `rref` je `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` stáhne pouze vzdáleně uloženou zálohu rclone do místního úložiště (detached); pak se obnoví normálním tokem `restore` |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` smaže jednu zálohu z rclone remotu; `rref` musí být přesně `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | správa cílů |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | správa rclone remotů (vytvoří záznam v `rclone.conf`, na který cíl `type:"rclone"` ukazuje); `backend` může být libovolný rclone backend, bez whitelistu |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (engine už otevřel prohlížeč telefonu na této URL souhlasu přes Android VIEW intent) nebo `{ok:false,code:"ERR_AUTHORIZE"}`. Spustí `rclone authorize <backend>` na místním callback serveru (`127.0.0.1:53682`) pro OAuth na zařízení. |
@@ -110,6 +113,7 @@ cíle (`rclone`/`restic`/ssh) komunikují se sítí.
 | `wipe-credentials` | `{}` | `{ok,wiped}` odstraní uložená vzdálená hesla a šifrovací klíč zařízení; cíle, úlohy a zálohy zůstávají. |
 | `log-prune` | `{}` | `{ok}` prořeže dávno dokončené protokoly operací, omezí auditní stopu a odstraní zastaralé ikony (volá to spouštěcí služba). |
 | `sanitize` | `{}` | `{ok}` znovu prosadí viditelnost (0755) složek záloh pro každého uživatele Androidu, aby správce souborů mohl otevřít složky, které syrová kopie root nebo záloha před v1.03.2 ponechaly přístupné jen vlastníkovi. |
+| `boot-sweep` | `{}` | `{ok,reaped}` uklidí zbytky po záloze, která byla přerušena nebo násilně ukončena (volá to spouštěcí služba); záloha, která selže nebo je zrušena, je už uklizena vlastním workerem. |
 
 ### Pole `progress`
 

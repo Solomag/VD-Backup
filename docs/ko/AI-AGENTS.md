@@ -91,6 +91,9 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `telegram-list` | `{}` | Telegram 채널의 백업 (이름 `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` Telegram 백업을 로컬 저장소로 다운로드(detached); 이후 일반 `restore` 흐름으로 복원 |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id`로 Telegram 채널에서 백업 삭제 (일괄: 쉼표 구분) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` rclone 대상에 원격 전용으로 저장된 Full 백업 (`dest`는 대상 id, `rref`는 `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` 원격 전용으로 저장된 rclone 백업을 로컬 저장소로 다운로드(detached); 이후 일반 `restore` 흐름으로 복원 |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` rclone 원격에서 백업 하나 삭제; `rref`는 정확히 `<pkg>/<ts_vc>`여야 함 |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | 대상 관리 |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone 원격 관리 (`type:"rclone"` 대상이 가리키는 `rclone.conf` 항목을 생성); `backend`는 임의의 rclone backend일 수 있으며 화이트리스트가 없음 |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (엔진이 Android VIEW 인텐트를 통해 해당 동의 URL을 이미 휴대폰 브라우저에서 열었음) 또는 `{ok:false,code:"ERR_AUTHORIZE"}`. 기기 내 OAuth를 위해 로컬 콜백 서버(`127.0.0.1:53682`)에서 `rclone authorize <backend>`를 실행. |
@@ -110,6 +113,7 @@ SSH-to-root 설정)을 통해 그 명령을 실행하세요. 모듈은 바이너
 | `wipe-credentials` | `{}` | `{ok,wiped}` 저장된 원격 비밀번호와 기기 암호화 키를 제거합니다. 대상, 작업, 백업은 유지됩니다. |
 | `log-prune` | `{}` | `{ok}` 오래전에 완료된 작업 로그를 정리하고 감사 추적을 제한하며 오래된 아이콘을 제거합니다(부팅 서비스가 호출). |
 | `sanitize` | `{}` | `{ok}` 모든 Android 사용자에서 백업 폴더의 가시성(0755)을 다시 적용하여, 원시 root 복사본이나 v1.03.2 이전 백업이 소유자 전용으로 남긴 폴더를 파일 관리자가 열 수 있게 합니다. |
+| `boot-sweep` | `{}` | `{ok,reaped}` 중단되었거나 강제 종료된 백업의 잔여물을 수거합니다(부팅 서비스가 호출). 실패하거나 취소된 백업은 이미 자체 worker가 정리합니다. |
 
 ### `progress` 필드
 

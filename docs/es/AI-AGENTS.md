@@ -91,6 +91,9 @@ de nube (`rclone`/`restic`/ssh) hablan con la red.
 | `telegram-list` | `{}` | copias en el canal de Telegram (nombres `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` descarga una copia de Telegram al almacenamiento local (detached); luego se restaura por el flujo normal de `restore` |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` elimina una copia del canal de Telegram por `message_id` (lote: separado por comas) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` copias Full almacenadas solo en remoto en un destino rclone (`dest` es el id del destino, `rref` es `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` descarga una copia rclone almacenada solo en remoto al almacenamiento local (detached); luego se restaura por el flujo normal de `restore` |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` elimina una copia de un remoto rclone; `rref` debe ser exactamente `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | gestión de destinos |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | gestión de remotos rclone (crea la entrada `rclone.conf` a la que apunta un dest `type:"rclone"`); `backend` puede ser cualquier backend de rclone, sin lista blanca |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (el motor ya abrió el navegador del teléfono en esa URL de consentimiento mediante un intent VIEW de Android) o `{ok:false,code:"ERR_AUTHORIZE"}`. Ejecuta `rclone authorize <backend>` en un servidor de callback local (`127.0.0.1:53682`) para OAuth en el dispositivo. |
@@ -110,6 +113,7 @@ de nube (`rclone`/`restic`/ssh) hablan con la red.
 | `wipe-credentials` | `{}` | `{ok,wiped}` elimina las contraseñas remotas guardadas y la clave de cifrado del dispositivo; destinos, trabajos y copias permanecen. |
 | `log-prune` | `{}` | `{ok}` poda registros de ops hace tiempo terminadas, limita el registro de auditoría y elimina iconos obsoletos (lo llama el servicio de arranque). |
 | `sanitize` | `{}` | `{ok}` reafirma la visibilidad (0755) de las carpetas de backup en cada usuario de Android, para que un gestor de archivos pueda abrir carpetas que una copia root en bruto o un backup anterior a v1.03.2 dejaron accesibles solo para el propietario. |
+| `boot-sweep` | `{}` | `{ok,reaped}` limpia los restos de un backup que fue interrumpido o terminado a la fuerza (lo llama el servicio de arranque); un backup que falla o se cancela ya lo limpia su propio worker. |
 
 ### Campos de `progress`
 

@@ -92,6 +92,9 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `telegram-list` | `{}` | `{ok,backups:[{message_id,name,size,date}]}` - backups stored in the Telegram channel (names are `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` download a Telegram backup into local storage (detached); it then restores via the normal `restore` flow |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` delete a backup from the Telegram channel by `message_id` (batch: comma-separated refs) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` - Full backups stored remote-only on an rclone destination (`dest` is the destination id, `rref` is `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` download an rclone remote-only backup into local storage (detached); it then restores via the normal `restore` flow |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` delete one backup from an rclone remote; `rref` must be exactly `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | destination management |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote management (creates the `rclone.conf` entry a `type:"rclone"` dest points to); `backend` may be any rclone backend, no whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (the engine already opened the phone browser to that consent URL via an Android VIEW intent) or `{ok:false,code:"ERR_AUTHORIZE"}`. Runs `rclone authorize <backend>` on a local callback server (`127.0.0.1:53682`) for on-device OAuth. |
@@ -111,6 +114,7 @@ destinations (`rclone`/`restic`/ssh) talk to the network.
 | `wipe-credentials` | `{}` | `{ok,wiped}` removes stored remote passwords and the device encryption key; destinations, jobs and backups stay. |
 | `log-prune` | `{}` | `{ok}` prunes long-finished op logs, caps the audit trail and evicts stale icons (the boot service calls this). |
 | `sanitize` | `{}` | `{ok}` re-asserts backup-folder visibility (0755) across every Android user, so a file manager can open folders a raw root copy or a pre-v1.03.2 backup left owner-only. |
+| `boot-sweep` | `{}` | `{ok,reaped}` reaps leftovers from a backup that was interrupted or force-killed (the boot service calls this); a backup that fails or is cancelled is already cleaned up by its own worker. |
 
 ### `progress` fields
 

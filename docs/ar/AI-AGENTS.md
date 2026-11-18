@@ -91,6 +91,9 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `telegram-list` | `{}` | النسخ في قناة تيليجرام (الأسماء `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` يُنزّل نسخة من تيليجرام إلى التخزين المحلي (detached)؛ ثم تُستعاد عبر مسار `restore` المعتاد |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` يحذف نسخة من قناة تيليجرام عبر `message_id` (دُفعة: مفصولة بفواصل) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` نسخ Full المخزَّنة عن بُعد فقط على وجهة rclone (‏`dest` هو معرّف الوجهة، و`rref` هو `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` يُنزّل نسخة rclone مخزَّنة عن بُعد فقط إلى التخزين المحلي (detached)؛ ثم تُستعاد عبر مسار `restore` المعتاد |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` يحذف نسخة واحدة من جهاز rclone بعيد؛ يجب أن يكون `rref` بالضبط `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | إدارة الوجهات |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | إدارة أجهزة rclone البعيدة (تنشئ إدخال `rclone.conf` الذي تشير إليه وجهة من نوع `type:"rclone"`)؛ قد يكون `backend` أي backend من rclone، بلا قائمة سماح |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (فتح المحرك بالفعل متصفح الهاتف على عنوان الموافقة ذاك عبر نية Android VIEW) أو `{ok:false,code:"ERR_AUTHORIZE"}`. يشغّل `rclone authorize <backend>` على خادم رد نداء محلي (`127.0.0.1:53682`) من أجل OAuth على الجهاز. |
@@ -110,6 +113,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `wipe-credentials` | `{}` | `{ok,wiped}` يزيل كلمات المرور البعيدة المحفوظة ومفتاح تشفير الجهاز؛ تبقى الوجهات والمهام والنسخ. |
 | `log-prune` | `{}` | `{ok}` يقلّم سجلات العمليات المنتهية منذ زمن، ويحدّ من سجل التدقيق، ويزيل الأيقونات القديمة (تستدعيه خدمة الإقلاع). |
 | `sanitize` | `{}` | `{ok}` يعيد تأكيد ظهور مجلدات النسخ الاحتياطي (0755) عبر كل مستخدم أندرويد، حتى يتمكن مدير الملفات من فتح مجلدات تركتها نسخة جذر خام أو نسخة احتياطية سابقة لـ v1.03.2 متاحة للمالك فقط. |
+| `boot-sweep` | `{}` | `{ok,reaped}` يجمع البقايا من نسخة احتياطية قوطعت أو أُنهيت بالقوة (تستدعيه خدمة الإقلاع)؛ أما النسخة الاحتياطية التي تفشل أو تُلغى فيتولى عاملها الخاص تنظيفها بالفعل. |
 
 ### حقول `progress`
 

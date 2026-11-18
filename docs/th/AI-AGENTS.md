@@ -90,6 +90,9 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `telegram-list` | `{}` | การสำรองข้อมูลในช่อง Telegram (ชื่อ `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` ดาวน์โหลดการสำรองข้อมูลจาก Telegram ไปยังที่เก็บในเครื่อง (detached) แล้วกู้คืนผ่านโฟลว์ `restore` ปกติ |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` ลบการสำรองข้อมูลจากช่อง Telegram ด้วย `message_id` (ชุด: คั่นด้วยจุลภาค) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` การสำรองข้อมูล Full ที่จัดเก็บแบบ remote เท่านั้นบนปลายทาง rclone (`dest` คือ id ปลายทาง, `rref` คือ `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` ดาวน์โหลดการสำรองข้อมูล rclone ที่จัดเก็บแบบ remote เท่านั้นไปยังที่เก็บในเครื่อง (detached) แล้วกู้คืนผ่านโฟลว์ `restore` ปกติ |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` ลบการสำรองข้อมูลหนึ่งรายการจาก remote ของ rclone; `rref` ต้องเป็น `<pkg>/<ts_vc>` พอดี |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | การจัดการปลายทาง |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | การจัดการ rclone remote (สร้างรายการใน `rclone.conf` ที่ปลายทาง `type:"rclone"` ชี้ไป); `backend` เป็น rclone backend ใดก็ได้ ไม่มี whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (เอนจินได้เปิดเบราว์เซอร์ของโทรศัพท์ไปยัง URL ขอความยินยอมนั้นแล้วผ่าน Android VIEW intent) หรือ `{ok:false,code:"ERR_AUTHORIZE"}` รัน `rclone authorize <backend>` บน callback server ในเครื่อง (`127.0.0.1:53682`) เพื่อทำ OAuth บนอุปกรณ์ |
@@ -109,6 +112,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `wipe-credentials` | `{}` | `{ok,wiped}` ลบรหัสผ่านระยะไกลที่บันทึกไว้และคีย์เข้ารหัสของอุปกรณ์ ปลายทาง งาน และข้อมูลสำรองยังคงอยู่ |
 | `log-prune` | `{}` | `{ok}` ตัดบันทึกปฏิบัติการที่เสร็จนานแล้ว จำกัดร่องรอยการตรวจสอบ และลบไอคอนที่ล้าสมัย (บริการบูตเรียกสิ่งนี้) |
 | `sanitize` | `{}` | `{ok}` ยืนยันการมองเห็น (0755) ของโฟลเดอร์สำรองข้อมูลอีกครั้งในทุกผู้ใช้ Android เพื่อให้โปรแกรมจัดการไฟล์สามารถเปิดโฟลเดอร์ที่สำเนา root แบบดิบหรือข้อมูลสำรองก่อน v1.03.2 ปล่อยให้เข้าถึงได้เฉพาะเจ้าของ |
+| `boot-sweep` | `{}` | `{ok,reaped}` เก็บกวาดเศษที่เหลือจากการสำรองข้อมูลที่ถูกขัดจังหวะหรือถูกบังคับปิด (บริการบูตเรียกสิ่งนี้) ส่วนการสำรองข้อมูลที่ล้มเหลวหรือถูกยกเลิกจะถูกเก็บกวาดโดย worker ของตัวเองอยู่แล้ว |
 
 ### ฟิลด์ของ `progress`
 

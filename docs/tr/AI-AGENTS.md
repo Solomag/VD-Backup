@@ -91,6 +91,9 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `telegram-list` | `{}` | Telegram kanalındaki yedekler (adlar `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` bir Telegram yedeğini yerel depolamaya indirir (detached); sonra normal `restore` akışıyla geri yüklenir |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` Telegram kanalından `message_id` ile bir yedeği siler (toplu: virgülle ayrılmış) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` bir rclone hedefinde yalnızca-uzakta saklanan Full yedekler (`dest` hedef id'sidir, `rref` ise `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` yalnızca-uzakta saklanan bir rclone yedeğini yerel depolamaya indirir (detached); sonra normal `restore` akışıyla geri yüklenir |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` bir rclone uzak biriminden bir yedeği siler; `rref` tam olarak `<pkg>/<ts_vc>` olmalıdır |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | hedef yönetimi |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone uzak yönetimi (bir `type:"rclone"` hedefinin işaret ettiği `rclone.conf` girdisini oluşturur); `backend` herhangi bir rclone backend'i olabilir, whitelist yok |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (motor, telefon tarayıcısını o onay URL'sine bir Android VIEW intent ile zaten açtı) veya `{ok:false,code:"ERR_AUTHORIZE"}`. Cihaz üzerinde OAuth için yerel bir geri çağırma sunucusunda (`127.0.0.1:53682`) `rclone authorize <backend>` çalıştırır. |
@@ -110,6 +113,7 @@ dosyalarla gelir, bu yüzden kurulduktan sonra yerel yedekleme/geri yükleme iç
 | `wipe-credentials` | `{}` | `{ok,wiped}` kayıtlı uzak parolaları ve cihaz şifreleme anahtarını kaldırır; hedefler, işler ve yedekler kalır. |
 | `log-prune` | `{}` | `{ok}` çoktan bitmiş işlem günlüklerini budar, denetim izini sınırlar ve eski simgeleri temizler (önyükleme hizmeti bunu çağırır). |
 | `sanitize` | `{}` | `{ok}` yedek klasörlerinin görünürlüğünü (0755) her Android kullanıcısında yeniden uygular, böylece bir dosya yöneticisi, ham bir root kopyasının veya v1.03.2 öncesi bir yedeğin yalnızca sahibine erişilebilir bıraktığı klasörleri açabilir. |
+| `boot-sweep` | `{}` | `{ok,reaped}` kesintiye uğramış veya zorla sonlandırılmış bir yedekten kalanları toplar (önyükleme hizmeti bunu çağırır); başarısız olan veya iptal edilen bir yedek zaten kendi worker'ı tarafından temizlenir. |
 
 ### `progress` alanları
 

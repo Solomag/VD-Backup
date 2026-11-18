@@ -183,6 +183,8 @@ een melding vertelt je wanneer het klaar is.
 
 In het back-updialoogvenster kun je ook de **bestemming** voor deze back-up kiezen, lokale opslag of een toegevoegde cloud-/externe bestemming, zonder eerst de standaardbestemming in Instellingen te wijzigen.
 
+VDBackup voert tijdens een backup twee automatische beveiligingen uit, beide standaard aan in Instellingen. **"Pauzeren om af te koelen wanneer het apparaat heet wordt"** laat een lange taak op adem komen en wacht tot het apparaat is afgekoeld als het echt heet is, zodat een grote backup de telefoon nooit oververhit; alleen het tempo verandert, nooit de getrouwheid. **"Vrije ruimte controleren vóór een batchback-up"** schat in wat een back-up van meerdere apps nodig heeft en stopt aan het begin, in plaats van halverwege, als de opslag het niet zou kunnen bevatten.
+
 ### 5.1 Kiezen wat je back-upt
 
 Voor elke app kun je elke combinatie van deze items opnemen:
@@ -446,6 +448,8 @@ standaard), **alleen wifi** of **alleen mobiele data**. Wanneer je het beperkt, 
 elke cloudoverdracht, handmatig of gepland, upload of herstel, eerst de actieve verbinding en
 weigert op de verkeerde te draaien, zodat een alleen-wifi-beleid nooit mobiele data verbruikt.
 Lokale backups worden nooit beïnvloed.
+
+**Houd een lokale kopie, of ga alleen-op-afstand.** Wanneer een backup naar een externe bestemming gaat die VDBackup zelf kan opsommen en terughalen (Telegram of een rclone-remote), is die **standaard alleen-op-afstand**: de backup wordt geüpload en er blijft niets op dit apparaat staan, wat ruimte bespaart en geen lokaal spoor achterlaat. Zet **"Een lokale kopie bewaren wanneer een back-up naar een bestemming gaat"** aan in Instellingen om de kopie ook op het apparaat te houden voor een onmiddellijk lokaal herstel. Hoe dan ook kun je een externe backup terugkrijgen met **Herstellen van cloud-remote** op het tabblad Backups, dat je externe backups opsomt en de door jou gekozen backup terughaalt.
 
 **Google Drive.** Je hebt twee manieren om Google Drive te bereiken:
 

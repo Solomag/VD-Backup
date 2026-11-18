@@ -189,6 +189,8 @@ seçin, sıkıştırmayı ve (isteğe bağlı olarak) şifrelemeyi ayarlayın, s
 
 Yedekleme iletişim kutusunda bu yedeğin **hedefini** de seçebilirsin, yerel depolama ya da eklediğin herhangi bir bulut/uzak hedef, önce Ayarlar'daki varsayılan hedefi değiştirmeden.
 
+VDBackup bir yedekleme sırasında, ikisi de Ayarlar'da varsayılan olarak açık olan iki otomatik güvenlik önlemi çalıştırır. **"Cihaz ısındığında soğuması için duraklat"** uzun bir işe nefes aldırır ve cihaz gerçekten sıcaksa soğumasını bekler, böylece büyük bir yedekleme telefonu asla aşırı ısıtmaz; yalnızca tempo değişir, sadakat asla. **"Toplu yedeklemeden önce boş alanı denetle"**, çok uygulamalı bir yedeklemenin neye ihtiyaç duyacağını tahmin eder ve depolama yetmeyecekse yarı yolda değil, en başta durur.
+
 ### 5.1 Neyi yedekleyeceğinizi seçme
 
 Her uygulama için bu öğelerin herhangi bir kombinasyonunu dahil edebilirsiniz:
@@ -445,6 +447,8 @@ mobil veri** (varsayılan), **yalnızca Wi-Fi** veya **yalnızca mobil veri**.
 Kısıtladığınızda, her bulut aktarımı, manuel veya zamanlanmış, yükleme veya geri yükleme
 - önce etkin bağlantıyı kontrol eder ve yanlış olanda çalışmayı reddeder, böylece yalnızca
 Wi-Fi politikası asla mobil veri harcamaz. Yerel yedekler asla etkilenmez.
+
+**Yerel bir kopya tut ya da yalnızca uzak git.** Bir yedek, VDBackup'ın kendi başına listeleyip geri çekebileceği bir uzak hedefe (Telegram ya da bir rclone uzak hedefi) gittiğinde, **varsayılan olarak yalnızca uzaktır**: yedek yüklenir ve bu cihazda hiçbir şey tutulmaz, bu da yerden tasarruf sağlar ve yerel bir iz bırakmaz. Kopyayı anında yerel geri yükleme için cihazda da tutmak üzere Settings'te **"Bir yedek bir hedefe giderken yerel bir kopya tut"** seçeneğini aç. Her iki durumda da bir uzak yedeği, Backups sekmesindeki **Bulut uzak biriminden geri yükle** ile geri alabilirsin; bu, uzak yedeklerini listeler ve seçtiğini geri çeker.
 
 **Google Drive.** Google Drive'a ulaşmanın iki yolu vardır:
 

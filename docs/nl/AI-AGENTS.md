@@ -91,6 +91,9 @@ backup/restore; alleen cloudbestemmingen (`rclone`/`restic`/ssh) praten met het 
 | `telegram-list` | `{}` | back-ups in het Telegram-kanaal (namen `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` haalt een Telegram-back-up naar lokale opslag (detached); die wordt dan via de normale `restore`-stroom teruggezet |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` verwijdert een back-up uit het Telegram-kanaal via `message_id` (batch: kommagescheiden) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` Full-back-ups die alleen-remote op een rclone-bestemming staan (`dest` is de bestemmings-id, `rref` is `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` haalt een alleen-remote rclone-back-up naar lokale opslag (detached); die wordt dan via de normale `restore`-stroom teruggezet |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` verwijdert één back-up uit een rclone-remote; `rref` moet exact `<pkg>/<ts_vc>` zijn |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | bestemmingsbeheer |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone-remote-beheer (maakt het `rclone.conf`-item waarnaar een `type:"rclone"`-bestemming verwijst); `backend` mag elke rclone-backend zijn, geen whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (de engine heeft de browser van de telefoon al via een Android-VIEW-intent op die toestemmings-URL geopend) of `{ok:false,code:"ERR_AUTHORIZE"}`. Draait `rclone authorize <backend>` op een lokale callbackserver (`127.0.0.1:53682`) voor OAuth op het apparaat. |
@@ -110,6 +113,7 @@ backup/restore; alleen cloudbestemmingen (`rclone`/`restic`/ssh) praten met het 
 | `wipe-credentials` | `{}` | `{ok,wiped}` verwijdert opgeslagen externe wachtwoorden en de versleutelingssleutel van het apparaat; bestemmingen, taken en back-ups blijven. |
 | `log-prune` | `{}` | `{ok}` snoeit allang voltooide op-logs, beperkt het auditspoor en verwijdert verouderde iconen (de opstartservice roept dit aan). |
 | `sanitize` | `{}` | `{ok}` herbevestigt de zichtbaarheid (0755) van back-upmappen voor elke Android-gebruiker, zodat een bestandsbeheerder mappen kan openen die een rauwe root-kopie of een back-up van vóór v1.03.2 alleen voor de eigenaar toegankelijk liet. |
+| `boot-sweep` | `{}` | `{ok,reaped}` ruimt restanten op van een back-up die werd onderbroken of geforceerd afgebroken (de opstartservice roept dit aan); een back-up die mislukt of wordt geannuleerd wordt al opgeruimd door zijn eigen worker. |
 
 ### `progress`-velden
 

@@ -6,6 +6,30 @@
 
 All notable changes to VDBackup are documented here. English only.
 
+## v1.13
+
+New:
+
+- You can set a default encryption passphrase in Settings, and override it per app, so encrypted backups no longer ask for a password every time. (#17)
+- A backup sent to a remote (Telegram or an rclone cloud remote) can now be remote-only: it uploads and keeps no local copy, which saves space and leaves no local trace, with a Settings switch to keep a local copy instead. You can also browse and restore your backups straight from an rclone remote. (#16)
+- A new Staging folder setting lets you choose where a backup is temporarily assembled when it goes to a remote or to external storage; a root-only folder keeps backup data off shared storage.
+
+Fixes:
+
+- Checking for and installing updates now works on every device. The bundled downloader could not validate secure (https) connections unless a specific developer app was installed, so the self-update, the Updates panel and the one-tap install from the MMRL app failed on most devices. It now uses the device's own trust store and works everywhere.
+- The size next to each item in the /data/adb file picker now always keeps one decimal (for example 15.6 KB, 184.3 MB), instead of dropping it on larger values.
+- Turning an installed app into a system app now actually takes effect. The app was placed into the system image, but the system refused to read it, so it never became a system app; it is now set up correctly and is picked up on the next boot.
+- A backup that fails or is interrupted no longer leaves a partial, unusable copy behind that could slowly use up storage over many retries. Leftovers from an abrupt kill, or from a backup stopped before it even starts, are cleared too, and once more on the next reboot.
+- Importing a Neo-Backup or Android-DataBackup backup now restores each app with the correct security labels, so a restored app no longer crashes or loses access to its own data.
+- Backup and restore notifications now show the app's name instead of its package id.
+- The system files (/data/adb) backup now goes to the destination you choose, instead of always staying in internal storage.
+- After restoring a system-files (/data/adb) backup, VDBackup reminds you to reboot so the restored modules take effect, and long folder names in the file picker now scroll instead of being clipped.
+- The app list and backup search now respond smoothly as you type.
+
+Improvements:
+
+- The last screens that were still in English (the default passphrase, remote-only backups, backup notes, the staging folder, and system-files restore) are now translated in all 21 languages.
+
 ## v1.12
 
 Reliability:

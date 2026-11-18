@@ -91,6 +91,9 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `telegram-list` | `{}` | cadangan di kanal Telegram (nama `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` mengunduh cadangan dari Telegram ke penyimpanan lokal (detached); lalu dipulihkan lewat alur `restore` normal |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` menghapus cadangan dari kanal Telegram berdasarkan `message_id` (batch: dipisah koma) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` cadangan Full yang disimpan hanya-remote pada tujuan rclone (`dest` adalah id tujuan, `rref` adalah `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` mengunduh cadangan rclone yang disimpan hanya-remote ke penyimpanan lokal (detached); lalu dipulihkan lewat alur `restore` normal |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` menghapus satu cadangan dari remote rclone; `rref` harus tepat `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | pengelolaan tujuan |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | pengelolaan remote rclone (membuat entri `rclone.conf` yang ditunjuk oleh dest `type:"rclone"`); `backend` bisa berupa backend rclone apa pun, tanpa daftar putih |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (mesin sudah membuka browser ponsel ke URL persetujuan itu lewat Android VIEW intent) atau `{ok:false,code:"ERR_AUTHORIZE"}`. Menjalankan `rclone authorize <backend>` pada server callback lokal (`127.0.0.1:53682`) untuk OAuth di perangkat. |
@@ -110,6 +113,7 @@ cloud (`rclone`/`restic`/ssh) yang berkomunikasi dengan jaringan.
 | `wipe-credentials` | `{}` | `{ok,wiped}` menghapus kata sandi jarak jauh tersimpan dan kunci enkripsi perangkat; tujuan, tugas, dan cadangan tetap ada. |
 | `log-prune` | `{}` | `{ok}` memangkas log op yang sudah lama selesai, membatasi jejak audit, dan membuang ikon usang (layanan boot memanggilnya). |
 | `sanitize` | `{}` | `{ok}` menegaskan kembali visibilitas (0755) folder backup di setiap pengguna Android, sehingga pengelola berkas dapat membuka folder yang ditinggalkan hanya-pemilik oleh salinan root mentah atau backup sebelum v1.03.2. |
+| `boot-sweep` | `{}` | `{ok,reaped}` membersihkan sisa-sisa dari backup yang terputus atau dihentikan paksa (layanan boot memanggilnya); backup yang gagal atau dibatalkan sudah dibersihkan oleh worker-nya sendiri. |
 
 ### Field `progress`
 

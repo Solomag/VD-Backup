@@ -179,6 +179,8 @@ bạn biết khi nó xong.
 
 Trong hộp thoại sao lưu, bạn cũng có thể chọn **đích** cho bản sao lưu này, bộ nhớ cục bộ hoặc bất kỳ đích đám mây/từ xa nào bạn đã thêm, mà không cần đổi đích mặc định trong Cài đặt trước.
 
+VDBackup chạy hai biện pháp bảo vệ tự động trong một lần sao lưu, cả hai bật theo mặc định trong Cài đặt. **"Tạm dừng để hạ nhiệt khi thiết bị nóng lên"** cho một tác vụ dài được nghỉ, và chờ thiết bị nguội nếu nó thực sự nóng, nên một bản sao lưu lớn không bao giờ làm điện thoại quá nhiệt; chỉ nhịp độ thay đổi, không bao giờ là độ trung thực. **"Kiểm tra dung lượng trống trước khi sao lưu theo lô"** ước tính một lần sao lưu nhiều ứng dụng sẽ cần bao nhiêu và dừng ngay từ đầu, thay vì giữa chừng, nếu bộ nhớ không đủ chứa.
+
 ### 5.1 Chọn những gì để sao lưu
 
 Đối với mỗi ứng dụng bạn có thể bao gồm bất kỳ tổ hợp nào của các mục này:
@@ -432,6 +434,8 @@ liệu di động** (mặc định), **chỉ Wi-Fi**, hoặc **chỉ dữ liệu
 mọi lần truyền đám mây, thủ công hay theo lịch, tải lên hay khôi phục, kiểm tra kết nối
 đang hoạt động trước và từ chối chạy trên kết nối sai, nên một chính sách chỉ-Wi-Fi không
 bao giờ tiêu dữ liệu di động. Các bản sao lưu cục bộ không bao giờ bị ảnh hưởng.
+
+**Giữ một bản sao cục bộ, hoặc chỉ dùng từ xa.** Khi một bản sao lưu đi đến một đích từ xa mà VDBackup có thể tự liệt kê và kéo về (Telegram hoặc một đích rclone), nó **chỉ từ xa theo mặc định**: bản sao lưu được tải lên và không có gì được giữ trên thiết bị này, điều này tiết kiệm dung lượng và không để lại dấu vết cục bộ. Bật **"Giữ một bản sao cục bộ khi một bản sao lưu đi tới một đích"** trong Settings để cũng giữ bản sao trên thiết bị cho một lần khôi phục cục bộ tức thì. Dù theo cách nào, bạn cũng có thể lấy lại một bản sao lưu từ xa bằng **Khôi phục từ remote đám mây** trên thẻ Backups, nơi liệt kê các bản sao lưu từ xa của bạn và kéo về bản bạn chọn.
 
 **Google Drive.** Bạn có hai cách để tiếp cận Google Drive:
 

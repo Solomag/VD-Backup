@@ -166,6 +166,8 @@ notification vous indique quand c'est terminé.
 
 Dans la boîte de dialogue de sauvegarde, tu peux aussi choisir la **destination** de cette sauvegarde, stockage local ou toute destination cloud/distante ajoutée, sans d'abord changer la destination par défaut dans les Paramètres.
 
+VDBackup exécute deux protections automatiques pendant une sauvegarde, toutes deux activées par défaut dans Settings. **"Faire une pause pour refroidir quand l'appareil chauffe"** laisse respirer une longue tâche et attend que l'appareil refroidisse s'il est vraiment chaud, de sorte qu'une grosse sauvegarde ne surchauffe jamais le téléphone ; seul le rythme change, jamais la fidélité. **"Vérifier l'espace libre avant une sauvegarde par lots"** estime ce dont une sauvegarde de plusieurs apps aura besoin et s'arrête au début, plutôt qu'à mi-chemin, si le stockage ne pouvait pas la contenir.
+
 ### 5.1 Choisir ce qu'il faut sauvegarder
 
 Pour chaque app, vous pouvez inclure n'importe quelle combinaison de ces items :
@@ -423,6 +425,8 @@ choix par défaut), **Wi-Fi uniquement**, ou **Données mobiles uniquement**. Qu
 cloud, manuel ou planifié, téléversement ou restauration, vérifie d'abord la connexion active
 et refuse de s'exécuter sur la mauvaise, de sorte qu'une politique Wi-Fi uniquement ne dépense jamais de données mobiles.
 Les sauvegardes locales ne sont jamais affectées.
+
+**Gardez une copie locale, ou passez en distant-seul.** Quand une sauvegarde va vers un distant que VDBackup peut lister et récupérer lui-même (Telegram ou un distant rclone), elle est **distant-seul par défaut** : la sauvegarde est téléversée et rien n'est conservé sur cet appareil, ce qui économise de l'espace et ne laisse aucune trace locale. Activez dans Settings **"Conserver une copie locale quand une sauvegarde part vers une destination"** pour garder aussi la copie sur l'appareil, pour une restauration locale instantanée. Dans les deux cas, vous pouvez récupérer une sauvegarde distante avec **Restaurer depuis un distant cloud** dans l'onglet Backups, qui liste vos sauvegardes distantes et récupère celle que vous choisissez.
 
 **Google Drive.** Vous avez deux façons d'atteindre Google Drive :
 

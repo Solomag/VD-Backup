@@ -91,6 +91,9 @@ destinazioni cloud (`rclone`/`restic`/ssh) comunicano con la rete.
 | `telegram-list` | `{}` | backup nel canale Telegram (nomi `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` scarica un backup da Telegram nell'archiviazione locale (detached); poi si ripristina col flusso `restore` normale |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` elimina un backup dal canale Telegram tramite `message_id` (batch: separati da virgola) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` backup Full archiviati solo-remoto su una destinazione rclone (`dest` è l'id della destinazione, `rref` è `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` scarica un backup rclone archiviato solo-remoto nell'archiviazione locale (detached); poi si ripristina col flusso `restore` normale |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` elimina un backup da un remote rclone; `rref` deve essere esattamente `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | gestione delle destinazioni |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | gestione dei remote rclone (crea la voce `rclone.conf` a cui punta una destinazione `type:"rclone"`); il `backend` può essere qualsiasi backend rclone, nessuna whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (il motore ha già aperto il browser del telefono su quella URL di consenso tramite un intent VIEW di Android) oppure `{ok:false,code:"ERR_AUTHORIZE"}`. Esegue `rclone authorize <backend>` su un server di callback locale (`127.0.0.1:53682`) per l'OAuth sul dispositivo. |
@@ -110,6 +113,7 @@ destinazioni cloud (`rclone`/`restic`/ssh) comunicano con la rete.
 | `wipe-credentials` | `{}` | `{ok,wiped}` rimuove le password remote salvate e la chiave di cifratura del dispositivo; destinazioni, job e backup restano. |
 | `log-prune` | `{}` | `{ok}` pota i log di op concluse da tempo, limita la traccia di audit e rimuove le icone obsolete (lo chiama il servizio di avvio). |
 | `sanitize` | `{}` | `{ok}` riafferma la visibilità (0755) delle cartelle di backup per ogni utente Android, così che un gestore di file possa aprire cartelle che una copia root grezza o un backup precedente a v1.03.2 hanno lasciato accessibili solo al proprietario. |
+| `boot-sweep` | `{}` | `{ok,reaped}` ripulisce i resti di un backup interrotto o terminato forzatamente (lo chiama il servizio di avvio); un backup che fallisce o viene annullato è già ripulito dal proprio worker. |
 
 ### Campi di `progress`
 

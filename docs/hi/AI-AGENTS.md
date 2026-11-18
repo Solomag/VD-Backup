@@ -91,6 +91,9 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `telegram-list` | `{}` | टेलीग्राम चैनल में बैकअप (नाम `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` टेलीग्राम से एक बैकअप स्थानीय संग्रहण में डाउनलोड करता है (detached); फिर सामान्य `restore` प्रवाह से पुनर्स्थापित होता है |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` `message_id` से टेलीग्राम चैनल से एक बैकअप हटाता है (बैच: अल्पविराम से अलग) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` किसी rclone गंतव्य पर केवल-remote संग्रहीत Full बैकअप (`dest` गंतव्य id है, `rref` है `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` केवल-remote संग्रहीत एक rclone बैकअप को स्थानीय संग्रहण में डाउनलोड करता है (detached); फिर सामान्य `restore` प्रवाह से पुनर्स्थापित होता है |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` किसी rclone remote से एक बैकअप हटाता है; `rref` बिल्कुल `<pkg>/<ts_vc>` होना चाहिए |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | गंतव्य प्रबंधन |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | rclone remote प्रबंधन (वह `rclone.conf` प्रविष्टि बनाता है जिसकी ओर `type:"rclone"` dest इशारा करता है); `backend` कोई भी rclone backend हो सकता है, कोई श्वेतसूची नहीं |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (इंजन पहले ही Android VIEW intent के ज़रिए फ़ोन का ब्राउज़र उस सहमति URL पर खोल चुका है) या `{ok:false,code:"ERR_AUTHORIZE"}`। ऑन-डिवाइस OAuth के लिए एक स्थानीय callback सर्वर (`127.0.0.1:53682`) पर `rclone authorize <backend>` चलाता है। |
@@ -110,6 +113,7 @@ sh "$H" backup "$(b64 '{"package":"com.example.app","mode":"full"}')"
 | `wipe-credentials` | `{}` | `{ok,wiped}` सहेजे गए रिमोट पासवर्ड और डिवाइस एन्क्रिप्शन कुंजी हटाता है; गंतव्य, जॉब और बैकअप बने रहते हैं। |
 | `log-prune` | `{}` | `{ok}` बहुत पहले पूर्ण हो चुके ऑप लॉग छाँटता है, ऑडिट ट्रेल सीमित करता है और पुराने आइकन हटाता है (बूट सेवा इसे कॉल करती है)। |
 | `sanitize` | `{}` | `{ok}` हर Android उपयोगकर्ता में बैकअप फ़ोल्डरों की दृश्यता (0755) फिर से लागू करता है, ताकि एक फ़ाइल मैनेजर उन फ़ोल्डरों को खोल सके जिन्हें एक कच्ची root कॉपी या v1.03.2 से पहले के बैकअप ने केवल-स्वामी छोड़ दिया था। |
+| `boot-sweep` | `{}` | `{ok,reaped}` किसी ऐसे बैकअप के अवशेष हटाता है जो बाधित हुआ या जबरन मारा गया (बूट सेवा इसे कॉल करती है); जो बैकअप विफल होता है या रद्द किया जाता है वह पहले ही अपने स्वयं के worker द्वारा साफ़ कर दिया जाता है। |
 
 ### `progress` फ़ील्ड
 

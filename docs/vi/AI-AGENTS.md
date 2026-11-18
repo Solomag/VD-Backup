@@ -91,6 +91,9 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `telegram-list` | `{}` | bản sao lưu trong kênh Telegram (tên `<pkg>__<ts>_<vc>.vdb.tar`) |
 | `telegram-pull` | `{message_id,name}` | `{ok,opid}` tải một bản sao lưu từ Telegram về bộ nhớ cục bộ (detached); rồi khôi phục qua luồng `restore` thông thường |
 | `telegram-delete` | `{message_id}` | `{ok,deleted:[...]}` xóa một bản sao lưu khỏi kênh Telegram theo `message_id` (hàng loạt: ngăn bằng dấu phẩy) |
+| `rclone-list` | `{dest}` | `{ok,dest,backups:[{dest,rref,package,tsvc}]}` các bản sao lưu Full chỉ lưu trên remote tại một đích rclone (`dest` là id đích, `rref` là `<pkg>/<ts_vc>`) |
+| `rclone-pull` | `{dest,rref}` | `{ok,opid}` tải một bản sao lưu rclone chỉ lưu trên remote về bộ nhớ cục bộ (detached); rồi khôi phục qua luồng `restore` thông thường |
+| `rclone-delete` | `{dest,rref}` | `{ok,deleted}` xóa một bản sao lưu khỏi một remote rclone; `rref` phải chính xác là `<pkg>/<ts_vc>` |
 | `dests-list` / `dest-add` / `dest-test` / `dest-del` | `{id,type,...}` | quản lý đích |
 | `remote-add` / `remote-list` / `remote-del` | `{name,backend,params:{...}}` | quản lý remote rclone (tạo mục `rclone.conf` mà một đích `type:"rclone"` trỏ tới); `backend` có thể là bất kỳ backend rclone nào, không có whitelist |
 | `remote-authorize` | `{backend}` | `{ok:true,url}` (engine đã mở trình duyệt của điện thoại đến URL đồng ý đó qua một Android VIEW intent) hoặc `{ok:false,code:"ERR_AUTHORIZE"}`. Chạy `rclone authorize <backend>` trên một callback server cục bộ (`127.0.0.1:53682`) để OAuth ngay trên thiết bị. |
@@ -110,6 +113,7 @@ các đích đám mây (`rclone`/`restic`/ssh) mới nói chuyện với mạng.
 | `wipe-credentials` | `{}` | `{ok,wiped}` xóa mật khẩu từ xa đã lưu và khóa mã hóa thiết bị; đích đến, công việc và bản sao lưu vẫn còn. |
 | `log-prune` | `{}` | `{ok}` cắt tỉa nhật ký thao tác đã hoàn tất từ lâu, giới hạn dấu vết kiểm toán và loại bỏ biểu tượng cũ (dịch vụ khởi động gọi cái này). |
 | `sanitize` | `{}` | `{ok}` tái khẳng định khả năng hiển thị (0755) của các thư mục sao lưu trên mọi người dùng Android, để trình quản lý tệp có thể mở các thư mục mà một bản sao root thô hoặc một bản sao lưu trước v1.03.2 đã để ở chế độ chỉ chủ sở hữu truy cập được. |
+| `boot-sweep` | `{}` | `{ok,reaped}` dọn phần còn sót lại từ một bản sao lưu bị gián đoạn hoặc bị buộc dừng (dịch vụ khởi động gọi cái này); một bản sao lưu bị lỗi hoặc bị hủy thì đã được worker của chính nó dọn dẹp. |
 
 ### Các trường của `progress`
 

@@ -72,6 +72,7 @@ function errMsg(r) {
 // --- UI helpers ---------------------------------------------------------
 function $(sel, root) { return (root || document).querySelector(sel); }
 function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function debounce(fn, ms) { var t; return function () { clearTimeout(t); t = setTimeout(fn, ms); }; }
 
 // pill badge on the semantic status scale (ok/info/warn/err, or accent when none)
 function statusBadge(kind, text) { return el("span", "badge" + (kind ? " " + kind : ""), text); }
@@ -326,6 +327,8 @@ function renderApps(filter) {
     grow.appendChild(el("div", "pkg", a.package));
     var _ts = appTags(a.package);
     if (_ts.length) { var tb = el("div", "tags"); _ts.forEach(function (t) { tb.appendChild(tagChip(t)); }); grow.appendChild(tb); }
+    var _nt = appNote(a.package);
+    if (_nt) grow.appendChild(el("div", "app-note", _nt));
     if (selectMode) {
       var cb = el("input", "selbox"); cb.type = "checkbox"; cb.checked = !!selected[a.package];
       cb.onclick = function (e) { e.stopPropagation(); toggleSel(a, cb.checked); li.classList.toggle("sel", cb.checked); };
@@ -1271,6 +1274,65 @@ function openTelegramBackups() {
   }).catch(function () { box.innerHTML = "<li class='muted'>" + errMsg() + "</li>"; });
 }
 
+// list Full backups stored remote-only on the configured rclone destinations and let the user PULL
+// one back to local storage (the normal restore flow then handles it) or DELETE it from the remote.
+function openRcloneBackups() {
+  var m = $("#rc-backups"), box = $("#rc-backups-list");
+  box.innerHTML = "<li class='muted'>" + I18N.t("apps_loading") + "</li>"; m.hidden = false;
+  $("#rc-backups-close").onclick = function () { m.hidden = true; };
+  helper("dests-list").then(function (r) {
+    var rdests = ((r && r.dests) ? r.dests : []).filter(function (d) { return d.type === "rclone" || d.type === "gdrive"; });
+    if (!rdests.length) { box.innerHTML = "<li class='muted'>" + I18N.t("ui_rc_no_dests") + "</li>"; return; }
+    var all = [], pending = rdests.length;
+    rdests.forEach(function (d) {
+      var verb = d.type === "gdrive" ? "gdrive-list" : "rclone-list";
+      helper(verb, { dest: d.id }).then(function (res) {
+        if (res && res.ok && res.backups) {
+          res.backups.forEach(function (entry) { entry.dtype = d.type; });
+          all = all.concat(res.backups);
+        }
+      }).catch(function () {}).then(function () {
+        if (--pending === 0) renderRcloneBackups(box, m, all);
+      });
+    });
+  }).catch(function () { box.innerHTML = "<li class='muted'>" + errMsg() + "</li>"; });
+}
+function renderRcloneBackups(box, m, items) {
+  box.innerHTML = "";
+  if (!items.length) { box.innerHTML = "<li class='muted'>" + I18N.t("ui_rc_no_backups") + "</li>"; return; }
+  items.forEach(function (b) {
+    var li = el("li", "row"), g = el("div", "grow");
+    g.appendChild(el("div", "name", b.package || b.rref));
+    g.appendChild(el("div", "pkg", b.dest + "  (" + (b.tsvc || "") + ")"));
+    li.appendChild(g);
+    var pull = el("button", "btn small go", I18N.t("ui_rc_pull"));
+    pull.onclick = function () {
+      m.hidden = true;
+      var pullReq = b.dtype === "gdrive"
+        ? helper("gdrive-pull", { dest: b.dest, rref: b.rref, folder: b.folder })
+        : helper("rclone-pull", { dest: b.dest, rref: b.rref });
+      pullReq.then(function (op) {
+        if (op && op.opid) trackOp(op.opid, { onDone: function (p) { if (p.ok) { loadBackups(); modalAlert(I18N.t("msg_rc_pulled")); } } });
+        else modalAlert(errMsg(op));
+      }).catch(function () { modalAlert(errMsg()); });
+    };
+    var del = el("button", "btn small danger", I18N.t("delete"));
+    del.onclick = function () {
+      modalConfirm(I18N.t("msg_rc_delete_confirm"), I18N.t("delete")).then(function (yes) {
+        if (!yes) return;
+        var delReq = b.dtype === "gdrive"
+          ? helper("gdrive-delete", { dest: b.dest, folder: b.folder })
+          : helper("rclone-delete", { dest: b.dest, rref: b.rref });
+        delReq.then(function (r) {
+          if (r && r.ok) { modalAlert(I18N.t("msg_rc_deleted")); openRcloneBackups(); }
+          else modalAlert(errMsg(r));
+        }).catch(function () { modalAlert(errMsg()); });
+      });
+    };
+    li.appendChild(del); li.appendChild(pull); box.appendChild(li);
+  });
+}
+
 // --- operations (detached; survive WebUI close) -------------------------
 // ask which items to include before backing up
 function openBackupModal(pkg, label) {
@@ -1794,6 +1856,12 @@ function loadSettings() {
   var sel = $("#set-lang");
   buildLangOptions();
   if ($("#set-comp"))     $("#set-comp").value = CFG.compression || "zstd:10";
+  if ($("#set-staging"))  $("#set-staging").value = CFG.staging_dir || "";
+  if ($("#set-gpass")) {
+    $("#set-gpass").value = "";
+    helper("pass-status", {}).then(function (r) { var e = $("#set-gpass-state"); if (e) e.textContent = I18N.t((r && r.global) ? "settings_gpass_set" : "settings_gpass_unset"); }).catch(function () {});
+    if ($("#set-gpass-clear")) $("#set-gpass-clear").onclick = function () { helper("pass-set-global", { password: "" }).then(function () { var e = $("#set-gpass-state"); if (e) e.textContent = I18N.t("settings_gpass_unset"); $("#set-gpass").value = ""; }); };
+  }
   if ($("#set-enc-data")) $("#set-enc-data").checked = !!CFG.encrypt_data;
   if ($("#set-enc-apk"))  $("#set-enc-apk").checked = !!CFG.encrypt_apk;
   if ($("#set-ssaid"))    $("#set-ssaid").checked = !!CFG.ssaid;
@@ -1804,6 +1872,7 @@ function loadSettings() {
   if ($("#set-auto-keep")) $("#set-auto-keep").value = CFG.auto_backup_keep || 5;
   if ($("#set-thermal"))  $("#set-thermal").checked = (CFG.thermal_throttle !== false);
   if ($("#set-space-preflight")) $("#set-space-preflight").checked = (CFG.space_preflight !== false);
+  if ($("#set-local-copy")) $("#set-local-copy").checked = (CFG.local_copy === true);
   if ($("#set-spoof"))    $("#set-spoof").checked = (CFG.spoof_installer !== false);
   var bs = $("#block-app-search"); if (bs) bs.value = "";
   var as = $("#ai-app-search"); if (as) as.value = "";
@@ -1827,11 +1896,14 @@ function saveSettings() {
   CFG.app_netpolicy = $("#set-app-netpolicy").checked;
   CFG.default_mode = $("#set-mode").value;
   CFG.default_dest = $("#set-dest").value;
+  if ($("#set-staging")) CFG.staging_dir = $("#set-staging").value.trim();
+  if ($("#set-gpass") && $("#set-gpass").value) { helper("pass-set-global", { password: $("#set-gpass").value }).then(function () { var e = $("#set-gpass-state"); if (e) e.textContent = I18N.t("settings_gpass_set"); }); $("#set-gpass").value = ""; }
   if ($("#set-netpolicy")) CFG.network_policy = $("#set-netpolicy").value;
   if ($("#set-auto")) CFG.auto_backup = $("#set-auto").checked;
   if ($("#set-auto-keep")) CFG.auto_backup_keep = parseInt($("#set-auto-keep").value, 10) || 5;
   if ($("#set-thermal")) CFG.thermal_throttle = $("#set-thermal").checked;
   if ($("#set-space-preflight")) CFG.space_preflight = $("#set-space-preflight").checked;
+  if ($("#set-local-copy")) CFG.local_copy = $("#set-local-copy").checked;
   if ($("#set-spoof")) CFG.spoof_installer = $("#set-spoof").checked;
   CFG.language = $("#set-lang").value;
   helper("config-set", CFG).then(function (r) {
@@ -2009,6 +2081,12 @@ function openAppItemsModal(pkg, label) {
   });
   buildAiTags();
   var ti = $("#ai-tag-input"); if (ti) ti.value = "";
+  var ne = $("#ai-note"); if (ne) ne.value = appNote(pkg);
+  if ($("#ai-pass")) {
+    $("#ai-pass").value = "";
+    helper("pass-status", { package: pkg }).then(function (r) { var e = $("#ai-pass-state"); if (e) e.textContent = I18N.t((r && r.app) ? "settings_gpass_set" : "settings_gpass_unset"); }).catch(function () {});
+    if ($("#ai-pass-clear")) $("#ai-pass-clear").onclick = function () { helper("pass-set-app", { package: pkg, password: "" }).then(function () { var e = $("#ai-pass-state"); if (e) e.textContent = I18N.t("settings_gpass_unset"); $("#ai-pass").value = ""; }); };
+  }
   $("#appitems-modal").hidden = false;
 }
 function closeAppItemsModal() { $("#appitems-modal").hidden = true; _aiPkg = null; }
@@ -2050,6 +2128,14 @@ function filterAppItemsPicker(q) {
 // Store is CFG.app_tags (package -> [labels]). Pure client-side organization: the batch
 // path reuses the normal per-app backup, so the worker needs no change.
 function appTags(pkg) { return (CFG.app_tags || {})[pkg] || []; }
+// Per-app free-text note (package -> string), like Neo-Backup's app Note. Client-side in CFG.
+function appNote(pkg) { return (CFG.app_note || {})[pkg] || ""; }
+function setAppNote(pkg, note) {
+  CFG.app_note = CFG.app_note || {};
+  note = (note || "").trim();
+  if (!note) delete CFG.app_note[pkg]; else CFG.app_note[pkg] = note;
+  saveCfg();
+}
 function allTags() {   // only tags carried by a currently-listed app, so uninstalled /
   var set = {};         // other-user packages never ghost into the filter dropdown
   APPS.forEach(function (a) { appTags(a.package).forEach(function (t) { set[t] = 1; }); });
@@ -2349,7 +2435,7 @@ function adbFmtSize(b) {
   b = +b || 0; if (!b) return "";
   var u = ["B", "KB", "MB", "GB", "TB"], i = 0;
   while (b >= 1024 && i < u.length - 1) { b /= 1024; i++; }
-  return (i ? b.toFixed(b < 10 ? 1 : 0) : b) + " " + u[i];
+  return (i ? b.toFixed(1) : b) + u[i];   // 1 decimal (KB+), no space: 324B, 15.6KB, 184.3MB, 1.2GB
 }
 function adbIcon(t) { return t === "dir" ? "📁" : t === "link" ? "🔗" : "📄"; }
 function adbMkNode(e, parent) {
@@ -2376,6 +2462,7 @@ function adbOpenBackup() {
   $("#adb-title").textContent = I18N.t("ui_adb_opts_title");
   $("#adb-sub").textContent = I18N.t("ui_adb_pick");
   $("#adb-bkopts").hidden = false; $("#adb-restwarn").hidden = true;
+  fillDestOptions($("#adb-dest"), CFG.default_dest);
   var enc = $("#adb-enc"); enc.checked = !!CFG.encrypt_data;
   $("#adb-comp").value = CFG.compression || "zstd:10";
   $("#adb-pass").hidden = !enc.checked; $("#adb-pass").value = "";
@@ -2476,7 +2563,7 @@ function adbRowEl(n) {
   var cb = el("input", "adb-cb"); cb.type = "checkbox";
   cb.checked = n.state === 1; cb.indeterminate = n.state === 2;
   cb.onclick = function (e) { e.stopPropagation(); adbSet(n, cb.checked); };
-  var nm = el("span", "adb-name", n.name); if (branch) nm.onclick = function () { adbToggle(n); };
+  var nm = el("span", "adb-name", n.name); nm.title = n.name; if (branch) nm.onclick = function () { adbToggle(n); };
   var sz = el("span", "adb-size", n.sizeKnown ? adbFmtSize(n.size) : "");
   row.appendChild(tw); row.appendChild(cb); row.appendChild(el("span", "adb-ic", adbIcon(n.type)));
   row.appendChild(nm); row.appendChild(sz);
@@ -2540,6 +2627,7 @@ function adbSubmit() {
     var enc = $("#adb-enc").checked, pass = $("#adb-pass").value;
     if (enc && !pass) { $("#adb-pass").focus(); return; }
     var a = { compression: $("#adb-comp").value, encrypt_data: enc };
+    var _ds = $("#adb-dest"); if (_ds && _ds.value) a.dest = _ds.value;
     if (!total) a.paths = paths;
     if (enc) a.password = pass;
     adbHide(); $("#adb-pass").value = "";
@@ -2555,7 +2643,7 @@ function adbSubmit() {
     adbHide(); $("#adb-pass").value = "";
     helper("adb-restore", a2).then(function (r) {
       a2.password = "";
-      if (r && r.opid) trackOp(r.opid, { onDone: loadAdbBackups }); else modalAlert(errMsg(r));
+      if (r && r.opid) trackOp(r.opid, { onDone: function () { loadAdbBackups(); modalAlert(I18N.t("ui_adb_restore_reboot")); } }); else modalAlert(errMsg(r));
     });
   }
 }
@@ -2752,7 +2840,7 @@ function boot() {
     t.onclick = function () { navTab(t.dataset.tab); };
   });
   $("#refresh").onclick = loadApps;
-  $("#search").oninput = function () { renderApps(this.value); };
+  $("#search").oninput = debounce(function () { renderApps($("#search").value); }, 120);
   $("#app-filter").onchange = function () { renderApps($("#search").value); };
   $("#app-sort").onchange = function () { renderApps($("#search").value); };
   if ($("#app-tag")) $("#app-tag").onchange = function () {
@@ -2765,11 +2853,12 @@ function boot() {
   $("#app-selnone").onclick = function () { selected = {}; updateSelCount(); renderApps($("#search").value); };
   $("#app-backupsel").onclick = startBatchBackup;
   $("#bk-select").onclick = function () { setBkSelectMode(!bkSelectMode); };
-  if ($("#bk-search")) $("#bk-search").oninput = function () { bkQuery = this.value; renderBackups(BACKUPS); };
+  if ($("#bk-search")) $("#bk-search").oninput = debounce(function () { bkQuery = $("#bk-search").value; renderBackups(BACKUPS); }, 120);
   $("#bk-selall").onclick = function () { (BACKUPS || []).forEach(function (b) { bkSelected[b.ref] = { ref: b.ref, package: b.package, items: b.items }; }); updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-selnone").onclick = function () { bkSelected = {}; updateBkSelCount(); renderBackups(BACKUPS); };
   $("#bk-restoresel").onclick = startBatchRestore;
   if ($("#tg-backups-open")) $("#tg-backups-open").onclick = openTelegramBackups;
+  if ($("#rc-backups-open")) $("#rc-backups-open").onclick = openRcloneBackups;
   $("#job-save").onclick = saveJob;
   $("#job-all").onchange = updateJobForm;
   $("#job-action").onchange = updateJobForm;
@@ -2781,7 +2870,9 @@ function boot() {
   if ($("#appitems-save")) $("#appitems-save").onclick = function () {
     if (!_aiPkg) return;
     var items = AI_ITEMS.filter(function (k) { var e = $("#ai-" + k); return e && e.checked; });
-    setAppItems(_aiPkg, items); closeAppItemsModal(); buildAppItemsPicker();
+    if ($("#ai-note")) setAppNote(_aiPkg, $("#ai-note").value);
+    if ($("#ai-pass") && $("#ai-pass").value) { helper("pass-set-app", { package: _aiPkg, password: $("#ai-pass").value }); $("#ai-pass").value = ""; }
+    setAppItems(_aiPkg, items); closeAppItemsModal(); buildAppItemsPicker(); renderApps($("#search") ? $("#search").value : "");
   };
   if ($("#appitems-clear")) $("#appitems-clear").onclick = function () {
     if (_aiPkg) setAppItems(_aiPkg, null);

@@ -164,6 +164,8 @@ notifikasi memberi tahu Anda saat selesai.
 
 Pada dialog pencadangan kamu juga bisa memilih **tujuan** cadangan ini, penyimpanan lokal atau tujuan cloud/jarak jauh mana pun yang kamu tambahkan, tanpa mengubah tujuan default di Pengaturan terlebih dahulu.
 
+VDBackup menjalankan dua pengaman otomatis selama pencadangan, keduanya aktif secara default di Pengaturan. **"Jeda untuk mendingin saat perangkat panas"** memberi napas pada tugas yang panjang, dan menunggu perangkat mendingin jika benar-benar panas, jadi pencadangan besar tidak pernah membuat ponsel kepanasan; hanya temponya yang berubah, bukan fidelitasnya. **"Periksa ruang kosong sebelum pencadangan batch"** memperkirakan kebutuhan pencadangan banyak aplikasi dan berhenti di awal, bukan di tengah jalan, jika penyimpanan tidak akan muat.
+
 ### 5.1 Memilih apa yang dibackup
 
 Untuk setiap aplikasi Anda bisa menyertakan kombinasi mana pun dari item berikut:
@@ -412,6 +414,8 @@ membatasi koneksi mana yang boleh dipakai transfer cloud: **Wi-Fi dan data selul
 cloud, manual atau terjadwal, unggah atau restore, memeriksa koneksi aktif terlebih dahulu
 dan menolak berjalan di koneksi yang salah, jadi kebijakan hanya-Wi-Fi tidak pernah menghabiskan data seluler.
 Backup lokal tidak pernah terpengaruh.
+
+**Simpan satu salinan lokal, atau sepenuhnya jarak jauh.** Ketika sebuah cadangan menuju remote yang bisa didaftar dan ditarik kembali sendiri oleh VDBackup (Telegram atau remote rclone), secara default cadangan itu **hanya jarak jauh**: cadangan diunggah dan tidak ada yang disimpan di perangkat ini, yang menghemat ruang dan tidak meninggalkan jejak lokal. Aktifkan **"Simpan salinan lokal saat cadangan menuju suatu tujuan"** di Settings untuk juga menyimpan salinannya di perangkat demi restore lokal seketika. Bagaimanapun, Anda bisa mengambil kembali cadangan jarak jauh dengan **Pulihkan dari remote cloud** di tab Backups, yang mendaftar cadangan jarak jauh Anda dan menarik yang Anda pilih.
 
 **Google Drive.** Anda punya dua cara untuk menjangkau Google Drive:
 

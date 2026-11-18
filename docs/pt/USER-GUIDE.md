@@ -184,6 +184,8 @@ notificação te avisa quando termina.
 
 No diálogo de backup você também pode escolher o **destino** deste backup, armazenamento local ou qualquer destino de nuvem/remoto que você adicionou, sem precisar mudar antes o destino padrão nas Configurações.
 
+O VDBackup roda duas salvaguardas automáticas durante um backup, ambas ligadas por padrão nas Configurações. **"Pausar para esfriar quando o aparelho esquentar"** deixa um trabalho longo respirar, e espera o aparelho esfriar se ele estiver realmente quente, então um backup grande nunca superaquece o aparelho; só o ritmo muda, nunca a fidelidade. **"Verificar o espaço livre antes de um backup em lote"** estima o que um backup de vários apps vai precisar e para no começo, em vez de no meio, se o armazenamento não fosse comportá-lo.
+
 ### 5.1 Escolhendo o que fazer backup
 
 Para cada app você pode incluir qualquer combinação destes itens:
@@ -436,6 +438,8 @@ padrão), **só Wi-Fi**, ou **só dados móveis**. Quando você restringe, toda 
 - manual ou agendada, upload ou restauração, checa a conexão ativa primeiro
 e se recusa a rodar na errada, então uma política só-Wi-Fi nunca gasta dados móveis.
 Backups locais nunca são afetados.
+
+**Mantenha uma cópia local, ou vá só-remoto.** Quando um backup vai para um remoto que o VDBackup consegue listar e puxar de volta sozinho (Telegram ou um remoto rclone), ele é **só-remoto por padrão**: o backup é enviado e nada fica neste aparelho, o que economiza espaço e não deixa rastro local. Ligue **"Manter uma cópia local quando um backup vai para um destino"** em Settings para também manter a cópia no aparelho para uma restauração local instantânea. De qualquer forma você consegue trazer um backup remoto de volta com **Restaurar do remoto de nuvem** na aba Backups, que lista seus backups remotos e puxa o que você escolher.
 
 **Google Drive.** Você tem duas maneiras de chegar ao Google Drive:
 

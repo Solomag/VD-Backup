@@ -709,7 +709,7 @@ input[type="checkbox"].switch:focus-visible { outline: 2px solid var(--accent); 
 .adb-twisty.leaf { visibility: hidden; }
 .adb-cb { width: 22px; height: 22px; flex: 0 0 auto; accent-color: var(--backup); }
 .adb-ic { flex: 0 0 auto; opacity: .66; width: 16px; text-align: center; }
-.adb-name { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adb-name { flex: 1 1 auto; min-width: 0; overflow-x: auto; white-space: nowrap; scrollbar-width: thin; }
 .adb-size { flex: 0 0 auto; color: var(--muted); font-size: .82em; font-variant-numeric: tabular-nums; }
 .adb-selinfo { margin: 8px 2px 4px; min-height: 1.2em; }
 .adb-busy { color: var(--faint); font-size: .85em; padding: 8px 12px; }
@@ -733,3 +733,5 @@ summary.section-head::after { content: "\25BC"; margin-inline-start: auto; flex:
 summary.section-head:hover::after { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
 details.grp[open] > summary.section-head::after { transform: rotate(180deg); color: var(--accent);
   border-color: color-mix(in srgb, var(--accent) 45%, var(--line)); }
+
+.app-note { font-size: .82em; opacity: .7; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

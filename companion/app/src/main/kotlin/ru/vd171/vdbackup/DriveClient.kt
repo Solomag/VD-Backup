@@ -32,6 +32,8 @@ import java.io.RandomAccessFile
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
+import org.json.JSONArray
+import org.json.JSONObject
 
 class DriveClient(private val context: Context) {
 
@@ -90,6 +92,38 @@ class DriveClient(private val context: Context) {
         return authorized { tok ->
             val conn = open(url, "GET", tok)
             readBody(conn, "ERR_LIST")
+        }
+    }
+
+    fun listBackups(prefix: String?): String {
+        return authorized { tok ->
+            val root = findFolderPathId(prefix.orEmpty().ifEmpty { "vdbackup" }, tok)
+                ?: return@authorized "{\"backups\":[]}"
+            val arr = JSONArray()
+            for ((pkgId, pkgName) in childFolders(root, tok)) {
+                for ((tsId, tsName) in childFolders(pkgId, tok)) {
+                    val o = JSONObject()
+                    o.put("package", pkgName)
+                    o.put("tsvc", tsName)
+                    o.put("folder", tsId)
+                    arr.put(o)
+                }
+            }
+            JSONObject().put("backups", arr).toString()
+        }
+    }
+
+    fun listFolderFiles(folderId: String): String {
+        if (folderId.isEmpty()) throw DriveException("ERR_LIST", "missing folder id")
+        return authorized { tok ->
+            val arr = JSONArray()
+            for ((id, name) in childFiles(folderId, tok)) {
+                val o = JSONObject()
+                o.put("id", id)
+                o.put("name", name)
+                arr.put(o)
+            }
+            JSONObject().put("files", arr).toString()
         }
     }
 
@@ -178,6 +212,51 @@ class DriveClient(private val context: Context) {
         val body = readBody(conn, "ERR_UPLOAD")
         return Regex("\"id\"\\s*:\\s*\"([^\"]+)\"").find(body)?.groupValues?.get(1)
             ?: throw DriveException("ERR_UPLOAD", "could not create folder $name")
+    }
+
+    // find-only resolve of a slash path to its leaf folder id; null if any segment is missing.
+    private fun findFolderPathId(path: String, token: String): String? {
+        if (path.isEmpty()) return null
+        var parent: String? = null
+        for (seg in path.split("/")) {
+            if (seg.isEmpty()) continue
+            var q = "name = '${driveQuote(seg)}' and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+            q += if (parent != null) " and '${driveQuote(parent)}' in parents" else ""
+            val url = "${DriveConfig.FILES_ENDPOINT}?q=${enc(q)}&fields=${enc("files(id)")}&pageSize=1"
+            val body = readBody(open(url, "GET", token), "ERR_LIST")
+            val files = JSONObject(body).optJSONArray("files")
+            if (files == null || files.length() == 0) return null
+            val id = files.getJSONObject(0).optString("id", "")
+            if (id.isEmpty()) return null
+            parent = id
+        }
+        return parent
+    }
+
+    private fun childFolders(parentId: String, token: String): List<Pair<String, String>> {
+        val q = "'${driveQuote(parentId)}' in parents and mimeType = 'application/vnd.google-apps.folder' and trashed = false"
+        val url = "${DriveConfig.FILES_ENDPOINT}?q=${enc(q)}&fields=${enc("files(id,name)")}&pageSize=1000"
+        val body = readBody(open(url, "GET", token), "ERR_LIST")
+        val out = ArrayList<Pair<String, String>>()
+        val files = JSONObject(body).optJSONArray("files") ?: return out
+        for (i in 0 until files.length()) {
+            val f = files.getJSONObject(i)
+            out.add(Pair(f.optString("id", ""), f.optString("name", "")))
+        }
+        return out
+    }
+
+    private fun childFiles(parentId: String, token: String): List<Pair<String, String>> {
+        val q = "'${driveQuote(parentId)}' in parents and mimeType != 'application/vnd.google-apps.folder' and trashed = false"
+        val url = "${DriveConfig.FILES_ENDPOINT}?q=${enc(q)}&fields=${enc("files(id,name)")}&pageSize=1000"
+        val body = readBody(open(url, "GET", token), "ERR_LIST")
+        val out = ArrayList<Pair<String, String>>()
+        val files = JSONObject(body).optJSONArray("files") ?: return out
+        for (i in 0 until files.length()) {
+            val f = files.getJSONObject(i)
+            out.add(Pair(f.optString("id", ""), f.optString("name", "")))
+        }
+        return out
     }
 
     private fun resumableUpload(file: File, name: String, parentId: String?, token: String): String {

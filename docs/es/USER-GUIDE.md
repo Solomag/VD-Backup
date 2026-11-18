@@ -166,6 +166,8 @@ notificación te avisa cuando termina.
 
 En el diálogo de copia también puedes elegir el **destino** de esta copia, almacenamiento local o cualquier destino en la nube/remoto que hayas añadido, sin cambiar antes el destino predeterminado en Ajustes.
 
+VDBackup ejecuta dos salvaguardas automáticas durante una copia, ambas activadas por defecto en Settings. **"Pausar para enfriar cuando el dispositivo se calienta"** deja respirar a un trabajo largo y espera a que el dispositivo se enfríe si está realmente caliente, así una copia grande nunca sobrecalienta el teléfono; solo cambia el ritmo, nunca la fidelidad. **"Comprobar el espacio libre antes de una copia por lotes"** estima lo que necesitará una copia de varias apps y se detiene al inicio, en vez de a medio camino, si el almacenamiento no la aguantara.
+
 ### 5.1 Elegir qué respaldar
 
 Para cada app puedes incluir cualquier combinación de estos items:
@@ -416,6 +418,8 @@ valor por defecto), **solo Wi-Fi**, o **solo datos móviles**. Cuando la restrin
 - manual o agendada, upload o restauración, revisa la conexión activa primero
 y se niega a correr en la equivocada, así que una política solo-Wi-Fi nunca gasta datos móviles.
 Los backups locales nunca se ven afectados.
+
+**Conserva una copia local, o ve solo-remoto.** Cuando una copia va a un remoto que VDBackup puede listar y recuperar por sí solo (Telegram o un remoto rclone), es **solo-remoto por defecto**: la copia se sube y no se guarda nada en este dispositivo, lo que ahorra espacio y no deja rastro local. Activa en Settings **"Conservar una copia local cuando una copia va a un destino"** para conservar también la copia en el dispositivo y hacer una restauración local instantánea. En cualquier caso puedes recuperar una copia remota con **Restaurar desde un remoto en la nube** en la pestaña Backups, que lista tus copias remotas y descarga la que elijas.
 
 **Google Drive.** Tienes dos maneras de llegar a Google Drive:
 
