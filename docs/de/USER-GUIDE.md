@@ -516,7 +516,7 @@ von beiden übersprungen.
 
 **Backup-Elemente pro App.** Ebenfalls in den Einstellungen kannst du genau wählen, welche Elemente jede App in Massen-, automatischen und geplanten Backups sichert, zum Beispiel nur APK oder APK + OBB. Ein einzelnes manuelles Backup lässt dich weiterhin wählen, ausgehend von der App-Auswahl. Apps, die du hier nicht festlegst, sichern alles.
 
-**App-Tags.** Tippe in den Einstellungen (Elemente und Tags pro App) auf eine App, um ihr freie Labels zu geben, zum Beispiel games oder work. Über der App-Liste erscheint dann eine Tag-Auswahl: Wähle einen Tag, um nur dessen Apps zu zeigen, und sichere die ganze Gruppe auf einmal. Du erreichst es auch über den Tab Apps: Tippe auf eine App und dann auf Elemente und Tags.
+**App-Tags.** Tippe in den Einstellungen (Elemente und Tags pro App) auf eine App, um ihr freie Labels zu geben, zum Beispiel games oder work. Deine Labels erscheinen dann als Chips zum Antippen über der App-Liste: Tippe einen oder mehrere an, um die Apps zu zeigen, die eines davon tragen, und sichere die ganze Gruppe auf einmal. Du erreichst es auch über den Tab Apps: Tippe auf eine App und dann auf Elemente und Tags.
 
 **Aktivitätsprotokoll.** Der Zeitplan-Tab hat eine Schaltfläche **Aktivitätsprotokoll anzeigen**,
 die einen ganzen Bildschirm (sofort) öffnet und den lokalen Audit-Trail zeigt, Backups,

@@ -524,7 +524,7 @@ birkaçını ekleyebilirsiniz (çoklu seçim) ve hariç tutulan uygulamalar her 
 
 **Uygulama başına yedek öğeleri.** Yine Ayarlar'da, toplu, otomatik ve zamanlanmış yedeklerde her uygulamanın tam olarak hangi öğeleri yedekleyeceğini seçebilirsiniz, örneğin yalnızca APK veya APK + OBB. Tek bir elle yedekte, uygulamanın kümesinden başlayarak yine o anda seçebilirsiniz. Burada ayarlamadığınız uygulamalar her şeyi yedekler.
 
-**Uygulama etiketleri.** Serbest etiketler vermek için Ayarlar'da (Uygulama başına öğeler ve etiketler) bir uygulamaya dokunun, örneğin games veya work. Ardından uygulama listesinin üstünde bir etiket seçici belirir: yalnızca o uygulamaları göstermek için bir etiket seçin ve grubun tamamını tek seferde yedekleyin. Buna Uygulamalar sekmesinden de ulaşabilirsiniz: bir uygulamaya dokunun, sonra Öğeler ve etiketler.
+**Uygulama etiketleri.** Serbest etiketler vermek için Ayarlar'da (Uygulama başına öğeler ve etiketler) bir uygulamaya dokunun, örneğin games veya work. Ardından etiketleriniz, uygulama listesinin üstünde dokununca açılıp kapanan çipler olarak görünür: içlerinden herhangi birini taşıyan uygulamaları göstermek için bir veya daha fazlasına dokunun ve grubun tamamını tek seferde yedekleyin. Buna Uygulamalar sekmesinden de ulaşabilirsiniz: bir uygulamaya dokunun, sonra Öğeler ve etiketler.
 
 **Etkinlik günlüğü.** Schedule sekmesinde, yerel denetim izini, yedekler, geri
 yüklemeler, silmeler, zamanlanmış ve otomatik çalıştırmalar ve budamalar, en yeni önce

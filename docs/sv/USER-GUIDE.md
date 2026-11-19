@@ -514,7 +514,7 @@ uteslutna appar hoppas över av båda.
 
 **Säkerhetskopieposter per app.** Även i Inställningar kan du välja exakt vilka poster varje app säkerhetskopierar i bulk-, automatiska och schemalagda säkerhetskopior, till exempel bara APK, eller APK + OBB. En enskild manuell säkerhetskopia låter dig fortfarande välja då, med appens uppsättning som utgångspunkt. Appar du inte ställer in här säkerhetskopierar allt.
 
-**App-taggar.** Tryck på en app i Inställningar (Objekt och taggar per app) för att ge den fria etiketter, till exempel games eller work. Ovanför applistan visas då en taggväljare: välj en tagg för att visa bara dess appar och säkerhetskopiera hela gruppen på en gång. Du kan också nå det från fliken Appar: tryck på en app och sedan på Objekt och taggar.
+**App-taggar.** Tryck på en app i Inställningar (Objekt och taggar per app) för att ge den fria etiketter, till exempel games eller work. Dina etiketter visas då som chips du växlar med ett tryck ovanför applistan: tryck på en eller flera för att visa apparna som bär någon av dem, och säkerhetskopiera hela gruppen på en gång. Du kan också nå det från fliken Appar: tryck på en app och sedan på Objekt och taggar.
 
 **Aktivitetslogg.** Fliken Schedule har en knapp **View activity log** som öppnar en helskärm (direkt)
 och visar den lokala revisionsloggen, säkerhetskopior, återställningar, raderingar, schemalagda och

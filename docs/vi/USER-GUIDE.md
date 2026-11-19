@@ -509,7 +509,7 @@ lúc (chọn nhiều), và các ứng dụng bị loại trừ được cả hai
 
 **Mục sao lưu theo ứng dụng.** Cũng trong Cài đặt, bạn có thể chọn chính xác những mục nào mỗi ứng dụng sao lưu trong sao lưu hàng loạt, tự động và theo lịch, ví dụ chỉ APK, hoặc APK + OBB. Một bản sao lưu thủ công đơn lẻ vẫn cho bạn chọn lúc đó, bắt đầu từ bộ của ứng dụng. Ứng dụng bạn không đặt ở đây sẽ sao lưu mọi thứ.
 
-**Thẻ ứng dụng.** Chạm vào một ứng dụng trong Cài đặt (Mục và thẻ theo ứng dụng) để gán cho nó các nhãn tự do, ví dụ games hoặc work. Một bộ chọn thẻ sẽ xuất hiện phía trên danh sách ứng dụng: chọn một thẻ để chỉ hiện ứng dụng của nó, và sao lưu cả nhóm cùng lúc. Bạn cũng có thể mở nó từ tab Ứng dụng: chạm vào một ứng dụng, rồi chọn Mục và thẻ.
+**Thẻ ứng dụng.** Chạm vào một ứng dụng trong Cài đặt (Mục và thẻ theo ứng dụng) để gán cho nó các nhãn tự do, ví dụ games hoặc work. Các nhãn của bạn sau đó hiện ra dưới dạng chip chạm để bật/tắt phía trên danh sách ứng dụng: chạm vào một hoặc nhiều chip để hiện các ứng dụng mang bất kỳ nhãn nào trong số đó, và sao lưu cả nhóm cùng lúc. Bạn cũng có thể mở nó từ tab Ứng dụng: chạm vào một ứng dụng, rồi chọn Mục và thẻ.
 
 **Nhật ký hoạt động.** Tab Schedule có một nút **View activity log** mở ra một màn hình đầy đủ (ngay
 lập tức) hiển thị dấu vết kiểm toán cục bộ, sao lưu, khôi phục, xóa, các lần chạy theo lịch và tự

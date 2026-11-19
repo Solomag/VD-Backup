@@ -6,11 +6,12 @@
 
 All notable changes to VDBackup are documented here. English only.
 
-## v1.13.1
+## v1.14
 
 New:
 
 - You can now cancel a running backup or restore from the progress card. The Cancel button stops the operation; a cancelled backup removes its partial copy, and cancelling a restore warns you first that the app may be left partially restored.
+- Filtering apps by label is easier. Your labels now show as tap-to-toggle chips above the app list, instead of a dropdown, and you can combine several at once: an app shows if it carries any of the labels you pick.
 
 Fixes:
 

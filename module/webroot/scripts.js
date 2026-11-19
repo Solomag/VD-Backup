@@ -303,7 +303,7 @@ function visibleApps(filter, ignoreTag) {
   var list = APPS.filter(function (a) {
     if (f === "user" && a.system) return false;
     if (f === "system" && !a.system) return false;
-    if (!ignoreTag && tagFilter && appTags(a.package).indexOf(tagFilter) < 0) return false;
+    if (!ignoreTag && tagFilters.length && !appTags(a.package).some(function (t) { return tagFilters.indexOf(t) >= 0; })) return false;
     return !q || a.package.toLowerCase().indexOf(q) >= 0 || (a.label || "").toLowerCase().indexOf(q) >= 0;
   });
   var byName = appSort() === "name";
@@ -348,7 +348,7 @@ function renderApps(filter) {
   // "Back up tag" is offered only when a tag is active, we are not in select mode, and the
   // tag actually matches apps in the current (user/system) view, so it never dead-ends.
   var tb = $("#app-backuptag");
-  if (tb) tb.hidden = !(tagFilter && !selectMode && tagFilterApps().length);
+  if (tb) tb.hidden = !(tagFilters.length && !selectMode && tagFilterApps().length);
 }
 function toggleSel(a, on) {
   if (on) selected[a.package] = { package: a.package, label: a.label };
@@ -371,7 +371,7 @@ function loadApps() {
   $("#applist").innerHTML = "<li class='muted'>" + I18N.t("apps_loading") + "</li>";
   helper("list-apps", { user: activeUser }).then(function (r) {
     APPS = (r && r.apps) ? r.apps : [];
-    fillTagFilter();
+    buildTagChips();
     renderApps($("#search").value);
     buildBlockPicker();   // keep the Settings "Excluded apps" picker in sync with APPS
     buildAppItemsPicker(); // and the "Per-app items and tags" picker
@@ -2179,26 +2179,35 @@ function buildAiTags() {
   var ts = appTags(pkg);
   if (!ts.length) { box.appendChild(el("span", "muted", I18N.t("ui_tag_none"))); return; }
   ts.forEach(function (t) {
-    box.appendChild(tagChip(t, function () { removeAppTag(pkg, t); buildAiTags(); fillTagFilter(); renderApps($("#search").value); }));
+    box.appendChild(tagChip(t, function () { removeAppTag(pkg, t); buildAiTags(); buildTagChips(); renderApps($("#search").value); }));
   });
 }
-var tagFilter = "";
-function fillTagFilter() {   // (re)build the dropdown; renderApps owns the button visibility
-  var sel = $("#app-tag"); if (!sel) return;
+var tagFilters = [];
+function tagActive(t) { return tagFilters.indexOf(t) >= 0; }
+function toggleTagFilter(t) {
+  var i = tagFilters.indexOf(t);
+  if (i < 0) tagFilters.push(t); else tagFilters.splice(i, 1);
+  buildTagChips(); renderApps($("#search").value);
+}
+function buildTagChips() {   // tap-to-toggle filter chips (multi-select, OR); renderApps owns the button
+  var box = $("#app-tag-chips"); if (!box) return;
   var ts = allTags();
-  if (!ts.length) { sel.hidden = true; tagFilter = ""; return; }
-  if (ts.indexOf(tagFilter) < 0) tagFilter = "";
-  sel.innerHTML = "";
-  var o0 = document.createElement("option"); o0.value = ""; o0.textContent = I18N.t("ui_tag_filter_all"); sel.appendChild(o0);
-  ts.forEach(function (t) { var o = document.createElement("option"); o.value = t; o.textContent = t; sel.appendChild(o); });
-  sel.value = tagFilter; sel.hidden = false;
+  tagFilters = tagFilters.filter(function (t) { return ts.indexOf(t) >= 0; });   // drop a filter whose tag is gone
+  box.innerHTML = "";
+  if (!ts.length) { box.hidden = true; return; }
+  ts.forEach(function (t) {
+    var c = el("button", "tag-filter-chip" + (tagActive(t) ? " on" : ""), t);
+    c.type = "button"; c.onclick = function () { toggleTagFilter(t); };
+    box.appendChild(c);
+  });
+  box.hidden = false;
 }
 // the apps a tag backup would act on: respects the user/system filter, ignores the search box
-function tagFilterApps() { return tagFilter ? visibleApps("") : []; }
+function tagFilterApps() { return tagFilters.length ? visibleApps("") : []; }
 function startTagBackup() {
   var pkgs = tagFilterApps().map(function (a) { return a.package; });
   if (!pkgs.length) return;
-  openBackupModal(I18N.t("ui_tag_backup_title", { tag: tagFilter, n: pkgs.length }), "").then(function (res) {
+  openBackupModal(I18N.t("ui_tag_backup_title", { tag: tagFilters.join(", "), n: pkgs.length }), "").then(function (res) {
     if (!res) return;
     setSelectMode(false);
     runBatchBackup(pkgs, res);
@@ -2856,10 +2865,6 @@ function boot() {
   $("#search").oninput = debounce(function () { renderApps($("#search").value); }, 120);
   $("#app-filter").onchange = function () { renderApps($("#search").value); };
   $("#app-sort").onchange = function () { renderApps($("#search").value); };
-  if ($("#app-tag")) $("#app-tag").onchange = function () {
-    tagFilter = this.value || "";
-    renderApps($("#search").value);   // renderApps toggles the "Back up tag" button
-  };
   if ($("#app-backuptag")) $("#app-backuptag").onclick = startTagBackup;
   $("#app-select").onclick = function () { setSelectMode(!selectMode); };
   $("#app-selall").onclick = function () { visibleApps($("#search").value).forEach(function (a) { selected[a.package] = { package: a.package, label: a.label }; }); updateSelCount(); renderApps($("#search").value); };
@@ -2895,7 +2900,7 @@ function boot() {
   var _aiTagCommit = function () {
     var ti = $("#ai-tag-input"); if (!ti || !_aiPkg) return;
     addAppTag(_aiPkg, ti.value); ti.value = ""; ti.focus();
-    buildAiTags(); fillTagFilter(); renderApps($("#search").value);
+    buildAiTags(); buildTagChips(); renderApps($("#search").value);
   };
   if ($("#ai-tag-add")) $("#ai-tag-add").onclick = _aiTagCommit;
   if ($("#ai-tag-input")) $("#ai-tag-input").onkeydown = function (e) { if (e.key === "Enter") { e.preventDefault(); _aiTagCommit(); } };

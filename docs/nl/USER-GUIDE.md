@@ -522,7 +522,7 @@ toevoegen (multiselectie), en uitgesloten apps worden door beide overgeslagen.
 
 **Back-upitems per app.** Ook in Instellingen kun je precies kiezen welke items elke app back-upt in bulk-, automatische en geplande back-ups, bijvoorbeeld alleen APK, of APK + OBB. Bij een losse handmatige back-up kun je nog steeds kiezen, uitgaand van de set van de app. Apps die je hier niet instelt, back-uppen alles.
 
-**App-tags.** Tik op een app in Instellingen (Items en tags per app) om deze vrije labels te geven, bijvoorbeeld games of work. Boven de app-lijst verschijnt dan een tagkiezer: kies een tag om alleen die apps te tonen en back-up de hele groep in één keer. Je kunt het ook openen via het tabblad Apps: tik op een app en dan op Items en tags.
+**App-tags.** Tik op een app in Instellingen (Items en tags per app) om deze vrije labels te geven, bijvoorbeeld games of work. Je labels verschijnen dan als tik-om-te-schakelen chips boven de app-lijst: tik er een of meer aan om de apps te tonen die een ervan dragen, en back-up de hele groep in één keer. Je kunt het ook openen via het tabblad Apps: tik op een app en dan op Items en tags.
 
 **Activiteitenlogboek.** Het Schema-tabblad heeft een knop **Activiteitenlogboek bekijken** die
 een volledig scherm (direct) opent met het lokale auditspoor, backups, herstelbewerkingen,

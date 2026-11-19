@@ -532,7 +532,7 @@ excluded apps are skipped by both.
 
 **Per-app backup items.** Also in Settings, you can choose exactly which items each app backs up in bulk, automatic and scheduled backups, for example APK only, or APK + OBB. A single manual backup still lets you pick at the time, starting from the app's set. Apps you do not set here back up everything.
 
-**App tags.** Tap an app in Settings (Per-app items and tags) to give it free labels, for example games or work. A tag picker then appears above the app list: pick a tag to show only its apps, and back up the whole group at once. You can also reach it from the Apps tab: tap an app, then Items and tags.
+**App tags.** Tap an app in Settings (Per-app items and tags) to give it free labels, for example games or work. Your labels then appear as tap-to-toggle chips above the app list: tap one or more to show the apps carrying any of them, and back up the whole group at once. You can also reach the labels from the Apps tab: tap an app, then Items and tags.
 
 **Activity log.** The Schedule tab has a **View activity log** button that opens a full
 screen (instantly) showing the local audit trail, backups, restores, deletions, scheduled

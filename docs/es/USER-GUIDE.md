@@ -492,7 +492,7 @@ respaldar automáticamente o según una programación; puedes añadir varias a l
 
 **Elementos de copia por app.** También en Ajustes puedes elegir exactamente qué elementos respalda cada app en copias masivas, automáticas y programadas, por ejemplo solo APK, o APK + OBB. Una copia manual individual te sigue dejando elegir, partiendo del conjunto de la app. Las apps que no configures aquí respaldan todo.
 
-**Etiquetas de apps.** Toca una app en Ajustes (Elementos y etiquetas por app) para darle nombres libres, por ejemplo games o work. Encima de la lista de apps aparece entonces un selector de etiquetas: elige una etiqueta para mostrar solo sus apps y respalda todo el grupo a la vez. También puedes acceder desde la pestaña Apps: toca una app y luego Elementos y etiquetas.
+**Etiquetas de apps.** Toca una app en Ajustes (Elementos y etiquetas por app) para darle nombres libres, por ejemplo games o work. Tus etiquetas aparecen entonces como chips que se activan con un toque encima de la lista de apps: toca una o varias para mostrar las apps que lleven cualquiera de ellas, y respalda todo el grupo a la vez. También puedes acceder desde la pestaña Apps: toca una app y luego Elementos y etiquetas.
 
 **Registro de actividad.** La pestaña Schedule tiene un botón **View activity log** que abre una
 pantalla completa (al instante) que muestra la traza de auditoría local, backups, restauraciones,

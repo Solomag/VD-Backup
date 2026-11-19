@@ -515,7 +515,7 @@ nigdy nie chcesz kopiować automatycznie ani według harmonogramu; możesz doda�
 
 **Elementy kopii dla aplikacji.** Również w Ustawieniach możesz wybrać dokładnie, które elementy każda aplikacja kopiuje w kopiach zbiorczych, automatycznych i zaplanowanych, na przykład tylko APK lub APK + OBB. Pojedyncza ręczna kopia nadal pozwala wybrać na miejscu, zaczynając od zestawu aplikacji. Aplikacje, których tu nie ustawisz, kopiują wszystko.
 
-**Tagi aplikacji.** Dotknij aplikacji w Ustawieniach (Elementy i tagi dla aplikacji), aby nadać jej swobodne etykiety, na przykład games lub work. Nad listą aplikacji pojawi się wtedy wybór tagów: wybierz tag, aby pokazać tylko jego aplikacje, i utwórz kopię całej grupy naraz. Możesz też otworzyć to z karty Aplikacje: dotknij aplikacji, a potem Elementy i tagi.
+**Tagi aplikacji.** Dotknij aplikacji w Ustawieniach (Elementy i tagi dla aplikacji), aby nadać jej swobodne etykiety, na przykład games lub work. Twoje etykiety pojawią się wtedy jako przełączane dotknięciem chipy nad listą aplikacji: dotknij jednej lub kilku, aby pokazać aplikacje mające którąkolwiek z nich, i utwórz kopię całej grupy naraz. Możesz też otworzyć to z karty Aplikacje: dotknij aplikacji, a potem Elementy i tagi.
 
 **Dziennik aktywności.** Zakładka Schedule ma przycisk **View activity log**, który otwiera pełny
 ekran (natychmiast) pokazujący lokalny ślad audytu, kopie, przywracania, usunięcia, zaplanowane i

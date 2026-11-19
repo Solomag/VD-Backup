@@ -493,7 +493,7 @@ il backup automaticamente o su pianificazione ; puoi aggiungerne diverse in una 
 
 **Elementi di backup per app.** Anche nelle Impostazioni puoi scegliere esattamente quali elementi ogni app salva nei backup di massa, automatici e pianificati, per esempio solo APK, o APK + OBB. Un singolo backup manuale ti lascia comunque scegliere sul momento, partendo dal set dell'app. Le app che non imposti qui salvano tutto.
 
-**Tag delle app.** Tocca un'app nelle Impostazioni (Elementi e tag per app) per darle etichette libere, ad esempio games o work. Sopra l'elenco delle app compare allora un selettore di tag: scegli un tag per mostrare solo le sue app e salva l'intero gruppo in una volta. Puoi raggiungerlo anche dalla scheda App: tocca un'app, poi Elementi e tag.
+**Tag delle app.** Tocca un'app nelle Impostazioni (Elementi e tag per app) per darle etichette libere, ad esempio games o work. Le tue etichette compaiono allora come chip da toccare per attivare sopra l'elenco delle app: toccane una o più per mostrare le app che ne hanno una qualsiasi, e salva l'intero gruppo in una volta. Puoi raggiungerlo anche dalla scheda App: tocca un'app, poi Elementi e tag.
 
 **Log di attività.** La scheda Schedule ha un pulsante **View activity log** che apre una schermata completa
 (istantaneamente) che mostra la traccia di audit locale, backup, ripristini, eliminazioni, esecuzioni pianificate e automatiche, e potature -

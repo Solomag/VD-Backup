@@ -171,6 +171,13 @@ main { padding: var(--pad-main); max-width: 760px; margin: 0 auto; }
 .tag-chip button:hover { opacity: 1; }
 .row .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 5px; }
 .row .tags .tag-chip { padding: 0 8px; }
+.tag-filter { display: flex; flex-wrap: wrap; gap: 8px; padding: 2px 16px 6px; }
+.tag-filter[hidden] { display: none; }
+.tag-filter-chip { font-size: 13px; font-weight: 700; line-height: 1.6; padding: 3px 13px;
+  border-radius: var(--r-pill); cursor: pointer; color: var(--muted);
+  background: var(--surface); border: 1px solid var(--line); }
+.tag-filter-chip.on { color: var(--accent); border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, transparent); }
 /* per-backup name + tags editor in the details modal */
 .info-note { display: flex; flex-direction: column; gap: 8px; margin: 12px 0 4px; }
 .info-note input { width: 100%; box-sizing: border-box; background: var(--surface);

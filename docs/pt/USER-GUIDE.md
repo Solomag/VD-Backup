@@ -512,7 +512,7 @@ excluídos são pulados por ambos.
 
 **Itens de backup por app.** Também em Ajustes, você pode escolher exatamente quais itens cada app faz backup em backups em massa, automáticos e agendados, por exemplo só APK, ou APK + OBB. Um backup manual individual ainda te deixa escolher na hora, partindo do conjunto do app. Apps que você não configurar aqui fazem backup de tudo.
 
-**Tags de app.** Toque num app em Ajustes (Itens e tags por app) para dar a ele rótulos livres, por exemplo games ou work. Um seletor de tags então aparece acima da lista de apps: escolha uma tag para mostrar só os apps dela e faça backup do grupo inteiro de uma vez. Você também chega nele pela aba Apps: toque num app e depois em Itens e tags.
+**Tags de app.** Toque num app em Ajustes (Itens e tags por app) para dar a ele rótulos livres, por exemplo games ou work. Seus rótulos então aparecem como chips de tocar-para-alternar acima da lista de apps: toque em um ou mais para mostrar os apps que tenham qualquer um deles e faça backup do grupo inteiro de uma vez. Você também chega nele pela aba Apps: toque num app e depois em Itens e tags.
 
 **Log de atividade.** A aba Schedule tem um botão **View activity log** que abre uma tela cheia
 (instantaneamente) mostrando a trilha de auditoria local, backups, restaurações, exclusões,

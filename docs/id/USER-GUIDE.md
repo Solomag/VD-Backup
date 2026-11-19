@@ -486,7 +486,7 @@ tidak pernah ingin dibackup secara otomatis atau sesuai jadwal; Anda bisa menamb
 
 **Item cadangan per aplikasi.** Juga di Pengaturan, Anda bisa memilih persis item mana yang dicadangkan setiap aplikasi dalam cadangan massal, otomatis, dan terjadwal, misalnya hanya APK, atau APK + OBB. Cadangan manual tunggal tetap membiarkan Anda memilih saat itu, dimulai dari set aplikasi. Aplikasi yang tidak Anda atur di sini mencadangkan semuanya.
 
-**Tag aplikasi.** Ketuk aplikasi di Pengaturan (Item dan tag per aplikasi) untuk memberinya label bebas, misalnya games atau work. Pemilih tag lalu muncul di atas daftar aplikasi: pilih tag untuk menampilkan hanya aplikasinya, dan cadangkan seluruh grup sekaligus. Anda juga bisa membukanya dari tab Apl: ketuk aplikasi, lalu Item dan tag.
+**Tag aplikasi.** Ketuk aplikasi di Pengaturan (Item dan tag per aplikasi) untuk memberinya label bebas, misalnya games atau work. Label Anda lalu muncul sebagai chip ketuk-untuk-aktifkan di atas daftar aplikasi: ketuk satu atau beberapa untuk menampilkan aplikasi yang memiliki salah satunya, dan cadangkan seluruh grup sekaligus. Anda juga bisa membukanya dari tab Apl: ketuk aplikasi, lalu Item dan tag.
 
 **Log aktivitas.** Tab Schedule punya tombol **View activity log** yang membuka layar penuh (seketika) menampilkan jejak audit lokal -
 backup, restore, penghapusan, jalankan terjadwal dan otomatis, serta pemangkasan, terbaru lebih dahulu. Aksi **Export logs** menyimpan berkas log (di dalam folder backup) yang bisa Anda lampirkan ke laporan umpan balik atau bug.

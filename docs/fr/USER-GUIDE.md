@@ -498,7 +498,7 @@ jamais voir sauvegardées automatiquement ou selon une planification ; vous pouv
 
 **Éléments de sauvegarde par app.** Également dans les Réglages, vous pouvez choisir exactement quels éléments chaque app sauvegarde dans les sauvegardes en masse, automatiques et planifiées, par exemple APK seul, ou APK + OBB. Une sauvegarde manuelle individuelle vous laisse toujours choisir sur le moment, à partir de l'ensemble de l'app. Les apps que vous ne réglez pas ici sauvegardent tout.
 
-**Étiquettes d'applications.** Touchez une application dans les Réglages (Éléments et étiquettes par application) pour lui donner des libellés libres, par exemple games ou work. Un sélecteur d'étiquettes apparaît alors au-dessus de la liste : choisissez une étiquette pour n'afficher que ses applications, et sauvegardez tout le groupe d'un coup. Vous pouvez aussi y accéder depuis l'onglet Applications : touchez une application, puis Éléments et étiquettes.
+**Étiquettes d'applications.** Touchez une application dans les Réglages (Éléments et étiquettes par application) pour lui donner des libellés libres, par exemple games ou work. Vos étiquettes apparaissent alors sous forme de puces à activer d'un toucher au-dessus de la liste : touchez-en une ou plusieurs pour afficher les applications qui portent l'une d'elles, et sauvegardez tout le groupe d'un coup. Vous pouvez aussi y accéder depuis l'onglet Applications : touchez une application, puis Éléments et étiquettes.
 
 **Journal d'activité.** L'onglet Schedule dispose d'un bouton **View activity log** qui ouvre un écran complet
 (instantanément) affichant la piste d'audit locale, sauvegardes, restaurations, suppressions, exécutions planifiées et automatiques, et élagages -

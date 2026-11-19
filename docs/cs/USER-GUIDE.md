@@ -485,7 +485,7 @@ nechcete zálohovat automaticky nebo podle rozvrhu; můžete jich přidat někol
 
 **Položky zálohy pro aplikace.** Také v Nastavení můžete zvolit přesně, které položky každá aplikace zálohuje v hromadných, automatických a naplánovaných zálohách, například jen APK, nebo APK + OBB. Jednotlivá ruční záloha vám stále umožní výběr, počínaje sadou aplikace. Aplikace, které zde nenastavíte, zálohují vše.
 
-**Štítky aplikací.** Klepnutím na aplikaci v Nastavení (Položky a štítky podle aplikace) jí přidělíte volné popisky, například games nebo work. Nad seznamem aplikací se pak objeví výběr štítků: zvolte štítek pro zobrazení jen jeho aplikací a zálohujte celou skupinu najednou. Dostanete se k tomu i z karty Aplikace: klepněte na aplikaci a pak na Položky a štítky.
+**Štítky aplikací.** Klepnutím na aplikaci v Nastavení (Položky a štítky podle aplikace) jí přidělíte volné popisky, například games nebo work. Nad seznamem aplikací se pak vaše štítky objeví jako přepínatelné odznaky: klepnutím na jeden nebo více zobrazíte aplikace nesoucí kterýkoli z nich a zálohujte celou skupinu najednou. Dostanete se k tomu i z karty Aplikace: klepněte na aplikaci a pak na Položky a štítky.
 
 **Protokol aktivity.** Záložka Schedule má tlačítko **View activity log**, které otevře celou
 obrazovku (okamžitě) zobrazující lokální auditní stopu, zálohy, obnovy, mazání, naplánované
