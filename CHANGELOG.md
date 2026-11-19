@@ -12,6 +12,10 @@ New:
 
 - You can now cancel a running backup or restore from the progress card. The Cancel button stops the operation; a cancelled backup removes its partial copy, and cancelling a restore warns you first that the app may be left partially restored.
 
+Fixes:
+
+- Testing a Telegram destination no longer reports "That destination type is not supported." The Test button now checks that you are signed in to Telegram, and tells you to sign in first if you are not.
+
 ## v1.13
 
 New:

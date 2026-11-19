@@ -1209,6 +1209,10 @@ EOF
         i=0; while [ ! -f "$res.done" ] && [ "$i" -lt 30 ]; do sleep 1; i=$((i+1)); done
         if [ -f "$res.done" ] && "$JQ" -e '.ok==true' "$res" >/dev/null 2>&1; then rm -f "$res" "$res.done"; ok '"reachable":true'
         else c="$("$JQ" -r '.code // "ERR_DRIVE_TIMEOUT"' "$res" 2>/dev/null)"; rm -f "$res" "$res.done"; err "${c:-ERR_DRIVE}" "Drive not reachable - authorize consent"; fi ;;
+      telegram) _tgb="$(command -v "$BIN/mtproto-store" 2>/dev/null || command -v "$STATE/bin/mtproto-store" 2>/dev/null || echo mtproto-store)"
+        _o="$(MTPROTO_STORE_TAG=VDB MTPROTO_STORE_STATE="$SECRETS/telegram" "$_tgb" check-auth 2>/dev/null)"
+        { [ -n "$_o" ] && printf '%s' "$_o" | "$JQ" -e '.is_auth==true' >/dev/null 2>&1; } && ok '"reachable":true' \
+          || err ERR_DEST_AUTH "Telegram not signed in - open the Telegram login and sign in first" ;;
       *) err ERR_DEST_TYPE "unknown type" ;;
     esac ;;
 
