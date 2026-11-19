@@ -1454,6 +1454,18 @@ function trackOp(opid, ctx) {
   var bar = el("div", "bar"); var fill = el("i"); bar.appendChild(fill);
   var sub = el("div", "op-sub"); sub.hidden = true;
   box.appendChild(label); box.appendChild(bar); box.appendChild(sub);
+  // Cancel the running op (kills the detached worker group via the cancel verb). Known-restore
+  // ops warn about a possibly-partial app; a reattached op (no ctx) uses the generic message.
+  var isRestore = !!(ctx && (ctx.restoreRef || ctx.pathRef || ctx.specialRef));
+  var cancelBtn = el("button", "btn small op-cancel", I18N.t("ui_cancel"));
+  cancelBtn.onclick = function () {
+    modalConfirm(I18N.t(isRestore ? "msg_cancel_restore" : (ctx ? "msg_cancel_backup" : "msg_cancel_op"))).then(function (yes) {
+      if (!yes) return;
+      cancelBtn.disabled = true;
+      helper("cancel", opid, true);   // the poller below sees the op vanish and hides the card
+    });
+  };
+  box.appendChild(cancelBtn);
   var missing = 0, stuck = 0;
   var timer = setInterval(function () {
     if (_curOpId !== opid) { clearInterval(timer); return; }   // a newer op took the slot: stop this poller so it neither leaks nor hides the current op
@@ -1468,6 +1480,7 @@ function trackOp(opid, ctx) {
       updateProgSub(sub, p);
       if (p.done) {
         clearInterval(timer);
+        cancelBtn.style.display = "none";
         if (!p.ok && ctx && ctx.entry && p.code === "ERR_IMPORT_ENCRYPTED") {
           box.hidden = true;
           startImport(ctx.from, ctx.entry, true);

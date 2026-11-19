@@ -1,9 +1,9 @@
 {
-  "version": "v1.13",
-  "versionCode": 11300,
-  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.13/VD-Backup-v1.13-universal-full.zip",
+  "version": "v1.13.1",
+  "versionCode": 11301,
+  "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.13.1/VD-Backup-v1.13.1-universal-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "New\n- Default encryption passphrase, set once in Settings with a per-app override, so encrypted backups stop asking every time. (#17)\n- Remote-only backups: a backup to Telegram or an rclone cloud remote uploads and keeps no local copy by default (with a Keep a local copy switch), and you can browse and restore straight from an rclone remote. (#16)\n- A Staging folder setting controls where a remote or external backup is temporarily assembled.\n\nFixes\n- Update checks and installs now work on every device.\n- Turning an installed app into a system app now actually takes effect.\n- Failed or interrupted backups no longer leave partial copies piling up.\n- Importing a Neo-Backup or Android-DataBackup backup now restores each app with the correct security labels, so it no longer crashes.\n- The system-files (/data/adb) backup goes to the destination you choose, with a post-restore reboot hint and scrollable folder names.\n- Notifications name the app, not its package id; smoother app and backup search.\n\nImprovements\n- The last English-only screens are now translated in all 21 languages.",
-  "size": 257576567,
-  "sha256": "927e8b25a9fe8a70ded52267a3762ea0a135c3b0ad66abae640bc4a2775107dc"
+  "notes": "",
+  "size": 0,
+  "sha256": ""
 }

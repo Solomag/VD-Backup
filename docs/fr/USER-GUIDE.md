@@ -164,6 +164,8 @@ Le flux de base : ouvrez **Apps**, choisissez une app, sélectionnez ce qu'il fa
 réglez la compression et (optionnellement) le chiffrement, puis lancez. La progression apparaît en direct et une
 notification vous indique quand c'est terminé.
 
+Pendant qu'une sauvegarde ou une restauration est en cours, sa carte de progression comporte un bouton **Annuler**. Annuler une sauvegarde l'arrête et supprime toute copie partielle qu'elle avait commencée, de sorte que rien d'écrit à moitié ne subsiste. Annuler une restauration l'arrête aussi, mais l'app peut rester partiellement restaurée, donc VDBackup vous prévient d'abord ; relancez la restauration pour la terminer.
+
 Dans la boîte de dialogue de sauvegarde, tu peux aussi choisir la **destination** de cette sauvegarde, stockage local ou toute destination cloud/distante ajoutée, sans d'abord changer la destination par défaut dans les Paramètres.
 
 VDBackup exécute deux protections automatiques pendant une sauvegarde, toutes deux activées par défaut dans Settings. **"Faire une pause pour refroidir quand l'appareil chauffe"** laisse respirer une longue tâche et attend que l'appareil refroidisse s'il est vraiment chaud, de sorte qu'une grosse sauvegarde ne surchauffe jamais le téléphone ; seul le rythme change, jamais la fidélité. **"Vérifier l'espace libre avant une sauvegarde par lots"** estime ce dont une sauvegarde de plusieurs apps aura besoin et s'arrête au début, plutôt qu'à mi-chemin, si le stockage ne pouvait pas la contenir.

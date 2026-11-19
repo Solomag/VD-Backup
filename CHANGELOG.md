@@ -6,6 +6,12 @@
 
 All notable changes to VDBackup are documented here. English only.
 
+## v1.13.1
+
+New:
+
+- You can now cancel a running backup or restore from the progress card. The Cancel button stops the operation; a cancelled backup removes its partial copy, and cancelling a restore warns you first that the app may be left partially restored.
+
 ## v1.13
 
 New:

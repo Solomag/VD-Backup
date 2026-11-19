@@ -187,6 +187,8 @@ Temel akış: **Apps**'i açın, bir uygulama seçin, neyi dahil edeceğinizi se
 seçin, sıkıştırmayı ve (isteğe bağlı olarak) şifrelemeyi ayarlayın, sonra çalıştırın.
 İlerleme canlı olarak görünür ve bir bildirim bittiğinde size haber verir.
 
+Bir yedekleme ya da geri yükleme sürerken, ilerleme kartında bir **Cancel** düğmesi bulunur. Bir yedeklemeyi iptal etmek onu durdurur ve başlatmış olduğu kısmi kopyayı kaldırır, böylece yarım yazılmış hiçbir şey geride kalmaz. Bir geri yüklemeyi iptal etmek de onu durdurur, ancak uygulama kısmen geri yüklenmiş kalabilir, bu yüzden VDBackup önce sizi uyarır; bitirmek için geri yüklemeyi yeniden çalıştırın.
+
 Yedekleme iletişim kutusunda bu yedeğin **hedefini** de seçebilirsin, yerel depolama ya da eklediğin herhangi bir bulut/uzak hedef, önce Ayarlar'daki varsayılan hedefi değiştirmeden.
 
 VDBackup bir yedekleme sırasında, ikisi de Ayarlar'da varsayılan olarak açık olan iki otomatik güvenlik önlemi çalıştırır. **"Cihaz ısındığında soğuması için duraklat"** uzun bir işe nefes aldırır ve cihaz gerçekten sıcaksa soğumasını bekler, böylece büyük bir yedekleme telefonu asla aşırı ısıtmaz; yalnızca tempo değişir, sadakat asla. **"Toplu yedeklemeden önce boş alanı denetle"**, çok uygulamalı bir yedeklemenin neye ihtiyaç duyacağını tahmin eder ve depolama yetmeyecekse yarı yolda değil, en başta durur.

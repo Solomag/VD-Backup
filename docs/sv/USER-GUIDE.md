@@ -182,6 +182,8 @@ Det grundläggande flödet: öppna **Apps**, välj en app, välj vad som ska ink
 ställ in komprimering och (valfritt) kryptering, kör sedan. Förloppet visas live och en
 notis talar om när det är klart.
 
+Medan en säkerhetskopiering eller återställning pågår har dess förloppskort en **Cancel**-knapp. Att avbryta en säkerhetskopiering stoppar den och tar bort eventuell delvis kopia som den hade påbörjat, så att inget halvskrivet lämnas kvar. Att avbryta en återställning stoppar den också, men appen kan lämnas delvis återställd, så VDBackup varnar dig först; kör återställningen igen för att slutföra.
+
 I säkerhetskopieringsdialogen kan du även välja **mål** för denna kopia, lokal lagring eller valfritt tillagt moln-/fjärrmål, utan att först ändra standardmålet i Inställningar.
 
 VDBackup kör två automatiska skyddsåtgärder under en säkerhetskopiering, båda på som standard i Inställningar. **"Pausa för att svalna när enheten blir varm"** låter ett långt jobb andas och väntar på att enheten ska svalna om den verkligen är het, så att en stor säkerhetskopiering aldrig överhettar telefonen; bara takten ändras, aldrig troheten. **"Kontrollera ledigt utrymme före en batch-säkerhetskopiering"** uppskattar vad en säkerhetskopiering av flera appar behöver och stoppar vid starten, i stället för halvvägs, om lagringen inte skulle rymma den.

@@ -171,6 +171,8 @@ Der grundlegende Ablauf: öffne **Apps**, wähle eine App, wähle aus, was einbe
 wähle einen Modus, stelle Komprimierung und (optional) Verschlüsselung ein, dann führe aus. Der
 Fortschritt erscheint live, und eine Benachrichtigung sagt dir, wann er fertig ist.
 
+Während ein Backup oder eine Wiederherstellung läuft, hat ihre Fortschrittskarte eine Schaltfläche **Abbrechen**. Das Abbrechen eines Backups stoppt es und entfernt jede teilweise Kopie, die es begonnen hatte, sodass nichts halb Geschriebenes zurückbleibt. Das Abbrechen einer Wiederherstellung stoppt sie ebenfalls, aber die App bleibt möglicherweise teilweise wiederhergestellt, daher warnt dich VDBackup zuerst; führe die Wiederherstellung erneut aus, um sie abzuschließen.
+
 Im Backup-Dialog kannst du auch das **Ziel** dieses Backups wählen, lokaler Speicher oder ein von dir hinzugefügtes Cloud-/Remote-Ziel, ohne vorher das Standardziel in den Einstellungen zu ändern.
 
 VDBackup führt während eines Backups zwei automatische Schutzmaßnahmen aus, beide in den Einstellungen standardmäßig an. **"Zum Abkühlen pausieren, wenn das Gerät heiß wird"** lässt einen langen Vorgang durchatmen und wartet, bis das Gerät abkühlt, wenn es wirklich heiß ist, sodass ein großes Backup das Telefon nie überhitzt; nur das Tempo ändert sich, nie die Originaltreue. **"Freien Speicher vor einer Stapelsicherung prüfen"** schätzt, was eine Mehr-App-Sicherung benötigt, und stoppt am Anfang statt auf halbem Weg, falls der Speicher nicht ausreicht.

@@ -163,6 +163,8 @@ Základní tok: otevřete **Apps**, vyberte aplikaci, zvolte, co zahrnout, vyber
 nastavte kompresi a (volitelně) šifrování, poté spusťte. Průběh se objevuje živě a
 notifikace vám řekne, až je hotovo.
 
+Během běhu zálohy nebo obnovení má její karta průběhu tlačítko **Zrušit**. Zrušení zálohy ji zastaví a odstraní jakoukoli částečnou kopii, kterou začala, takže nezůstane nic napůl zapsaného. Zrušení obnovení ji také zastaví, ale aplikace může zůstat částečně obnovená, proto vás VDBackup nejprve varuje; obnovení dokončíte tím, že je spustíte znovu.
+
 V dialogu zálohy můžeš také zvolit **cíl** této zálohy, místní úložiště nebo libovolný přidaný cloudový/vzdálený cíl, bez předchozí změny výchozího cíle v Nastavení.
 
 VDBackup během zálohy spouští dvě automatické pojistky, obě ve výchozím stavu zapnuté v Settings. **"Pozastavit kvůli ochlazení, když se zařízení zahřeje"** nechá dlouhou úlohu nadechnout a počká, až zařízení vychladne, pokud je opravdu horké, takže velká záloha telefon nikdy nepřehřeje; mění se jen tempo, nikdy ne věrnost. **"Před dávkovou zálohou zkontrolovat volné místo"** odhadne, co bude záloha více aplikací potřebovat, a zastaví se na začátku místo v půlce, pokud by se do úložiště nevešla.

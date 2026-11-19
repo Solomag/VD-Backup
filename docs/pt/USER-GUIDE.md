@@ -182,6 +182,8 @@ O fluxo básico: abra **Apps**, escolha um app, selecione o que incluir, escolha
 defina a compressão e (opcionalmente) a criptografia, depois execute. O progresso aparece ao vivo e uma
 notificação te avisa quando termina.
 
+Enquanto um backup ou uma restauração está em andamento, seu cartão de progresso tem um botão **Cancelar**. Cancelar um backup o interrompe e remove qualquer cópia parcial que ele tenha começado, então nada escrito pela metade fica para trás. Cancelar uma restauração também a interrompe, mas o app pode ficar parcialmente restaurado, então o VDBackup te avisa antes; rode a restauração de novo para terminar.
+
 No diálogo de backup você também pode escolher o **destino** deste backup, armazenamento local ou qualquer destino de nuvem/remoto que você adicionou, sem precisar mudar antes o destino padrão nas Configurações.
 
 O VDBackup roda duas salvaguardas automáticas durante um backup, ambas ligadas por padrão nas Configurações. **"Pausar para esfriar quando o aparelho esquentar"** deixa um trabalho longo respirar, e espera o aparelho esfriar se ele estiver realmente quente, então um backup grande nunca superaquece o aparelho; só o ritmo muda, nunca a fidelidade. **"Verificar o espaço livre antes de um backup em lote"** estima o que um backup de vários apps vai precisar e para no começo, em vez de no meio, se o armazenamento não fosse comportá-lo.

@@ -181,6 +181,8 @@ De basisstroom: open **Apps**, kies een app, selecteer wat je wilt opnemen, kies
 stel compressie en (optioneel) versleuteling in, voer dan uit. De voortgang verschijnt live en
 een melding vertelt je wanneer het klaar is.
 
+Terwijl een backup of herstel loopt, heeft de voortgangskaart een knop **Annuleren**. Een backup annuleren stopt hem en verwijdert elke gedeeltelijke kopie die al was begonnen, zodat er niets half geschreven achterblijft. Een herstel annuleren stopt het ook, maar de app kan gedeeltelijk hersteld achterblijven, dus VDBackup waarschuwt je eerst; voer het herstel opnieuw uit om het af te maken.
+
 In het back-updialoogvenster kun je ook de **bestemming** voor deze back-up kiezen, lokale opslag of een toegevoegde cloud-/externe bestemming, zonder eerst de standaardbestemming in Instellingen te wijzigen.
 
 VDBackup voert tijdens een backup twee automatische beveiligingen uit, beide standaard aan in Instellingen. **"Pauzeren om af te koelen wanneer het apparaat heet wordt"** laat een lange taak op adem komen en wacht tot het apparaat is afgekoeld als het echt heet is, zodat een grote backup de telefoon nooit oververhit; alleen het tempo verandert, nooit de getrouwheid. **"Vrije ruimte controleren vóór een batchback-up"** schat in wat een back-up van meerdere apps nodig heeft en stopt aan het begin, in plaats van halverwege, als de opslag het niet zou kunnen bevatten.

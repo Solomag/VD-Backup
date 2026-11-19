@@ -181,6 +181,8 @@ Podstawowy przepływ: otwórz **Apps**, wybierz aplikację, zaznacz, co dołącz
 ustaw kompresję i (opcjonalnie) szyfrowanie, a następnie uruchom. Postęp pojawia się na żywo, a
 powiadomienie mówi ci, kiedy jest gotowe.
 
+Gdy trwa tworzenie kopii lub przywracanie, jego karta postępu ma przycisk **Anuluj**. Anulowanie kopii zatrzymuje ją i usuwa każdą częściową kopię, którą już rozpoczęto, więc nie zostaje nic zapisanego w połowie. Anulowanie przywracania również je zatrzymuje, ale aplikacja może pozostać częściowo przywrócona, dlatego VDBackup najpierw cię ostrzega; uruchom przywracanie ponownie, aby je dokończyć.
+
 W oknie kopii zapasowej możesz też wybrać **miejsce docelowe** tej kopii, pamięć lokalną lub dowolne dodane miejsce w chmurze/zdalne, bez wcześniejszej zmiany domyślnego miejsca w Ustawieniach.
 
 VDBackup uruchamia podczas kopii dwa automatyczne zabezpieczenia, oba domyślnie włączone w Ustawieniach. **"Wstrzymaj w celu schłodzenia, gdy urządzenie się nagrzewa"** pozwala długiemu zadaniu złapać oddech i czeka, aż urządzenie ostygnie, jeśli naprawdę jest gorące, więc duża kopia nigdy nie przegrzewa telefonu; zmienia się tylko tempo, nigdy wierność. **"Sprawdź wolne miejsce przed kopią wsadową"** szacuje, ile będzie potrzebować kopia wielu aplikacji, i zatrzymuje się na początku, a nie w połowie, jeśli pamięć by jej nie pomieściła.

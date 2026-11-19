@@ -185,6 +185,8 @@ The basic flow: open **Apps**, choose an app, select what to include, pick a mod
 set compression and (optionally) encryption, then run. Progress appears live and a
 notification tells you when it is done.
 
+While a backup or restore is running, its progress card has a **Cancel** button. Cancelling a backup stops it and removes any partial copy it had started, so nothing half-written is left behind. Cancelling a restore also stops it, but the app may be left partially restored, so VDBackup warns you first; run the restore again to finish.
+
 In the backup dialog you can also choose the **destination** for this backup, local storage or any cloud/remote destination you have added, without changing the default destination in Settings first.
 
 VDBackup runs two automatic safeguards during a backup, both on by default in Settings. **"Pause to cool down when the device gets hot"** lets a long job breathe, and waits for the device to cool if it is truly hot, so a big backup never overheats the phone; only the pace changes, never the fidelity. **"Check free space before a batch backup"** estimates what a multi-app backup will need and stops at the start, instead of part-way, if the storage would not hold it.

@@ -301,6 +301,7 @@ button { cursor: pointer; font-family: inherit; }
   background: linear-gradient(90deg, var(--backup), var(--accent)); transition: width .3s ease; }
 .op-sub { color: var(--muted); font-size: 13px; margin-top: 8px; }
 .op-sub[hidden] { display: none; }
+.op-cancel { margin-top: 10px; }
 
 /* ---- modal (floating, centered) ---- */
 .modal { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center;

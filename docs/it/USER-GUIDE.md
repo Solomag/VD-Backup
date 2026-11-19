@@ -164,6 +164,8 @@ Il flusso di base : apri **Apps**, scegli un'app, seleziona cosa includere, sceg
 imposta la compressione e (opzionalmente) la cifratura, poi esegui. L'avanzamento appare in tempo reale e una
 notifica ti dice quando è finito.
 
+Mentre un backup o un ripristino è in corso, la sua scheda di avanzamento ha un pulsante **Annulla**. Annullare un backup lo ferma e rimuove qualsiasi copia parziale che aveva iniziato, così non resta nulla scritto a metà. Annullare un ripristino lo ferma anch'esso, ma l'app potrebbe restare parzialmente ripristinata, perciò VDBackup ti avvisa prima; esegui di nuovo il ripristino per completarlo.
+
 Nella finestra di backup puoi anche scegliere la **destinazione** di questo backup, archiviazione locale o qualsiasi destinazione cloud/remota aggiunta, senza prima cambiare la destinazione predefinita nelle Impostazioni.
 
 VDBackup esegue due salvaguardie automatiche durante un backup, entrambe attive per impostazione predefinita nelle Impostazioni. **"Metti in pausa per raffreddare quando il dispositivo si surriscalda"** lascia respirare un lavoro lungo, e aspetta che il dispositivo si raffreddi se è davvero caldo, così un backup grande non surriscalda mai il telefono; cambia solo il ritmo, mai la fedeltà. **"Controlla lo spazio libero prima di un backup in lotto"** stima ciò di cui avrà bisogno un backup di più app e si ferma all'inizio, invece che a metà, se l'archiviazione non lo conterrebbe.

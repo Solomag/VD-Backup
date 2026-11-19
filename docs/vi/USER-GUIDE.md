@@ -177,6 +177,8 @@ Luồng cơ bản: mở **Apps**, chọn một ứng dụng, chọn những gì 
 đặt nén và (tùy chọn) mã hóa, rồi chạy. Tiến trình xuất hiện trực tiếp và một thông báo cho
 bạn biết khi nó xong.
 
+Trong khi một lần sao lưu hoặc khôi phục đang chạy, thẻ tiến trình của nó có một nút **Cancel**. Hủy một lần sao lưu sẽ dừng nó và xóa bất kỳ bản sao một phần nào mà nó đã bắt đầu, nên không có gì viết dở còn sót lại. Hủy một lần khôi phục cũng dừng nó, nhưng ứng dụng có thể bị khôi phục một phần, nên VDBackup cảnh báo bạn trước; chạy lại lần khôi phục để hoàn tất.
+
 Trong hộp thoại sao lưu, bạn cũng có thể chọn **đích** cho bản sao lưu này, bộ nhớ cục bộ hoặc bất kỳ đích đám mây/từ xa nào bạn đã thêm, mà không cần đổi đích mặc định trong Cài đặt trước.
 
 VDBackup chạy hai biện pháp bảo vệ tự động trong một lần sao lưu, cả hai bật theo mặc định trong Cài đặt. **"Tạm dừng để hạ nhiệt khi thiết bị nóng lên"** cho một tác vụ dài được nghỉ, và chờ thiết bị nguội nếu nó thực sự nóng, nên một bản sao lưu lớn không bao giờ làm điện thoại quá nhiệt; chỉ nhịp độ thay đổi, không bao giờ là độ trung thực. **"Kiểm tra dung lượng trống trước khi sao lưu theo lô"** ước tính một lần sao lưu nhiều ứng dụng sẽ cần bao nhiêu và dừng ngay từ đầu, thay vì giữa chừng, nếu bộ nhớ không đủ chứa.

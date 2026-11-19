@@ -162,6 +162,8 @@ Alur dasar: buka **Apps**, pilih sebuah aplikasi, pilih apa yang disertakan, pil
 setel kompresi dan (opsional) enkripsi, lalu jalankan. Kemajuan muncul live dan sebuah
 notifikasi memberi tahu Anda saat selesai.
 
+Saat pencadangan atau pemulihan sedang berjalan, kartu kemajuannya punya tombol **Batal**. Membatalkan pencadangan akan menghentikannya dan menghapus salinan sebagian apa pun yang sudah dimulainya, jadi tidak ada yang tertulis separuh yang tertinggal. Membatalkan pemulihan juga menghentikannya, tetapi aplikasi mungkin tertinggal dalam keadaan dipulihkan sebagian, jadi VDBackup memperingatkan Anda terlebih dahulu; jalankan pemulihan lagi untuk menyelesaikannya.
+
 Pada dialog pencadangan kamu juga bisa memilih **tujuan** cadangan ini, penyimpanan lokal atau tujuan cloud/jarak jauh mana pun yang kamu tambahkan, tanpa mengubah tujuan default di Pengaturan terlebih dahulu.
 
 VDBackup menjalankan dua pengaman otomatis selama pencadangan, keduanya aktif secara default di Pengaturan. **"Jeda untuk mendingin saat perangkat panas"** memberi napas pada tugas yang panjang, dan menunggu perangkat mendingin jika benar-benar panas, jadi pencadangan besar tidak pernah membuat ponsel kepanasan; hanya temponya yang berubah, bukan fidelitasnya. **"Periksa ruang kosong sebelum pencadangan batch"** memperkirakan kebutuhan pencadangan banyak aplikasi dan berhenti di awal, bukan di tengah jalan, jika penyimpanan tidak akan muat.
