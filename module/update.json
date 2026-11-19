@@ -3,7 +3,7 @@
   "versionCode": 11400,
   "zipUrl": "https://github.com/VD171/VD-Backup/releases/download/v1.14/VD-Backup-v1.14-universal-full.zip",
   "changelog": "https://raw.githubusercontent.com/VD171/VD-Backup/main/CHANGELOG.md",
-  "notes": "",
-  "size": 0,
-  "sha256": ""
+  "notes": "v1.14 adds label filter chips: filter the app list by one or more labels as tap-to-toggle chips (an app shows if it carries any selected label), replacing the single-label dropdown. Also in this release: cancel a running backup or restore from the progress card, and a fix for the Telegram destination Test (it wrongly reported the type as unsupported). All in 21 languages.",
+  "size": 257579989,
+  "sha256": "575f1713ce459ea3f76fdac4b37115edff8688697dd7a81626a2a7e34ce0e762"
 }
